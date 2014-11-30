@@ -1,9 +1,10 @@
 // main.js
 
-function Game(canvas, audio)
+function Game(canvas, image, audio)
 {
   this.canvas = canvas;
   this.ctx = canvas.getContext('2d');
+  this.image = image;
   this.audio = audio;
 }
 
@@ -81,6 +82,7 @@ Game.prototype.repaint = function()
   this.ctx.save();
   this.ctx.fillStyle = 'blue';
   this.ctx.fillRect(this.x, this.y, 100, 100);
+  this.ctx.drawImage(this.image, this.x, this.y);
   this.ctx.restore();
 }
 
@@ -93,8 +95,9 @@ function run()
 {
   var dt = 1000/20;
   var canvas = document.getElementById('canvas');
+  var image = document.getElementById('image');
   var audio = document.getElementById('audio');
-  var game = new Game(canvas, audio);
+  var game = new Game(canvas, image, audio);
   var idle = function() { game.idle(); window.setTimeout(idle, dt); };
   var keydown = function(e) { game.keydown(e); };
   var keyup = function(e) { game.keyup(e); };
