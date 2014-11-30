@@ -3,7 +3,7 @@
 // log(x)
 function log(x)
 {
-  if (window.console != 'undefined') {
+  if (typeof(window.console) !== 'undefined') {
     window.console.log(x);
   }
 }
@@ -15,8 +15,9 @@ function clamp(v0, v, v1)
 }
   
 // rnd(n)
-function rnd(a, b=0)
+function rnd(a, b)
 {
+  b = (typeof(b) !== 'undefined')? b : 0;
   if (b < a) {
     var c = a;
     a = b;
@@ -26,8 +27,10 @@ function rnd(a, b=0)
 }
 
 // format
-function format(v, n=3, c=" ")
+function format(v, n, c)
 {
+  n = (typeof(n) !== 'undefined')? n : 3;
+  c = (typeof(c) !== 'undefined')? c : " ";
   var s = "";
   while (s.length < n) {
     s = (v % 10)+s;
