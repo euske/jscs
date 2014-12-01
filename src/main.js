@@ -58,12 +58,14 @@ Player.prototype.repaint = function (ctx)
 		this.rect.width, this.rect.height);
 }
 
-function Game(canvas, tiles, sprites, audio)
+function Game(canvas, tiles, sprites, music, audio)
 {
   this.canvas = canvas;
   this.tiles = tiles;
   this.sprites = sprites;
+  this.music = music;
   this.audio = audio;
+  this.active = false;
 }
 
 Game.prototype.keydown = function (ev)
@@ -127,11 +129,24 @@ Game.prototype.init = function ()
   var tilesize = 32;
   this.scene = new Scene(this.tiles, tilesize, this.canvas.width, this.canvas.height);
   this.player = new Player(this.scene, this.sprites, tilesize, tilesize);
+  this.focus();
 }
 
 Game.prototype.idle = function ()
 {
   this.player.idle();
+}
+
+Game.prototype.focus = function (ev)
+{
+  this.active = true;
+  this.music.play();
+}
+
+Game.prototype.blur = function (ev)
+{
+  this.music.pause();
+  this.active = false;
 }
 
 Game.prototype.repaint = function (ctx)
@@ -154,20 +169,28 @@ Game.prototype.action = function ()
 
 function run()
 {
-  var dt = 1000/20;
   var canvas = document.getElementById('canvas');
   var tiles = document.getElementById('sprites');
   var sprites = document.getElementById('sprites');
+  var music = document.getElementById('music');
   var audio = document.getElementById('audio');
-  var game = new Game(canvas, tiles, sprites, audio);
   var ctx = canvas.getContext('2d');
-  var idle = function() { game.idle(); game.repaint(ctx); window.setTimeout(idle, dt); };
-  var keydown = function(e) { game.keydown(e); };
-  var keyup = function(e) { game.keyup(e); };
-  var resize = function(e) { };
+  var game = new Game(canvas, tiles, sprites, music, audio);
+  var dt = 1000/20;
+  function idle() {
+    if (game.active) {
+      game.idle();
+      game.repaint(ctx);
+    }
+    window.setTimeout(idle, dt);
+  };
   window.setTimeout(idle, dt);
-  window.addEventListener('keydown', keydown);
-  window.addEventListener('keyup', keyup);
+  function resize() {
+  };
   window.addEventListener('resize', resize);
+  window.addEventListener('keydown', function (e) { game.keydown(e); });
+  window.addEventListener('keyup', function (e) { game.keyup(e); });
+  window.addEventListener('focus', function (e) { game.focus(e); });
+  window.addEventListener('blur', function (e) { game.blur(e); });
   game.init();
 }
