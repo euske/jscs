@@ -5,6 +5,20 @@ function Scene(tiles, tilesize, width, height)
   this.tiles = tiles;
   this.tilesize = tilesize;
   this.floor = new Rectangle(0, height-this.tilesize, width, this.tilesize);
+  this.buffer = document.createElement('canvas');
+  this.buffer.width = width;
+  this.buffer.height = height;
+  this.ctx = this.buffer.getContext('2d');
+  this.init();
+}
+Scene.prototype.init = function ()
+{
+  for (var x = 0; x < this.floor.width; x += this.tilesize) {
+    this.ctx.drawImage(this.tiles,
+		       this.tilesize, 0, this.tilesize, this.tilesize,
+		       x, this.floor.y,
+		       this.tilesize, this.tilesize);
+  }
 }
 Scene.prototype.collide = function (rect, vx, vy)
 {
@@ -12,12 +26,7 @@ Scene.prototype.collide = function (rect, vx, vy)
 }
 Scene.prototype.repaint = function (ctx)
 {
-  for (var x = 0; x < this.floor.width; x += this.tilesize) {
-    ctx.drawImage(this.tiles,
-		  this.tilesize, 0, this.tilesize, this.tilesize,
-		  x, this.floor.y,
-		  this.tilesize, this.tilesize);
-  }
+  ctx.drawImage(this.buffer, 0, 0);
 }
 
 function Player(scene, sprites, width, height)
