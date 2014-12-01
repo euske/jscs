@@ -30,8 +30,8 @@ function rnd(a, b)
 function format(v, n, c)
 {
   n = (typeof(n) !== 'undefined')? n : 3;
-  c = (typeof(c) !== 'undefined')? c : " ";
-  var s = "";
+  c = (typeof(c) !== 'undefined')? c : ' ';
+  var s = '';
   while (s.length < n) {
     s = (v % 10)+s;
     v /= 10;
@@ -44,31 +44,37 @@ function format(v, n, c)
 }
 
 // Point
-function pt_make(x, y)
+function Point(x, y)
 {
-  return {x:x, y:y};
+  this.x = x;
+  this.y = y;
 }
-function pt_move(p, dx, dy)
+Point.prototype.toString = function ()
 {
-  return {x:(p.x+dx), y:(p.y+dy)};
+  return '('+this.x+', '+this.y+')';
 }
-function pt_str(p)
+Point.prototype.move = function (dx, dy)
 {
-  return "("+p.x+", "+p.y+")";
+  this.x += dx;
+  this.y += dy;
 }
 
 // Rectangle
-function rect_make(x, y, width, height)
+function Rectangle(x, y, width, height)
 {
-  return {x:x, y:y, width:width, height:height};
+  this.x = x;
+  this.y = y;
+  this.width = width;
+  this.height = height;
 }
-function rect_move(rect, dx, dy)
+Rectangle.prototype.toString = function () 
 {
-  return {x:(rect.x+dx), y:(rect.y+dy), width:rect.width, height:rect.height};
+  return '('+this.x+', '+this.y+', '+this.width+', '+this.height+')';
 }
-function rect_str(rect)
+Rectangle.prototype.move = function (dx, dy)
 {
-  return "("+rect.x+", "+rect.y+", "+rect.width+", "+rect.height+")";
+  this.x += dx;
+  this.y += dy;
 }
 
 // collideRect
@@ -93,7 +99,7 @@ function collideHLine(x0, x1, y, rect, v)
       (x1+dx < left || right < x0+dx)) {
     return v;
   }
-  return pt_make(dx, dy);
+  return new Point(dx, dy);
 }
 
 function collideVLine(y0, y1, x, rect, v)
@@ -117,7 +123,7 @@ function collideVLine(y0, y1, x, rect, v)
       (y1+dy < top || bottom < y0+dy)) {
     return v;
   }
-  return pt_make(dx, dy);
+  return new Point(dx, dy);
 }
 
 function collideRect(r0, r1, v)

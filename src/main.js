@@ -5,11 +5,11 @@ function Scene(sprites, ctx, width, height)
   this.tilesize = 32;
   this.sprites = sprites;
   this.ctx = ctx;
-  this.floor = rect_make(0, height-this.tilesize, width, this.tilesize);
+  this.floor = new Rectangle(0, height-this.tilesize, width, this.tilesize);
 }
 Scene.prototype.collide = function (rect, vx, vy)
 {
-  return collideRect(this.floor, rect, pt_make(vx, vy));
+  return collideRect(this.floor, rect, new Point(vx, vy));
 }
 Scene.prototype.repaint = function()
 {
@@ -30,18 +30,17 @@ function Player(sprites, ctx, scene, width, height)
   this.sprites = sprites;
   this.ctx = ctx;
   this.scene = scene;
-  this.rect = rect_make(0, 0, width, height);
+  this.rect = new Rectangle(0, 0, width, height);
   this.vx = this.vy = 0;
   this.gy = 0;
 }
 Player.prototype.idle = function()
 {
-  var v = pt_make(this.speed * this.vx, this.gy);
+  var v = new Point(this.speed * this.vx, this.gy);
   var d = this.scene.collide(this.rect, v.x, v.y);
   d.x = this.scene.collide(this.rect, v.x, d.y).x;
   d.y = this.scene.collide(this.rect, d.x, v.y).y;
-  this.rect.x += d.x;
-  this.rect.y += d.y;
+  this.rect.move(d.x, d.y);
   this.gy = Math.min(d.y + this.gravity, this.maxspeed);
 }
 Player.prototype.jump = function()
@@ -165,10 +164,10 @@ function run()
   var idle = function() { game.idle(); window.setTimeout(idle, dt); };
   var keydown = function(e) { game.keydown(e); };
   var keyup = function(e) { game.keyup(e); };
-  var resize = function(e) { alert(e); };
+  var resize = function(e) { };
   window.setTimeout(idle, dt);
   window.addEventListener('keydown', keydown);
   window.addEventListener('keyup', keyup);
-  canvas.addEventListener('resize', resize);
+  window.addEventListener('resize', resize);
   game.init();
 }
