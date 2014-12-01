@@ -151,12 +151,21 @@ Game.prototype.blur = function (ev)
 
 Game.prototype.repaint = function (ctx)
 {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   ctx.save();
-  //ctx.fillStyle = 'blue';
-  //ctx.fillRect(this.x, this.y, 100, 100);
   this.scene.repaint(ctx);
   this.player.repaint(ctx);
+  if (!this.active) {
+    var size = 50;
+    ctx.fillStyle = 'rgba(0,0,64, 0.5)'; // gray out
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.fillStyle = 'lightgray';
+    ctx.beginPath();
+    ctx.moveTo(this.canvas.width/2-size, this.canvas.height/2-size);
+    ctx.lineTo(this.canvas.width/2-size, this.canvas.height/2+size);
+    ctx.lineTo(this.canvas.width/2+size, this.canvas.height/2);
+    ctx.fill();
+  }
   ctx.restore();
 }
 
@@ -190,7 +199,7 @@ function run()
   window.addEventListener('resize', resize);
   window.addEventListener('keydown', function (e) { game.keydown(e); });
   window.addEventListener('keyup', function (e) { game.keyup(e); });
-  window.addEventListener('focus', function (e) { game.focus(e); });
-  window.addEventListener('blur', function (e) { game.blur(e); });
+  window.addEventListener('focus', function (e) { game.focus(e); game.repaint(ctx); });
+  window.addEventListener('blur', function (e) { game.blur(e); game.repaint(ctx); });
   game.init();
 }
