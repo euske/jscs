@@ -59,7 +59,24 @@ Scene.prototype.init = function ()
 }
 Scene.prototype.collide = function (rect, vx, vy)
 {
-  return collideRect(this.floor, rect, new Point(vx, vy));
+  var ts = this.tilesize;
+  var r = rect.copy();
+  r.move(vx, vy);
+  r = r.union(rect);
+  v = new Point(vx, vy);
+  var x0 = Math.floor(r.x/ts);
+  var y0 = Math.floor(r.y/ts);
+  var x1 = Math.ceil((r.x+r.width)/ts);
+  var y1 = Math.ceil((r.y+r.height)/ts);
+  for (var y = y0; y < y1; y++) {
+    for (var x = x0; x < x1; x++) {
+      if (this.tilemap.get(x, y)) {
+	var bounds = new Rectangle(x*ts, y*ts, ts, ts);
+	v = collideRect(bounds, rect, v);
+      }
+    }
+  }
+  return v;
 }
 Scene.prototype.repaint = function (ctx)
 {

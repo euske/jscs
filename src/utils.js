@@ -71,10 +71,30 @@ Rectangle.prototype.toString = function ()
 {
   return '('+this.x+', '+this.y+', '+this.width+', '+this.height+')';
 }
+Rectangle.prototype.copy = function ()
+{
+  return new Rectangle(this.x, this.y, this.width, this.height);
+}
 Rectangle.prototype.move = function (dx, dy)
 {
   this.x += dx;
   this.y += dy;
+}
+Rectangle.prototype.union = function (rect)
+{
+  var x0 = Math.min(this.x, rect.x);
+  var y0 = Math.min(this.y, rect.y);
+  var x1 = Math.max(this.x+this.width, rect.x+rect.width);
+  var y1 = Math.max(this.y+this.height, rect.y+rect.height);
+  return new Rectangle(x0, y0, x1-x0, y1-y0);
+}
+Rectangle.prototype.intersection = function (rect)
+{
+  var x0 = Math.max(this.x, rect.x);
+  var y0 = Math.max(this.y, rect.y);
+  var x1 = Math.min(this.x+this.width, rect.x+rect.width);
+  var y1 = Math.min(this.y+this.height, rect.y+rect.height);
+  return new Rectangle(x0, y0, x1-x0, y1-y0);
 }
 
 // collideRect
