@@ -1,7 +1,41 @@
 // main.js
 
-function Scene(tiles, tilesize, width, height)
+function TileMap()
 {
+  this.map = [
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 1,1,1,1, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    
+    [0,0,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0, 1,1,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+  ];
+}
+TileMap.prototype.width = function () { return this.map[0].length; }
+TileMap.prototype.height = function () { return this.map.length; }
+TileMap.prototype.get = function (x, y)
+{
+  if (x < 0 || y < 0 || this.width() <= x || this.height() <= y) {
+    return -1;
+  } else {
+    return this.map[y][x];
+  }
+}
+
+function Scene(tilemap, tiles, tilesize, width, height)
+{
+  this.tilemap = tilemap;
   this.tiles = tiles;
   this.tilesize = tilesize;
   this.floor = new Rectangle(0, height-this.tilesize, width, this.tilesize);
@@ -13,11 +47,14 @@ function Scene(tiles, tilesize, width, height)
 }
 Scene.prototype.init = function ()
 {
-  for (var x = 0; x < this.floor.width; x += this.tilesize) {
-    this.ctx.drawImage(this.tiles,
-		       this.tilesize, 0, this.tilesize, this.tilesize,
-		       x, this.floor.y,
-		       this.tilesize, this.tilesize);
+  var ts = this.tilesize;
+  for (var y = 0; y < this.tilemap.height(); y++) {
+    for (var x = 0; x < this.tilemap.width(); x++) {
+      var c = this.tilemap.get(x, y);
+      this.ctx.drawImage(this.tiles,
+			 ts*c, 0, ts, ts,
+			 ts*x, ts*y, ts, ts);
+    }
   }
 }
 Scene.prototype.collide = function (rect, vx, vy)
@@ -136,7 +173,8 @@ Game.prototype.keyup = function (ev)
 Game.prototype.init = function ()
 {
   var tilesize = 32;
-  this.scene = new Scene(this.tiles, tilesize, this.canvas.width, this.canvas.height);
+  var tilemap = new TileMap();
+  this.scene = new Scene(tilemap, this.tiles, tilesize, this.canvas.width, this.canvas.height);
   this.player = new Player(this.scene, this.sprites, tilesize, tilesize);
   this.focus();
 }
@@ -188,7 +226,7 @@ Game.prototype.action = function ()
 function run()
 {
   var canvas = document.getElementById('canvas');
-  var tiles = document.getElementById('sprites');
+  var tiles = document.getElementById('tiles');
   var sprites = document.getElementById('sprites');
   var music = document.getElementById('music');
   var audio = document.getElementById('audio');
