@@ -1,82 +1,18 @@
 // main.js
 
-function TileMap()
-{
-  this.map = [
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 1,1,1,1, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    
-    [0,0,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0, 1,1,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
-  ];
-}
-TileMap.prototype.width = function () { return this.map[0].length; }
-TileMap.prototype.height = function () { return this.map.length; }
-TileMap.prototype.get = function (x, y)
-{
-  if (x < 0 || y < 0 || this.width() <= x || this.height() <= y) {
-    return -1;
-  } else {
-    return this.map[y][x];
-  }
-}
-
-function Scene(tilemap, tiles, tilesize, width, height)
+function Scene(tilemap, width, height)
 {
   this.tilemap = tilemap;
-  this.tiles = tiles;
-  this.tilesize = tilesize;
-  this.floor = new Rectangle(0, height-this.tilesize, width, this.tilesize);
   this.buffer = document.createElement('canvas');
   this.buffer.width = width;
   this.buffer.height = height;
   this.ctx = this.buffer.getContext('2d');
-  this.init();
-}
-Scene.prototype.init = function ()
-{
-  var ts = this.tilesize;
-  for (var y = 0; y < this.tilemap.height(); y++) {
-    for (var x = 0; x < this.tilemap.width(); x++) {
-      var c = this.tilemap.get(x, y);
-      this.ctx.drawImage(this.tiles,
-			 ts*c, 0, ts, ts,
-			 ts*x, ts*y, ts, ts);
-    }
-  }
+  this.tilemap.render(this.ctx);
 }
 Scene.prototype.collide = function (rect, vx, vy)
 {
-  var ts = this.tilesize;
-  var r = rect.copy();
-  r.move(vx, vy);
-  r = r.union(rect);
-  v = new Point(vx, vy);
-  var x0 = Math.floor(r.x/ts);
-  var y0 = Math.floor(r.y/ts);
-  var x1 = Math.ceil((r.x+r.width)/ts);
-  var y1 = Math.ceil((r.y+r.height)/ts);
-  for (var y = y0; y < y1; y++) {
-    for (var x = x0; x < x1; x++) {
-      if (this.tilemap.get(x, y)) {
-	var bounds = new Rectangle(x*ts, y*ts, ts, ts);
-	v = collideRect(bounds, rect, v);
-      }
-    }
-  }
-  return v;
+  var f = function (c) { return (c != 0); }
+  return this.tilemap.collide(rect, new Point(vx, vy), f);
 }
 Scene.prototype.repaint = function (ctx)
 {
@@ -190,8 +126,8 @@ Game.prototype.keyup = function (ev)
 Game.prototype.init = function ()
 {
   var tilesize = 32;
-  var tilemap = new TileMap();
-  this.scene = new Scene(tilemap, this.tiles, tilesize, this.canvas.width, this.canvas.height);
+  var tilemap = new TileMap(tilesize, this.tiles);
+  this.scene = new Scene(tilemap, this.canvas.width, this.canvas.height);
   this.player = new Player(this.scene, this.sprites, tilesize, tilesize);
   this.focus();
 }
@@ -238,32 +174,4 @@ Game.prototype.action = function ()
   if (this.player.jump()) {
     this.audio.play();
   }
-}
-
-function run()
-{
-  var canvas = document.getElementById('canvas');
-  var tiles = document.getElementById('tiles');
-  var sprites = document.getElementById('sprites');
-  var music = document.getElementById('music');
-  var audio = document.getElementById('audio');
-  var ctx = canvas.getContext('2d');
-  var game = new Game(canvas, tiles, sprites, music, audio);
-  var dt = 1000/20;
-  function idle() {
-    if (game.active) {
-      game.idle();
-      game.repaint(ctx);
-    }
-    window.setTimeout(idle, dt);
-  };
-  window.setTimeout(idle, dt);
-  function resize() {
-  };
-  window.addEventListener('resize', resize);
-  window.addEventListener('keydown', function (e) { game.keydown(e); });
-  window.addEventListener('keyup', function (e) { game.keyup(e); });
-  window.addEventListener('focus', function (e) { game.focus(e); game.repaint(ctx); });
-  window.addEventListener('blur', function (e) { game.blur(e); game.repaint(ctx); });
-  game.init();
 }

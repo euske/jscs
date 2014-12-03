@@ -5,14 +5,41 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <title>foo</title>
 <script language="javascript" src="src/utils.js"></script>
-<script language="javascript" src="src/main.js"></script>
+<script language="javascript" src="src/tilemap.js"></script>
+<script language="javascript" src="src/game.js"></script>
+<script language="javascript">
+function run()
+{
+  var canvas = document.getElementById('canvas');
+  var tiles = document.getElementById('tiles');
+  var sprites = document.getElementById('sprites');
+  var audio = document.getElementById('audio');
+  var music = document.getElementById('music');
+  var ctx = canvas.getContext('2d');
+  var game = new Game(canvas, tiles, sprites, music, audio);
+  var dt = 1000/30;
+  function idle() {
+    if (game.active) {
+      game.idle();
+      game.repaint(ctx);
+    }
+    window.setTimeout(idle, dt);
+  };
+  window.setTimeout(idle, dt);
+  window.addEventListener('keydown', function (e) { game.keydown(e); });
+  window.addEventListener('keyup', function (e) { game.keyup(e); });
+  window.addEventListener('focus', function (e) { game.focus(e); game.repaint(ctx); });
+  window.addEventListener('blur', function (e) { game.blur(e); game.repaint(ctx); });
+  game.init();
+}
+</script>
 <body onload="run();">
 Foo
 <div align=center>
+  <canvas id="canvas" style="background:gray;" width="640" height="480"></canvas>
   <img id="tiles" src="assets/tiles.png" style="display:none;">
   <img id="sprites" src="assets/sprites.png" style="display:none;">
   <audio id="audio" type="audio/mpeg" src="assets/jump.mp3" preload="auto"></audio>
   <audio id="music" type="audio/mpeg" src="assets/music.mp3" loop="true" preload="auto"></audio>
-  <canvas id="canvas" style="background:gray;" width="640" height="480"></canvas>
 </div>
 </body>
