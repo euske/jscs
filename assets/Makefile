@@ -3,7 +3,7 @@
 PYTHON=python
 LAME=lame
 
-ASSETS=jump.mp3 music.mp3
+ASSETS=jump.mp3 music.mp3 pick.mp3
 
 all: $(ASSETS)
 
@@ -14,6 +14,3 @@ clean:
 
 .wav.mp3:
 	$(LAME) $< $@
-
-jump.mp3: jump.wav
-music.mp3: music.wav
