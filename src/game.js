@@ -57,13 +57,13 @@ Player.prototype.repaint = function (ctx)
 		this.rect.width, this.rect.height);
 }
 
-function Game(canvas, tiles, sprites, music, audio)
+function Game(canvas, images, audios)
 {
   this.canvas = canvas;
-  this.tiles = tiles;
-  this.sprites = sprites;
-  this.music = music;
-  this.audio = audio;
+  this.tiles = images.tiles;
+  this.sprites = images.sprites;
+  this.music = audios.music;
+  this.jump = audios.jump;
   this.active = false;
 }
 
@@ -172,6 +172,6 @@ Game.prototype.repaint = function (ctx)
 Game.prototype.action = function ()
 {
   if (this.player.jump()) {
-    this.audio.play();
+    this.jump.play();
   }
 }
