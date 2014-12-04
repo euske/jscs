@@ -1,13 +1,12 @@
 // main.js
 
-function Scene(tilemap, width, height)
+function Scene(tilemap)
 {
-  this.tilemap = tilemap;
   this.buffer = document.createElement('canvas');
-  this.buffer.width = width;
-  this.buffer.height = height;
-  this.ctx = this.buffer.getContext('2d');
-  this.tilemap.render(this.ctx);
+  this.buffer.width = tilemap.width * tilemap.tilesize;
+  this.buffer.height = tilemap.height * tilemap.tilesize;
+  this.tilemap = tilemap;
+  this.tilemap.render(this.buffer.getContext('2d'));
 }
 Scene.prototype.collide = function (rect, vx, vy)
 {
@@ -53,8 +52,7 @@ Player.prototype.repaint = function (ctx)
 {
   ctx.drawImage(this.sprites,
 		0, 0, this.rect.width, this.rect.height,
-		this.rect.x, this.rect.y,
-		this.rect.width, this.rect.height);
+		this.rect.x, this.rect.y, this.rect.width, this.rect.height);
 }
 
 function Game(canvas, images, audios)
@@ -126,8 +124,27 @@ Game.prototype.keyup = function (ev)
 Game.prototype.init = function ()
 {
   var tilesize = 32;
-  var tilemap = new TileMap(tilesize, this.tiles);
-  this.scene = new Scene(tilemap, this.canvas.width, this.canvas.height);
+  var map = [
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 1,1,1,1, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    
+    [0,0,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0, 1,1,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+  ];
+  var tilemap = new TileMap(tilesize, this.tiles, map);
+  this.scene = new Scene(tilemap);
   this.player = new Player(this.scene, this.sprites, tilesize, tilesize);
   this.focus();
 }

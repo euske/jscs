@@ -1,40 +1,16 @@
 // tilemap.js
 
-function TileMap(tilesize, tiles)
+function TileMap(tilesize, tiles, map)
 {
   this.tilesize = tilesize;
   this.tiles = tiles;
-  this.map = [
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 1,1,1,1, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    
-    [0,0,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0, 1,1,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
-  ];
-}
-TileMap.prototype.width = function ()
-{
-  return this.map[0].length;
-}
-TileMap.prototype.height = function ()
-{
-  return this.map.length;
+  this.map = map;
+  this.width = map[0].length;
+  this.height = map.length;
 }
 TileMap.prototype.get = function (x, y)
 {
-  if (x < 0 || y < 0 || this.width() <= x || this.height() <= y) {
+  if (x < 0 || y < 0 || this.width <= x || this.height <= y) {
     return -1;
   } else {
     return this.map[y][x];
@@ -43,8 +19,8 @@ TileMap.prototype.get = function (x, y)
 TileMap.prototype.render = function (ctx)
 {
   var ts = this.tilesize;
-  for (var y = 0; y < this.height(); y++) {
-    for (var x = 0; x < this.width(); x++) {
+  for (var y = 0; y < this.height; y++) {
+    for (var x = 0; x < this.width; x++) {
       var c = this.get(x, y);
       ctx.drawImage(this.tiles,
 		    ts*c, 0, ts, ts,
