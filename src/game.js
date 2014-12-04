@@ -2,30 +2,45 @@
 
 function Scene(tilemap)
 {
+  this.tilemap = tilemap;
   this.buffer = document.createElement('canvas');
   this.buffer.width = tilemap.width * tilemap.tilesize;
   this.buffer.height = tilemap.height * tilemap.tilesize;
-  this.tilemap = tilemap;
-  this.tilemap.render(this.buffer.getContext('2d'));
-}
-Scene.prototype.collide = function (rect, vx, vy)
-{
-  var f = function (c) { return (c != 0); }
-  return this.tilemap.collide(rect, new Point(vx, vy), f);
+  this.update();
 }
 Scene.prototype.repaint = function (ctx)
 {
   ctx.drawImage(this.buffer, 0, 0);
 }
+Scene.prototype.update = function ()
+{
+  this.tilemap.render(this.buffer.getContext('2d'));
+}
+Scene.prototype.collide = function (rect, vx, vy)
+{
+  var f = function (c) { return (c == 1); }
+  return this.tilemap.collide(rect, new Point(vx, vy), f);
+}
+Scene.prototype.pick = function (rect)
+{
+  var tilemap = this.tilemap;
+  var f = function (x,y) { return (tilemap.get(x,y) == 2); };
+  var g = function (x,y) { if (tilemap.get(x,y) == 2) { tilemap.set(x,y,0); } };
+  if (tilemap.apply(rect, f)) {
+    tilemap.apply(rect, g);
+    return true;
+  }
+  return false;
+}
 
-function Player(scene, sprites, width, height)
+function Player(game, scene, width, height)
 {
   this.speed = 8;
   this.gravity = 2;
   this.maxspeed = 16;
   this.jumpacc = -16;
+  this.game = game;
   this.scene = scene;
-  this.sprites = sprites;
   this.rect = new Rectangle(0, 0, width, height);
   this.vx = this.vy = 0;
   this.gy = 0;
@@ -38,19 +53,22 @@ Player.prototype.idle = function ()
   d.y = this.scene.collide(this.rect, d.x, v.y).y;
   this.rect.move(d.x, d.y);
   this.gy = Math.min(d.y + this.gravity, this.maxspeed);
+  if (this.scene.pick(this.rect)) {
+    this.scene.update();
+    this.game.audios.pick.play();
+  }
 }
 Player.prototype.jump = function ()
 {
   var v = this.scene.collide(this.rect, 0, this.gy);
   if (0 < this.gy && v.y == 0) {
     this.gy = this.jumpacc;
-    return true;
+    this.game.audios.jump.play();
   }
-  return false;
 }
 Player.prototype.repaint = function (ctx)
 {
-  ctx.drawImage(this.sprites,
+  ctx.drawImage(this.game.images.sprites,
 		0, 0, this.rect.width, this.rect.height,
 		this.rect.x, this.rect.y, this.rect.width, this.rect.height);
 }
@@ -58,10 +76,8 @@ Player.prototype.repaint = function (ctx)
 function Game(canvas, images, audios)
 {
   this.canvas = canvas;
-  this.tiles = images.tiles;
-  this.sprites = images.sprites;
-  this.music = audios.music;
-  this.jump = audios.jump;
+  this.images = images;
+  this.audios = audios;
   this.active = false;
 }
 
@@ -129,23 +145,23 @@ Game.prototype.init = function ()
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 2,2,0,0, 0,0,0,0],
     
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,2,0, 0,0,0,0, 0,2,2,0],
     [0,0,0,0, 0,0,0,0, 1,1,1,1, 0,0,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
     
     [0,0,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0, 1,1,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,2,0, 0,2,0,0, 0,0,0,0],
     [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
   ];
-  var tilemap = new TileMap(tilesize, this.tiles, map);
+  var tilemap = new TileMap(tilesize, this.images.tiles, map);
   this.scene = new Scene(tilemap);
-  this.player = new Player(this.scene, this.sprites, tilesize, tilesize);
+  this.player = new Player(this, this.scene, tilesize, tilesize);
   this.focus();
 }
 
@@ -157,12 +173,12 @@ Game.prototype.idle = function ()
 Game.prototype.focus = function (ev)
 {
   this.active = true;
-  this.music.play();
+  this.audios.music.play();
 }
 
 Game.prototype.blur = function (ev)
 {
-  this.music.pause();
+  this.audios.music.pause();
   this.active = false;
 }
 
@@ -188,7 +204,5 @@ Game.prototype.repaint = function (ctx)
 
 Game.prototype.action = function ()
 {
-  if (this.player.jump()) {
-    this.jump.play();
-  }
+  this.player.jump();
 }
