@@ -18,7 +18,7 @@ Scene.prototype.update = function ()
 }
 Scene.prototype.collide = function (rect, vx, vy)
 {
-  var f = function (c) { return (c == 1); }
+  var f = function (c) { return (c < 0 || c == 1); }
   return this.tilemap.collide(rect, new Point(vx, vy), f);
 }
 Scene.prototype.pick = function (rect)
