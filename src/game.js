@@ -140,7 +140,7 @@ Game.prototype.keyup = function (ev)
 Game.prototype.init = function ()
 {
   var tilesize = 32;
-  var map = [
+  var map = copyarray([
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
@@ -158,7 +158,7 @@ Game.prototype.init = function ()
     [0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0, 1,1,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,2,0, 0,2,0,0, 0,0,0,0],
     [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
-  ];
+  ]);
   var tilemap = new TileMap(tilesize, this.images.tiles, map);
   this.scene = new Scene(tilemap);
   this.player = new Player(this, this.scene, tilesize, tilesize);

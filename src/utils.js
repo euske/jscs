@@ -13,6 +13,20 @@ function clamp(v0, v, v1)
 {
   return Math.min(Math.max(v, v0), v1);
 }
+
+// copyarray(a)
+function copyarray(a)
+{
+  if (a instanceof Array) {
+    var b = new Array(a.length);
+    for (var i = 0; i < a.length; i++) {
+      b[i] = copyarray(a[i]);
+    }
+    return b;
+  } else {
+    return a;
+  }
+}
   
 // rnd(n)
 function rnd(a, b)
