@@ -55,7 +55,7 @@ Player.prototype.idle = function ()
   this.gy = Math.min(d.y + this.gravity, this.maxspeed);
   if (this.scene.pick(this.rect)) {
     this.scene.update();
-    this.game.audios.pick.play();
+    this.game.addscore(+1);
   }
 }
 Player.prototype.jump = function ()
@@ -73,11 +73,12 @@ Player.prototype.repaint = function (ctx)
 		this.rect.x, this.rect.y, this.rect.width, this.rect.height);
 }
 
-function Game(canvas, images, audios)
+function Game(canvas, images, audios, label)
 {
   this.canvas = canvas;
   this.images = images;
   this.audios = audios;
+  this.label = label;
   this.active = false;
 }
 
@@ -162,6 +163,7 @@ Game.prototype.init = function ()
   var tilemap = new TileMap(tilesize, this.images.tiles, map);
   this.scene = new Scene(tilemap);
   this.player = new Player(this, this.scene, tilesize, tilesize);
+  this.score = 0;
   this.focus();
 }
 
@@ -205,4 +207,11 @@ Game.prototype.repaint = function (ctx)
 Game.prototype.action = function ()
 {
   this.player.jump();
+}
+
+Game.prototype.addscore = function (d)
+{
+  this.score += d;
+  this.audios.pick.play();
+  this.label.innerHTML = ("Score: "+this.score);
 }

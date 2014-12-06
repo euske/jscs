@@ -18,8 +18,9 @@ function run()
   var images = getprops(document.getElementsByTagName('img'));
   var audios = getprops(document.getElementsByTagName('audio'));
   var canvas = document.getElementById('canvas');
+  var label = document.getElementById('label');
   var ctx = canvas.getContext('2d');
-  var game = new Game(canvas, images, audios);
+  var game = new Game(canvas, images, audios, label);
   var dt = 1000/30;
   function idle() {
     if (game.active) {
@@ -37,9 +38,9 @@ function run()
 }
 </script>
 <body onload="run();">
-Foo
 <div align=center>
-  <canvas id="canvas" style="background:gray;" width="640" height="480"></canvas>
+  <canvas id="canvas" style="position:absolute; top:0; left:0; background:gray;" width="640" height="480"></canvas>
+  <div id="label" style="position:absolute; top:0; left:0; color:white;">Score: 0</div>
   <img id="tiles" src="assets/tiles.png" style="display:none;">
   <img id="sprites" src="assets/sprites.png" style="display:none;">
   <audio id="jump" type="audio/mpeg" src="assets/jump.mp3" preload="auto"></audio>
