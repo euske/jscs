@@ -5,7 +5,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <title>foo</title>
 <script language="javascript" src="src/utils.js"></script>
+<script language="javascript" src="src/const.js"></script>
 <script language="javascript" src="src/tilemap.js"></script>
+<script language="javascript" src="src/actor.js"></script>
+<script language="javascript" src="src/scene.js"></script>
 <script language="javascript" src="src/game.js"></script>
 <script language="javascript">
 function run()
@@ -59,12 +62,13 @@ function run()
       game.repaint(ctx);
     }
   };
-  game.init();
-  window.setInterval(idle, 1000/framerate);
   window.addEventListener('keydown', keydown);
   window.addEventListener('keyup', keyup);
   window.addEventListener('focus', focus);
   window.addEventListener('blur', blur);
+  game.init();
+  canvas.focus();
+  window.setInterval(idle, 1000/framerate);
 }
 </script>
 <body onload="run();">
@@ -72,7 +76,7 @@ function run()
   <div style="position:relative;">
     <canvas id="canvas" 
 	    style="position:absolute; top:0; left:0; background:gray;"
-	    width="640" height="480"></canvas>
+	    width="320" height="240"></canvas>
     <div class="label" id="score" 
 	 style="position:absolute; top:10px; left:10px; color:white;">Score: 0</div>
   </div>

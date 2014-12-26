@@ -126,6 +126,11 @@ Rectangle.prototype.inset = function (dw, dh)
   var h = this.height - dh;
   return new Rectangle(cx-w/2, cy-h/2, w, h);
 }
+Rectangle.prototype.includes = function (x, y)
+{
+  return (this.x <= x && this.y <= y &&
+	  x <= this.x+this.width && y <= this.y+this.height);
+}
 Rectangle.prototype.clamp = function (rect)
 {
   var x0 = Math.max(this.x, rect.x);
