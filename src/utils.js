@@ -1,6 +1,7 @@
 // utils.js
+// Misc. routines.
 
-// log(x)
+// log(x): display a thing in the console (Firefox only, maybe)
 function log(x)
 {
   if (typeof(window.console) !== 'undefined') {
@@ -8,27 +9,13 @@ function log(x)
   }
 }
 
-// clamp(v0, v, v1)
+// clamp(v0, v, v1): limit the value within v0-v1.
 function clamp(v0, v, v1)
 {
   return Math.min(Math.max(v, v0), v1);
 }
 
-// copyarray(a)
-function copyarray(a)
-{
-  if (a instanceof Array) {
-    var b = new Array(a.length);
-    for (var i = 0; i < a.length; i++) {
-      b[i] = copyarray(a[i]);
-    }
-    return b;
-  } else {
-    return a;
-  }
-}
-  
-// rnd(n)
+// rnd(n): returns a random number.
 function rnd(a, b)
 {
   b = (typeof(b) !== 'undefined')? b : 0;
@@ -40,7 +27,7 @@ function rnd(a, b)
   return Math.floor(Math.random()*(b-a))+a;
 }
 
-// format
+// format: pretty print a number.
 function format(v, n, c)
 {
   n = (typeof(n) !== 'undefined')? n : 3;
@@ -57,6 +44,32 @@ function format(v, n, c)
   return s;
 }
 
+// copyArray(a): deep copy of an Array.
+function copyArray(a)
+{
+  if (a instanceof Array) {
+    var b = new Array(a.length);
+    for (var i = 0; i < a.length; i++) {
+      b[i] = copyArray(a[i]);
+    }
+    return b;
+  } else {
+    return a;
+  }
+}
+
+// removeArray(a, b): remove objects in b from a.
+function removeArray(a, b)
+{
+  for (var i = 0; i < b.length; i++) {
+    var j = a.indexOf(b[i]);
+    if (0 <= j) {
+      a.splice(j, 1);
+    }
+  }
+  return a;
+}
+  
 // Point
 function Point(x, y)
 {
@@ -67,10 +80,17 @@ Point.prototype.toString = function ()
 {
   return '('+this.x+', '+this.y+')';
 }
+Point.prototype.equals = function (p)
+{
+  return (this.x == p.x && this.y == p.y);
+}
+Point.prototype.copy = function ()
+{
+  return new Point(this.x, this.y);
+}
 Point.prototype.move = function (dx, dy)
 {
-  this.x += dx;
-  this.y += dy;
+  return new Point(this.x+dx, this.y+dy);
 }
 
 // Rectangle
@@ -85,14 +105,34 @@ Rectangle.prototype.toString = function ()
 {
   return '('+this.x+', '+this.y+', '+this.width+', '+this.height+')';
 }
+Rectangle.prototype.equals = function (rect)
+{
+  return (this.x == rect.x && this.y == rect.y &&
+	  this.width == rect.width && this.height == rect.height);
+}
 Rectangle.prototype.copy = function ()
 {
   return new Rectangle(this.x, this.y, this.width, this.height);
 }
 Rectangle.prototype.move = function (dx, dy)
 {
-  this.x += dx;
-  this.y += dy;
+  return new Rectangle(this.x+dx, this.y+dy, this.width, this.height);  
+}
+Rectangle.prototype.inset = function (dw, dh)
+{
+  var cx = this.x+this.width/2;
+  var cy = this.y+this.height/2;
+  var w = this.width - dw;
+  var h = this.height - dh;
+  return new Rectangle(cx-w/2, cy-h/2, w, h);
+}
+Rectangle.prototype.clamp = function (rect)
+{
+  var x0 = Math.max(this.x, rect.x);
+  var y0 = Math.max(this.y, rect.y);
+  var x1 = Math.min(this.x+this.width, rect.x+rect.width);
+  var y1 = Math.min(this.y+this.height, rect.y+rect.height);
+  return new Rectangle(x0, y0, x1-x0, y1-y0);
 }
 Rectangle.prototype.union = function (rect)
 {
@@ -110,8 +150,15 @@ Rectangle.prototype.intersection = function (rect)
   var y1 = Math.min(this.y+this.height, rect.y+rect.height);
   return new Rectangle(x0, y0, x1-x0, y1-y0);
 }
+Rectangle.prototype.overlap = function (rect)
+{
+  return !(this.x+this.width <= rect.x ||
+	   this.y+this.height <= rect.y ||
+	   rect.x+rect.width <= this.x ||
+	   rect.y+rect.height <= this.y);
+}
 
-// collideRect
+// collideRect: 2D collision detection
 function collideHLine(x0, x1, y, rect, v)
 {
   var left = rect.x;

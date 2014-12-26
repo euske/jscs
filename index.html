@@ -15,34 +15,71 @@ function run()
     for (var i = 0; i < a.length; i++) { d[a[i].id] = a[i]; }
     return d;
   }
+  var framerate = 30;
   var images = getprops(document.getElementsByTagName('img'));
   var audios = getprops(document.getElementsByTagName('audio'));
+  var labels = getprops(document.getElementsByClassName('label'));
   var canvas = document.getElementById('canvas');
-  var label = document.getElementById('label');
   var ctx = canvas.getContext('2d');
-  var game = new Game(canvas, images, audios, label);
-  var dt = 1000/30;
+  var game = new Game(framerate, canvas, images, audios, labels);
   function idle() {
     if (game.active) {
       game.idle();
       game.repaint(ctx);
     }
-    window.setTimeout(idle, dt);
   };
-  window.setTimeout(idle, dt);
-  window.addEventListener('keydown', function (e) { game.keydown(e); });
-  window.addEventListener('keyup', function (e) { game.keyup(e); });
-  window.addEventListener('focus', function (e) { game.focus(e); game.repaint(ctx); });
-  window.addEventListener('blur', function (e) { game.blur(e); game.repaint(ctx); });
+  function keydown(e) {
+    if (game.active) {
+      game.keydown(e);
+      switch (e.keyCode) {
+      case 32:
+      case 37:
+      case 38:
+      case 39:
+      case 40:
+	e.preventDefault();
+	break;
+      }
+    }
+  };
+  function keyup(e) {
+    if (game.active) {
+      game.keyup(e);
+    }
+  };
+  function focus(e) {
+    if (!game.active) {
+      game.focus(e);
+      game.repaint(ctx);
+    }
+  };
+  function blur(e) {
+    if (game.active) {
+      game.blur(e);
+      game.repaint(ctx);
+    }
+  };
   game.init();
+  window.setInterval(idle, 1000/framerate);
+  window.addEventListener('keydown', keydown);
+  window.addEventListener('keyup', keyup);
+  window.addEventListener('focus', focus);
+  window.addEventListener('blur', blur);
 }
 </script>
 <body onload="run();">
 <div align=center>
-  <canvas id="canvas" style="position:absolute; top:0; left:0; background:gray;" width="640" height="480"></canvas>
-  <div id="label" style="position:absolute; top:0; left:0; color:white;">Score: 0</div>
-  <img id="tiles" src="assets/tiles.png" style="display:none;">
-  <img id="sprites" src="assets/sprites.png" style="display:none;">
+  <div style="position:relative;">
+    <canvas id="canvas" 
+	    style="position:absolute; top:0; left:0; background:gray;"
+	    width="640" height="480"></canvas>
+    <div class="label" id="score" 
+	 style="position:absolute; top:10px; left:10px; color:white;">Score: 0</div>
+  </div>
+</div>
+<div style="display:none;">
+  <img id="tiles" src="assets/tiles.png">
+  <img id="sprites" src="assets/sprites.png">
   <audio id="jump" type="audio/mpeg" src="assets/jump.mp3" preload="auto"></audio>
   <audio id="pick" type="audio/mpeg" src="assets/pick.mp3" preload="auto"></audio>
   <audio id="music" type="audio/mpeg" src="assets/music.mp3" loop="true" preload="auto"></audio>

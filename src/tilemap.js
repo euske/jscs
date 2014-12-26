@@ -53,9 +53,7 @@ TileMap.prototype.apply = function (rect, f)
 TileMap.prototype.collide = function (rect, v, f)
 {
   var ts = this.tilesize;
-  var r = rect.copy();
-  r.move(v.x, v.y);
-  r = r.union(rect);
+  var r = rect.move(v.x, v.y).union(rect);
   var x0 = Math.floor(r.x/ts);
   var y0 = Math.floor(r.y/ts);
   var x1 = Math.ceil((r.x+r.width)/ts);

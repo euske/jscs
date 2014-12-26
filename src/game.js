@@ -1,4 +1,4 @@
-// main.js
+// game.js
 
 function Scene(tilemap)
 {
@@ -51,7 +51,7 @@ Player.prototype.idle = function ()
   var d = this.scene.collide(this.rect, v.x, v.y);
   d.x = this.scene.collide(this.rect, v.x, d.y).x;
   d.y = this.scene.collide(this.rect, d.x, v.y).y;
-  this.rect.move(d.x, d.y);
+  this.rect = this.rect.move(d.x, d.y);
   this.gy = Math.min(d.y + this.gravity, this.maxspeed);
   if (this.scene.pick(this.rect)) {
     this.scene.update();
@@ -63,8 +63,9 @@ Player.prototype.jump = function ()
   var v = this.scene.collide(this.rect, 0, this.gy);
   if (0 < this.gy && v.y == 0) {
     this.gy = this.jumpacc;
-    this.game.audios.jump.play();
+    return true;
   }
+  return false;
 }
 Player.prototype.repaint = function (ctx)
 {
@@ -73,75 +74,24 @@ Player.prototype.repaint = function (ctx)
 		this.rect.x, this.rect.y, this.rect.width, this.rect.height);
 }
 
-function Game(canvas, images, audios, label)
+function Game(framerate, canvas, images, audios, labels)
 {
+  this.framerate = framerate;
   this.canvas = canvas;
   this.images = images;
   this.audios = audios;
-  this.label = label;
+  this.labels = labels;
   this.active = false;
-}
-
-Game.prototype.keydown = function (ev)
-{
-  switch (ev.keyCode) {
-  case 37:			// LEFT
-  case 65:			// A
-  case 72:			// H
-    this.player.vx = -1;
-    break;
-  case 39:			// RIGHT
-  case 68:			// D
-  case 76:			// L
-    this.player.vx = +1;
-    break;
-  case 38:			// UP
-  case 87:			// W
-  case 75:			// K
-    this.player.vy = -1;
-    break;
-  case 40:			// DOWN
-  case 83:			// S
-  case 74:			// J
-    this.player.vy = +1;
-    break;
-  case 13:			// ENTER
-  case 32:			// SPACE
-  case 90:			// Z
-  case 88:			// X
-    this.action();
-    break;
-  case 112:			// F1
-    break;
-  }
-}
-
-Game.prototype.keyup = function (ev)
-{
-  switch (ev.keyCode) {
-  case 37:			// LEFT
-  case 65:			// A
-  case 72:			// H
-  case 39:			// RIGHT
-  case 68:			// D
-  case 76:			// L
-    this.player.vx = 0;
-    break;
-  case 38:			// UP
-  case 87:			// W
-  case 75:			// K
-  case 40:			// DOWN
-  case 83:			// S
-  case 74:			// J
-    this.player.vy = 0;
-    break;
-  }
+  this.key_left = false;
+  this.key_right = false;
+  this.key_up = false;
+  this.key_down = false;
 }
 
 Game.prototype.init = function ()
 {
   var tilesize = 32;
-  var map = copyarray([
+  var map = copyArray([
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
@@ -165,6 +115,74 @@ Game.prototype.init = function ()
   this.player = new Player(this, this.scene, tilesize, tilesize);
   this.score = 0;
   this.focus();
+}
+
+Game.prototype.keydown = function (ev)
+{
+  switch (ev.keyCode) {
+  case 37:			// LEFT
+  case 65:			// A
+  case 72:			// H
+    this.key_left = true;
+    this.player.vx = -1;
+    break;
+  case 39:			// RIGHT
+  case 68:			// D
+  case 76:			// L
+    this.key_right = true;
+    this.player.vx = +1;
+    break;
+  case 38:			// UP
+  case 87:			// W
+  case 75:			// K
+    this.key_up = true;
+    this.player.vy = -1;
+    break;
+  case 40:			// DOWN
+  case 83:			// S
+  case 74:			// J
+    this.key_down = true;
+    this.player.vy = +1;
+    break;
+  case 13:			// ENTER
+  case 32:			// SPACE
+  case 90:			// Z
+  case 88:			// X
+    this.action();
+    break;
+  case 112:			// F1
+    break;
+  }
+}
+
+Game.prototype.keyup = function (ev)
+{
+  switch (ev.keyCode) {
+  case 37:			// LEFT
+  case 65:			// A
+  case 72:			// H
+    this.key_left = false;
+    this.player.vx = (this.key_right) ? +1 : 0;
+    break;
+  case 39:			// RIGHT
+  case 68:			// D
+  case 76:			// L
+    this.key_right = false;
+    this.player.vx = (this.key_left) ? -1 : 0;
+    break;
+  case 38:			// UP
+  case 87:			// W
+  case 75:			// K
+    this.key_up = false;
+    this.player.vy = (this.key_down) ? +1 : 0;
+    break;
+  case 40:			// DOWN
+  case 83:			// S
+  case 74:			// J
+    this.key_down = false;
+    this.player.vy = (this.key_up) ? -1 : 0;
+    break;
+  }
 }
 
 Game.prototype.idle = function ()
@@ -206,12 +224,16 @@ Game.prototype.repaint = function (ctx)
 
 Game.prototype.action = function ()
 {
-  this.player.jump();
+  if (this.player.jump()) {
+    this.audios.jump.currentTime = 0;
+    this.audios.jump.play();
+  }
 }
 
 Game.prototype.addscore = function (d)
 {
   this.score += d;
+  this.audios.pick.currentTime = 0;
   this.audios.pick.play();
-  this.label.innerHTML = ("Score: "+this.score);
+  this.labels.score.innerHTML = ("Score: "+this.score);
 }
