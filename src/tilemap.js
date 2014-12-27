@@ -16,14 +16,14 @@ TileMap.prototype.get = function (x, y)
   } else {
     return -1;
   }
-}
+};
 
 TileMap.prototype.set = function (x, y, v)
 {
   if (0 <= x && 0 <= y && x < this.width && y < this.height) {
     this.map[y][x] = v;
   }
-}
+};
 
 TileMap.prototype.render = function (ctx, tiles, f, x0, y0, x, y, w, h)
 {
@@ -40,7 +40,7 @@ TileMap.prototype.render = function (ctx, tiles, f, x0, y0, x, y, w, h)
       }
     }
   }
-}
+};
 
 TileMap.prototype.coord2map = function (rect)
 {
@@ -56,7 +56,7 @@ TileMap.prototype.coord2map = function (rect)
     y1 = y0+1;
   }
   return new Rectangle(x0, y0, x1-x0, y1-y0);
-}
+};
 
 TileMap.prototype.map2coord = function (rect)
 {
@@ -67,7 +67,7 @@ TileMap.prototype.map2coord = function (rect)
   } else {
     return new Rectangle(rect.x*ts, rect.y*ts, ts, ts);
   }
-}
+};
 
 TileMap.prototype.apply = function (rect, f)
 {
@@ -82,7 +82,7 @@ TileMap.prototype.apply = function (rect, f)
     }
   }
   return false;
-}
+};
 
 TileMap.prototype.collide = function (rect, v, f)
 {
@@ -101,4 +101,4 @@ TileMap.prototype.collide = function (rect, v, f)
     }
   }
   return v;
-}
+};

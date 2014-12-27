@@ -158,7 +158,7 @@ Game.prototype.player_jumped = function (e)
 {
   this.audios.jump.currentTime = 0;
   this.audios.jump.play();
-}
+};
 
 Game.prototype.player_picked = function (e)
 {

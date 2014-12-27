@@ -76,7 +76,7 @@ Player.prototype.move = function (vx, vy)
   this.bounds = this.bounds.move(d.x, d.y);
   this.hitbox = this.hitbox.move(d.x, d.y);
   this._gy = Math.min(d.y + this.gravity, this.maxspeed);
-}
+};
 
 Player.prototype.pick = function ()
 {

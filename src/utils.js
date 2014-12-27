@@ -92,8 +92,8 @@ Slot.prototype.signal = function (arg)
   for (var i = 0; i < this.receivers.length; i++) {
     this.receivers[i](this.object, arg);
   }
-}
-;
+};
+
 // Point
 function Point(x, y)
 {
@@ -103,19 +103,19 @@ function Point(x, y)
 Point.prototype.toString = function ()
 {
   return '('+this.x+', '+this.y+')';
-}
+};
 Point.prototype.equals = function (p)
 {
   return (this.x == p.x && this.y == p.y);
-}
+};
 Point.prototype.copy = function ()
 {
   return new Point(this.x, this.y);
-}
+};
 Point.prototype.move = function (dx, dy)
 {
   return new Point(this.x+dx, this.y+dy);
-}
+};
 
 // Rectangle
 function Rectangle(x, y, width, height)
@@ -128,20 +128,20 @@ function Rectangle(x, y, width, height)
 Rectangle.prototype.toString = function () 
 {
   return '('+this.x+', '+this.y+', '+this.width+', '+this.height+')';
-}
+};
 Rectangle.prototype.equals = function (rect)
 {
   return (this.x == rect.x && this.y == rect.y &&
 	  this.width == rect.width && this.height == rect.height);
-}
+};
 Rectangle.prototype.copy = function ()
 {
   return new Rectangle(this.x, this.y, this.width, this.height);
-}
+};
 Rectangle.prototype.move = function (dx, dy)
 {
   return new Rectangle(this.x+dx, this.y+dy, this.width, this.height);  
-}
+};
 Rectangle.prototype.inset = function (dw, dh)
 {
   var cx = this.x+this.width/2;
@@ -149,12 +149,12 @@ Rectangle.prototype.inset = function (dw, dh)
   var w = this.width - dw;
   var h = this.height - dh;
   return new Rectangle(cx-w/2, cy-h/2, w, h);
-}
+};
 Rectangle.prototype.includes = function (x, y)
 {
   return (this.x <= x && this.y <= y &&
 	  x <= this.x+this.width && y <= this.y+this.height);
-}
+};
 Rectangle.prototype.clamp = function (rect)
 {
   var x0 = Math.max(this.x, rect.x);
@@ -162,7 +162,7 @@ Rectangle.prototype.clamp = function (rect)
   var x1 = Math.min(this.x+this.width, rect.x+rect.width);
   var y1 = Math.min(this.y+this.height, rect.y+rect.height);
   return new Rectangle(x0, y0, x1-x0, y1-y0);
-}
+};
 Rectangle.prototype.union = function (rect)
 {
   var x0 = Math.min(this.x, rect.x);
@@ -170,7 +170,7 @@ Rectangle.prototype.union = function (rect)
   var x1 = Math.max(this.x+this.width, rect.x+rect.width);
   var y1 = Math.max(this.y+this.height, rect.y+rect.height);
   return new Rectangle(x0, y0, x1-x0, y1-y0);
-}
+};
 Rectangle.prototype.intersection = function (rect)
 {
   var x0 = Math.max(this.x, rect.x);
@@ -178,14 +178,14 @@ Rectangle.prototype.intersection = function (rect)
   var x1 = Math.min(this.x+this.width, rect.x+rect.width);
   var y1 = Math.min(this.y+this.height, rect.y+rect.height);
   return new Rectangle(x0, y0, x1-x0, y1-y0);
-}
+};
 Rectangle.prototype.overlap = function (rect)
 {
   return !(this.x+this.width <= rect.x ||
 	   this.y+this.height <= rect.y ||
 	   rect.x+rect.width <= this.x ||
 	   rect.y+rect.height <= this.y);
-}
+};
 
 // collideRect: 2D collision detection
 function collideHLine(x0, x1, y, rect, v)
