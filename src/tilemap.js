@@ -94,7 +94,7 @@ TileMap.prototype.collide = function (rect, v, f)
   var y1 = Math.ceil((r.y+r.height)/ts);
   for (var y = y0; y < y1; y++) {
     for (var x = x0; x < x1; x++) {
-      if (f(this.get(x, y))) {
+      if (f(x, y)) {
 	var bounds = new Rectangle(x*ts, y*ts, ts, ts);
 	v = collideRect(bounds, rect, v);
       }

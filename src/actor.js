@@ -28,7 +28,7 @@ function Collectible(scene, rect)
 Collectible.prototype.repaint = function(ctx, x, y)
 {
   var ts = this.scene.tilesize;
-  ctx.drawImage(this.scene.game.images.tiles,
+  ctx.drawImage(this.scene.game.images.sprites,
 		Sprite.COLLECTIBLE*ts, 0, ts, ts,
 		x, y, this.bounds.width, this.bounds.height);
 };
@@ -66,9 +66,10 @@ Player.prototype.move = function (vx, vy)
 {
   var tilemap = this.scene.tilemap;
   var v = new Point(this.speed * vx, this._gy);
-  var d = tilemap.collide(this.hitbox, new Point(v.x, v.y), Tile.isObstacle);
-  d.x = tilemap.collide(this.hitbox, new Point(v.x, d.y), Tile.isObstacle).x;
-  d.y = tilemap.collide(this.hitbox, new Point(d.x, v.y), Tile.isObstacle).y;
+  var f = (function (x,y) { return Tile.isObstacle(tilemap.get(x,y)); });
+  var d = tilemap.collide(this.hitbox, new Point(v.x, v.y), f);
+  d.x = tilemap.collide(this.hitbox, new Point(v.x, d.y), f).x;
+  d.y = tilemap.collide(this.hitbox, new Point(d.x, v.y), f).y;
   this.bounds = this.bounds.move(d.x, d.y);
   this.hitbox = this.hitbox.move(d.x, d.y);
   this._gy = Math.min(d.y + this.gravity, this.maxspeed);
@@ -91,7 +92,8 @@ Player.prototype.pick = function ()
 Player.prototype.jump = function ()
 {
   var tilemap = this.scene.tilemap;
-  var d = tilemap.collide(this.hitbox, new Point(0, this._gy), Tile.isObstacle);
+  var f = (function (x,y) { return Tile.isObstacle(tilemap.get(x,y)); });
+  var d = tilemap.collide(this.hitbox, new Point(0, this._gy), f);
   if (0 < this._gy && d.y == 0) {
     this._gy = this.jumpacc;
     return true;

@@ -2,6 +2,7 @@
 
 Sprite = {
   PLAYER: 0,
+  BLOCK: 1,
   COLLECTIBLE: 2,
 };
 

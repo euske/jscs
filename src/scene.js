@@ -36,7 +36,7 @@ Scene.prototype.addActor = function (actor)
 {
   this.actors.push(actor);
   this.actors.sort(function (a,b) { return (b.layer-a.layer); });
-}
+};
 
 Scene.prototype.removeActor = function (actor)
 {
@@ -44,7 +44,7 @@ Scene.prototype.removeActor = function (actor)
   if (0 <= i) {
     this.actors.splice(i, 1);
   }
-}
+};
 
 Scene.prototype.setCenter = function (rect)
 {
@@ -64,7 +64,7 @@ Scene.prototype.setCenter = function (rect)
   }
   this.window.x = clamp(0, this.window.x, this.mapWidth-this.window.width);
   this.window.y = clamp(0, this.window.y, this.mapHeight-this.window.height);
-}
+};
 
 Scene.prototype.idle = function (ticks)
 {
@@ -77,7 +77,7 @@ Scene.prototype.idle = function (ticks)
     }
   }
   removeArray(this.actors, removed);
-}
+};
 
 Scene.prototype.repaint = function (ctx, bx, by)
 {
@@ -95,14 +95,24 @@ Scene.prototype.repaint = function (ctx, bx, by)
   }
   for (var i = 0; i < this.actors.length; i++) {
     var actor = this.actors[i];
-    var dy = Math.floor((actor.bounds.y+actor.bounds.height)/this.tilesize) - y0;
-    if (0 <= dy && dy < nrows) {
-      actors[dy].push(actor);
+    var b = actor.bounds;
+    if (this.window.x < b.x+b.width &&
+	b.x < this.window.x+this.window.width) {
+      var dy = Math.floor((b.y+b.height-this.window.y)/this.tilesize);
+      if (0 <= dy && dy < nrows) {
+	actors[dy].push(actor);
+      }
     }
   }
 
+  ctx.fillStyle = 'rgb(0,0,128)';
+  ctx.fillRect(0, 0, this.window.width, this.window.height);
+
   var tilemap = this.tilemap;
-  var f = function (x,y) { return tilemap.get(x,y); };
+  var f = function (x,y) {
+    var c = tilemap.get(x,y);
+    return (c == Tile.NONE? -1 : c);
+  };
   for (var dy = 0; dy < nrows; dy++) {
     tilemap.render(ctx,
 		   this.game.images.tiles, f,
@@ -116,7 +126,7 @@ Scene.prototype.repaint = function (ctx, bx, by)
 		    by-this.window.y+actor.bounds.y);
     }
   }
-}
+};
 
 Scene.prototype.collide = function (actor0)
 {
@@ -128,7 +138,7 @@ Scene.prototype.collide = function (actor0)
     }
   }
   return a;
-}
+};
 
 Scene.prototype.init = function ()
 {
