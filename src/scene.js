@@ -87,7 +87,7 @@ Scene.prototype.repaint = function (ctx, bx, by)
   var y1 = Math.ceil((this.window.y+this.window.height)/this.tilesize);
   var fx = x0*this.tilesize-this.window.x;
   var fy = y0*this.tilesize-this.window.y;
-  var nrows = y1-y0+1;
+  var nrows = y1-y0;
   
   var actors = new Array(nrows);
   for (var dy = 0; dy < nrows; dy++) {
@@ -98,7 +98,7 @@ Scene.prototype.repaint = function (ctx, bx, by)
     var b = actor.bounds;
     if (this.window.x < b.x+b.width &&
 	b.x < this.window.x+this.window.width) {
-      var dy = Math.floor((b.y+b.height-this.window.y)/this.tilesize);
+      var dy = Math.floor((b.y+b.height/2-this.window.y)/this.tilesize);
       if (0 <= dy && dy < nrows) {
 	actors[dy].push(actor);
       }
