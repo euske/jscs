@@ -47,6 +47,9 @@ function Player(scene, rect)
   this.bounds = rect;
   this.hitbox = rect.inset(4, 4);
   this.alive = true;
+  this.picked = new Slot(this);
+  this.jumped = new Slot(this);
+
   this._gy = 0;
 }
 
@@ -77,16 +80,14 @@ Player.prototype.move = function (vx, vy)
 
 Player.prototype.pick = function ()
 {
-  var picked = 0;
   var r = this.scene.collide(this);
   for (var i = 0; i < r.length; i++) {
     var a = r[i];
     if (a instanceof Collectible) {
       a.alive = false;
-      picked++;
+      this.picked.signal();
     }
   }
-  return picked;
 };
 
 Player.prototype.jump = function ()
@@ -96,7 +97,6 @@ Player.prototype.jump = function ()
   var d = tilemap.collide(this.hitbox, new Point(0, this._gy), f);
   if (0 < this._gy && d.y == 0) {
     this._gy = this.jumpacc;
-    return true;
+    this.jumped.signal();
   }
-  return false;
 };

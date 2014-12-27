@@ -69,7 +69,31 @@ function removeArray(a, b)
   }
   return a;
 }
-  
+
+// Slot
+function Slot(object)
+{
+  this.object = object
+  this.receivers = [];
+}
+Slot.prototype.subscribe = function (recv)
+{
+  this.receivers.push(recv);
+};
+Slot.prototype.unsubscribe = function (recv)
+{
+  var i = this.receivers.indexOf(recv);
+  if (0 <= i) {
+    this.receivers.splice(i, 1);
+  }
+};
+Slot.prototype.signal = function (arg)
+{
+  for (var i = 0; i < this.receivers.length; i++) {
+    this.receivers[i](this.object, arg);
+  }
+}
+;
 // Point
 function Point(x, y)
 {
