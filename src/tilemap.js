@@ -7,6 +7,7 @@ function TileMap(tilesize, map)
   this.map = map;
   this.width = map[0].length;
   this.height = map.length;
+  this.rangemap = {};
 }
 
 TileMap.prototype.get = function (x, y)
@@ -102,3 +103,13 @@ TileMap.prototype.collide = function (rect, v, f)
   }
   return v;
 };
+
+TileMap.prototype.getRange = function (f)
+{
+  var map = this.rangemap[f];
+  if (map === undefined) {
+    map = new RangeMap(this, f);
+    this.rangemap[f] = map;
+  }
+  return map;
+}
