@@ -131,6 +131,10 @@ Game.prototype.repaint = function (ctx)
 {
   ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  ctx.webkitImageSmoothingEnabled = false;
+  ctx.mozImageSmoothingEnabled = false;
+  ctx.msImageSmoothingEnabled = false;
   this.scene.repaint(ctx, 0, 0);
   if (!this.active) {
     var size = 50;
@@ -145,6 +149,18 @@ Game.prototype.repaint = function (ctx)
   }
   ctx.restore();
 };
+
+Game.prototype.renderString = function(ctx, font, text, scale, x, y)
+{
+  var fs = font.height;
+  for (var i = 0; i < text.length; i++) {
+    var c = text.charCodeAt(i);
+    ctx.drawImage(font,
+		  (c-32)*fs, 0, fs, fs,
+		  x, y, fs*scale, fs*scale);
+    x += fs*scale;
+  }
+}
 
 Game.prototype.addscore = function (d)
 {

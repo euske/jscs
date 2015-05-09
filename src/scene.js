@@ -164,7 +164,7 @@ Scene.prototype.repaint = function (ctx, bx, by)
 		     bx-this.window.x+particle.bounds.x,
 		     by-this.window.y+particle.bounds.y);
   }
-  
+
 };
 
 Scene.prototype.collide = function (actor0)
