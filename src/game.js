@@ -25,10 +25,9 @@ Game.prototype.init = function ()
   var window = new Rectangle(0, 0, this.canvas.width, this.canvas.height);
   var rect = new Rectangle(0, 0, tilesize, tilesize);
   var game = this;
-  this.ticks = 0;
   this.scene = new Scene(this, tilesize, window);
   this.scene.init();
-  this.player = new Player(this.scene, rect);
+  this.player = new Player(rect);
   this.player.picked.subscribe(function (e) { game.player_picked(e); });
   this.player.jumped.subscribe(function (e) { game.player_jumped(e); });
   this.scene.addActor(this.player);
@@ -108,8 +107,7 @@ Game.prototype.idle = function ()
   this.player.move(this._vx, this._vy);
   this.player.pick();
   this.scene.setCenter(this.player.bounds.inset(-200, -100));
-  this.scene.idle(this.ticks);
-  this.ticks++;
+  this.scene.idle();
 };
 
 Game.prototype.action = function ()

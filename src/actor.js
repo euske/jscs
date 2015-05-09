@@ -3,26 +3,57 @@
 // Actor
 function Actor(rect)
 {
+  this.scene = null;
+  this.start = 0;
+  this.alive = true;
+  
   this.bounds = rect;
   this.hitbox = rect;
-  this.alive = true;
 }
 
 Actor.prototype.repaint = function(ctx, x, y)
 {
 };
 
-Actor.prototype.idle = function(ticks)
+Actor.prototype.idle = function()
 {
 };
 
-// Collectible
-function Collectible(scene, rect)
+// Particle
+function Particle(bounds, duration)
 {
-  this.scene = scene;
+  this.scene = null;
+  this.start = 0;
+  this.alive = true;
+  
+  this.bounds = bounds;
+  this.duration = duration;
+}
+
+Particle.prototype.repaint = function(ctx, x, y)
+{
+  var ts = this.scene.tilesize;
+  ctx.drawImage(this.scene.game.images.sprites,
+		1*ts, 0, ts, ts,
+		x, y, this.bounds.width, this.bounds.height);
+};
+
+Particle.prototype.idle = function()
+{
+  this.bounds.y -= 1;
+  this.alive = (this.scene.ticks < this.start+this.duration);
+};
+
+
+// Collectible
+function Collectible(rect)
+{
+  this.scene = null;
+  this.start = 0;
+  this.alive = true;
+  
   this.bounds = rect;
   this.hitbox = rect.inset(16, 16);
-  this.alive = true;
 }
 
 Collectible.prototype.repaint = function(ctx, x, y)
@@ -36,17 +67,19 @@ Collectible.prototype.repaint = function(ctx, x, y)
 Collectible.prototype.idle = Actor.prototype.idle;
 
 // Player
-function Player(scene, rect)
+function Player(rect)
 {
+  this.scene = null;
+  this.start = 0;
+  this.alive = true;
+  
   this.speed = 8;
   this.gravity = 2;
   this.maxspeed = 16;
   this.jumpacc = -16;
   
-  this.scene = scene;
   this.bounds = rect;
   this.hitbox = rect.inset(4, 4);
-  this.alive = true;
   this.picked = new Slot(this);
   this.jumped = new Slot(this);
 
@@ -61,7 +94,7 @@ Player.prototype.repaint = function (ctx, x, y)
 		x, y, this.bounds.width, this.bounds.height);
 };
 
-Player.prototype.idle = function (ticks)
+Player.prototype.idle = function ()
 {
 };
 
@@ -86,6 +119,7 @@ Player.prototype.pick = function ()
     if (a instanceof Collectible) {
       a.alive = false;
       this.picked.signal();
+      this.scene.addParticle(new Particle(a.bounds, this.scene.game.framerate));
     }
   }
 };

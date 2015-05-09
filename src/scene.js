@@ -30,10 +30,14 @@ function Scene(game, tilesize, window)
   this.mapWidth = this.tilemap.width * tilesize;
   this.mapHeight = this.tilemap.height * tilesize;
   this.actors = [];
+  this.particles = [];
+  this.ticks = 0;
 }
 
 Scene.prototype.addActor = function (actor)
 {
+  actor.scene = this;
+  actor.start = this.ticks;
   this.actors.push(actor);
   this.actors.sort(function (a,b) { return (b.layer-a.layer); });
 };
@@ -43,6 +47,21 @@ Scene.prototype.removeActor = function (actor)
   var i = this.actors.indexOf(actor);
   if (0 <= i) {
     this.actors.splice(i, 1);
+  }
+};
+
+Scene.prototype.addParticle = function (particle)
+{
+  particle.scene = this;
+  particle.start = this.ticks;
+  this.particles.push(particle);
+};
+
+Scene.prototype.removeParticle = function (particle)
+{
+  var i = this.particles.indexOf(particle);
+  if (0 <= i) {
+    this.particles.splice(i, 1);
   }
 };
 
@@ -66,21 +85,36 @@ Scene.prototype.setCenter = function (rect)
   this.window.y = clamp(0, this.window.y, this.mapHeight-this.window.height);
 };
 
-Scene.prototype.idle = function (ticks)
+Scene.prototype.idle = function ()
 {
   var removed = []
   for (var i = 0; i < this.actors.length; i++) {
     var actor = this.actors[i];
-    actor.idle(ticks);
+    actor.idle();
     if (!actor.alive) {
       removed.push(actor);
     }
   }
   removeArray(this.actors, removed);
+  
+  removed = [];
+  for (var i = 0; i < this.particles.length; i++) {
+    var particle = this.particles[i];
+    particle.idle();
+    if (!particle.alive) {
+      removed.push(particle);
+    }
+  }
+  removeArray(this.particles, removed);
+
+  this.ticks++;
 };
 
 Scene.prototype.repaint = function (ctx, bx, by)
 {
+  ctx.fillStyle = 'rgb(0,0,128)';
+  ctx.fillRect(0, 0, this.window.width, this.window.height);
+  
   var x0 = Math.floor(this.window.x/this.tilesize);
   var y0 = Math.floor(this.window.y/this.tilesize);
   var x1 = Math.ceil((this.window.x+this.window.width)/this.tilesize);
@@ -105,9 +139,6 @@ Scene.prototype.repaint = function (ctx, bx, by)
     }
   }
 
-  ctx.fillStyle = 'rgb(0,0,128)';
-  ctx.fillRect(0, 0, this.window.width, this.window.height);
-
   var tilemap = this.tilemap;
   var f = function (x,y) {
     var c = tilemap.get(x,y);
@@ -126,6 +157,14 @@ Scene.prototype.repaint = function (ctx, bx, by)
 		    by-this.window.y+actor.bounds.y);
     }
   }
+
+  for (var i = 0; i < this.particles.length; i++) {
+    var particle = this.particles[i];
+    particle.repaint(ctx,
+		     bx-this.window.x+particle.bounds.x,
+		     by-this.window.y+particle.bounds.y);
+  }
+  
 };
 
 Scene.prototype.collide = function (actor0)
@@ -147,7 +186,7 @@ Scene.prototype.init = function ()
   var f = function (x,y) {
     if (Tile.isCollectible(tilemap.get(x,y))) {
       var rect = tilemap.map2coord(new Point(x,y));
-      scene.addActor(new Collectible(scene, rect));
+      scene.addActor(new Collectible(rect));
       tilemap.set(x, y, Tile.NONE);
     }
   };
