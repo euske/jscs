@@ -164,3 +164,20 @@ Game.prototype.player_picked = function (e)
   this.audios.pick.play();
   this.addscore(+1);
 };
+
+Game.prototype.addElement = function(bounds)
+{
+  var e = document.createElement("div");
+  e.style.position = "absolute";
+  e.style.left = bounds.x+"px";
+  e.style.top = bounds.y+"px";
+  e.style.width = bounds.width+"px";
+  e.style.height = bounds.height+"px";
+  this.canvas.parentNode.appendChild(e);
+  return e;
+}
+
+Game.prototype.removeElement = function(e)
+{
+  e.parentNode.removeChild(e);
+}

@@ -15,6 +15,7 @@ function run()
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
   var game = new Game(framerate, canvas, images, audios, labels);
+  var timer;
   
   function idle() {
     if (game.active) {
@@ -65,5 +66,5 @@ function run()
   
   game.init();
   game.focus(null);
-  window.setInterval(idle, 1000/framerate);
+  timer = window.setInterval(idle, 1000/framerate);
 }
