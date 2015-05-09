@@ -1,4 +1,4 @@
 jscs (JavaScript Cheat Sheet)
 
-A minimalistic framework for upcoming LD31.
+A minimalistic framework for JavaScript games.
 
