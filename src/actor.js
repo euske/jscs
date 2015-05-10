@@ -1,14 +1,14 @@
 // actor.js
 
 // Actor
-function Actor(rect)
+function Actor(bounds)
 {
   this.scene = null;
   this.start = 0;
   this.alive = true;
   
-  this.bounds = rect;
-  this.hitbox = rect;
+  this.bounds = bounds;
+  this.hitbox = bounds;
 }
 
 Actor.prototype.repaint = function(ctx, x, y)
@@ -67,7 +67,7 @@ Collectible.prototype.repaint = function(ctx, x, y)
 Collectible.prototype.idle = Actor.prototype.idle;
 
 // Player
-function Player(rect)
+function Player(bounds)
 {
   this.scene = null;
   this.start = 0;
@@ -78,8 +78,8 @@ function Player(rect)
   this.maxspeed = 16;
   this.jumpacc = -16;
   
-  this.bounds = rect;
-  this.hitbox = rect.inset(4, 4);
+  this.bounds = bounds;
+  this.hitbox = bounds.inset(4, 4);
   this.picked = new Slot(this);
   this.jumped = new Slot(this);
 

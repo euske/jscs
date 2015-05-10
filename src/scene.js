@@ -170,10 +170,13 @@ Scene.prototype.repaint = function (ctx, bx, by)
 Scene.prototype.collide = function (actor0)
 {
   var a = []
-  for (var i = 0; i < this.actors.length; i++) {
-    var actor1 = this.actors[i];
-    if (actor1 !== actor0 && actor1.hitbox.overlap(actor0.hitbox)) {
-      a.push(actor1);
+  if (actor0.hitbox != null) {
+    for (var i = 0; i < this.actors.length; i++) {
+      var actor1 = this.actors[i];
+      if (actor1 !== actor0 && actor1.hitbox != null &&
+	  actor1.hitbox.overlap(actor0.hitbox)) {
+	a.push(actor1);
+      }
     }
   }
   return a;

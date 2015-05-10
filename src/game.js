@@ -28,8 +28,17 @@ Game.prototype.init = function ()
   this.scene = new Scene(this, tilesize, window);
   this.scene.init();
   this.player = new Player(rect);
-  this.player.picked.subscribe(function (e) { game.player_picked(e); });
-  this.player.jumped.subscribe(function (e) { game.player_jumped(e); });
+  function player_jumped(e) {
+    game.audios.jump.currentTime = 0;
+    game.audios.jump.play();
+  }
+  function player_picked(e) {
+    game.audios.pick.currentTime = 0;
+    game.audios.pick.play();
+    game.addScore(+1);
+  }
+  this.player.picked.subscribe(player_picked);
+  this.player.jumped.subscribe(player_jumped);
   this.scene.addActor(this.player);
   this.score = 0;
 };
@@ -65,7 +74,7 @@ Game.prototype.keydown = function (ev)
   case 32:			// SPACE
   case 90:			// Z
   case 88:			// X
-    this.action();
+    this.player.jump();
     break;
   case 112:			// F1
     break;
@@ -110,11 +119,6 @@ Game.prototype.idle = function ()
   this.scene.idle();
 };
 
-Game.prototype.action = function ()
-{
-  this.player.jump();
-};
-
 Game.prototype.focus = function (ev)
 {
   this.active = true;
@@ -138,10 +142,10 @@ Game.prototype.repaint = function (ctx)
   this.scene.repaint(ctx, 0, 0);
   if (!this.active) {
     var size = 50;
-    ctx.fillStyle = 'rgba(0,0,64, 0.5)'; // gray out
+    ctx.fillStyle = 'rgba(0,0,64, 0.5)'; // gray out.
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.fillStyle = 'lightgray';
-    ctx.beginPath();
+    ctx.beginPath();		// draw a play button.
     ctx.moveTo(this.canvas.width/2-size, this.canvas.height/2-size);
     ctx.lineTo(this.canvas.width/2-size, this.canvas.height/2+size);
     ctx.lineTo(this.canvas.width/2+size, this.canvas.height/2);
@@ -162,25 +166,6 @@ Game.prototype.renderString = function(ctx, font, text, scale, x, y)
   }
 }
 
-Game.prototype.addscore = function (d)
-{
-  this.score += d;
-  this.labels.score.innerHTML = ("Score: "+this.score);
-};
-
-Game.prototype.player_jumped = function (e)
-{
-  this.audios.jump.currentTime = 0;
-  this.audios.jump.play();
-};
-
-Game.prototype.player_picked = function (e)
-{
-  this.audios.pick.currentTime = 0;
-  this.audios.pick.play();
-  this.addscore(+1);
-};
-
 Game.prototype.addElement = function(bounds)
 {
   var e = document.createElement("div");
@@ -197,3 +182,9 @@ Game.prototype.removeElement = function(e)
 {
   e.parentNode.removeChild(e);
 }
+
+Game.prototype.addScore = function (d)
+{
+  this.score += d;
+  this.labels.score.innerHTML = ("Score: "+this.score);
+};
