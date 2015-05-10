@@ -70,6 +70,17 @@ function removeArray(a, b)
   return a;
 }
 
+// removeChildren(n, name): remove all child nodes with the given name.
+function removeChildren(n, name)
+{
+  for (var i = 0; i < n.childNodes.length; i++) {
+    var c = n.childNodes[i];
+    if (c.nodeName == name) {
+      n.removeChild(c);
+    }
+  }
+}
+
 // Slot
 function Slot(object)
 {

@@ -25,6 +25,7 @@ Game.prototype.init = function ()
   var window = new Rectangle(0, 0, this.canvas.width, this.canvas.height);
   var rect = new Rectangle(0, 0, tilesize, tilesize);
   var game = this;
+  removeChildren(this.canvas.parentNode, 'div');
   this.scene = new Scene(this, tilesize, window);
   this.scene.init();
   this.player = new Player(rect);
@@ -40,7 +41,11 @@ Game.prototype.init = function ()
   this.player.picked.subscribe(player_picked);
   this.player.jumped.subscribe(player_jumped);
   this.scene.addActor(this.player);
+  this.score_node = this.addElement(new Rectangle(10, 10, 100, 20));
+  this.score_node.align = 'left';
+  this.score_node.style.color = 'white';
   this.score = 0;
+  this.addScore(0);
 };
 
 Game.prototype.keydown = function (ev)
@@ -168,12 +173,13 @@ Game.prototype.renderString = function(ctx, font, text, scale, x, y)
 
 Game.prototype.addElement = function(bounds)
 {
-  var e = document.createElement("div");
-  e.style.position = "absolute";
-  e.style.left = bounds.x+"px";
-  e.style.top = bounds.y+"px";
-  e.style.width = bounds.width+"px";
-  e.style.height = bounds.height+"px";
+  var e = document.createElement('div');
+  e.style.position = 'absolute';
+  e.style.left = bounds.x+'px';
+  e.style.top = bounds.y+'px';
+  e.style.width = bounds.width+'px';
+  e.style.height = bounds.height+'px';
+  e.style.padding = '0px';
   this.canvas.parentNode.appendChild(e);
   return e;
 }
@@ -186,5 +192,5 @@ Game.prototype.removeElement = function(e)
 Game.prototype.addScore = function (d)
 {
   this.score += d;
-  this.labels.score.innerHTML = ("Score: "+this.score);
+  this.score_node.innerHTML = ('Score: '+this.score);
 };
