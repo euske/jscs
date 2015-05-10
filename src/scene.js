@@ -29,15 +29,27 @@ function Scene(game, tilesize, window)
   this.tilemap = new TileMap(tilesize, map);
   this.mapWidth = this.tilemap.width * tilesize;
   this.mapHeight = this.tilemap.height * tilesize;
+  this.tasks = [];
   this.actors = [];
   this.particles = [];
   this.ticks = 0;
 }
 
+Scene.prototype.addTask = function (task)
+{
+  this.tasks.push(task);
+};
+
+Scene.prototype.removeTask = function (task)
+{
+  var i = this.tasks.indexOf(task);
+  if (0 <= i) {
+    this.tasks.splice(i, 1);
+  }
+};
+
 Scene.prototype.addActor = function (actor)
 {
-  actor.scene = this;
-  actor.start = this.ticks;
   this.actors.push(actor);
   this.actors.sort(function (a,b) { return (b.layer-a.layer); });
 };
@@ -52,8 +64,6 @@ Scene.prototype.removeActor = function (actor)
 
 Scene.prototype.addParticle = function (particle)
 {
-  particle.scene = this;
-  particle.start = this.ticks;
   this.particles.push(particle);
 };
 
@@ -87,9 +97,27 @@ Scene.prototype.setCenter = function (rect)
 
 Scene.prototype.idle = function ()
 {
-  var removed = []
+  var removed;
+
+  removed = [];
+  for (var i = 0; i < this.tasks.length; i++) {
+    var task = this.tasks[i];
+    if (task.scene == null) {
+      task.start(this);
+    }
+    task.idle();
+    if (!task.alive) {
+      removed.push(task);
+    }
+  }
+  removeArray(this.tasks, removed);
+  
+  removed = [];
   for (var i = 0; i < this.actors.length; i++) {
     var actor = this.actors[i];
+    if (actor.scene == null) {
+      actor.start(this);
+    }
     actor.idle();
     if (!actor.alive) {
       removed.push(actor);
@@ -100,6 +128,9 @@ Scene.prototype.idle = function ()
   removed = [];
   for (var i = 0; i < this.particles.length; i++) {
     var particle = this.particles[i];
+    if (particle.scene == null) {
+      particle.start(this);
+    }
     particle.idle();
     if (!particle.alive) {
       removed.push(particle);
@@ -129,6 +160,7 @@ Scene.prototype.repaint = function (ctx, bx, by)
   }
   for (var i = 0; i < this.actors.length; i++) {
     var actor = this.actors[i];
+    if (actor.scene != this) continue;
     var b = actor.bounds;
     if (this.window.x < b.x+b.width &&
 	b.x < this.window.x+this.window.width) {
@@ -160,6 +192,7 @@ Scene.prototype.repaint = function (ctx, bx, by)
 
   for (var i = 0; i < this.particles.length; i++) {
     var particle = this.particles[i];
+    if (particle.scene != this) continue;
     particle.repaint(ctx,
 		     bx-this.window.x+particle.bounds.x,
 		     by-this.window.y+particle.bounds.y);
@@ -170,11 +203,11 @@ Scene.prototype.repaint = function (ctx, bx, by)
 Scene.prototype.collide = function (actor0)
 {
   var a = []
-  if (actor0.hitbox != null) {
+  if (actor0.scene == this && actor0.hitbox != null) {
     for (var i = 0; i < this.actors.length; i++) {
       var actor1 = this.actors[i];
-      if (actor1 !== actor0 && actor1.hitbox != null &&
-	  actor1.hitbox.overlap(actor0.hitbox)) {
+      if (actor1.scene == this && actor1.hitbox != null &&
+	  actor1 !== actor0 && actor1.hitbox.overlap(actor0.hitbox)) {
 	a.push(actor1);
       }
     }
