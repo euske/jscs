@@ -20,12 +20,13 @@ Actor.prototype.idle = function()
 };
 
 // Particle
-function Particle(bounds, duration)
+function Particle(sprite, bounds, duration)
 {
   this.scene = null;
   this.start = 0;
   this.alive = true;
   
+  this.sprite = sprite
   this.bounds = bounds;
   this.duration = duration;
 }
@@ -34,7 +35,7 @@ Particle.prototype.repaint = function(ctx, x, y)
 {
   var ts = this.scene.tilesize;
   ctx.drawImage(this.scene.game.images.sprites,
-		1*ts, 0, ts, ts,
+		this.sprite*ts, 0, ts, ts,
 		x, y, this.bounds.width, this.bounds.height);
 };
 
@@ -119,7 +120,8 @@ Player.prototype.pick = function ()
     if (a instanceof Collectible) {
       a.alive = false;
       this.picked.signal();
-      this.scene.addParticle(new Particle(a.bounds, this.scene.game.framerate));
+      var particle = new Particle(Sprite.YAY, a.bounds, this.scene.game.framerate);
+      this.scene.addParticle(particle);
     }
   }
 };
