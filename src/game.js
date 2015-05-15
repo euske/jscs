@@ -2,10 +2,11 @@
 // Game class handles the event loop and global state management.
 // It also has shared resources (images, audios, etc.)
 
-function Game(framerate, canvas, images, audios, labels)
+function Game(framerate, screen, buffer, images, audios, labels)
 {
   this.framerate = framerate;
-  this.canvas = canvas;
+  this.screen = screen;
+  this.buffer = buffer;
   this.images = images;
   this.audios = audios;
   this.labels = labels;
@@ -22,10 +23,10 @@ function Game(framerate, canvas, images, audios, labels)
 Game.prototype.init = function ()
 {
   var tilesize = 32;
-  var window = new Rectangle(0, 0, this.canvas.width, this.canvas.height);
+  var window = new Rectangle(0, 0, this.buffer.width, this.buffer.height);
   var rect = new Rectangle(0, 0, tilesize, tilesize);
   var game = this;
-  removeChildren(this.canvas.parentNode, 'div');
+  removeChildren(this.screen.parentNode, 'div');
   this.scene = new Scene(this, tilesize, window);
   this.scene.init();
   this.player = new Player(rect);
@@ -138,24 +139,9 @@ Game.prototype.blur = function (ev)
 
 Game.prototype.repaint = function (ctx)
 {
-  ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  ctx.clearRect(0, 0, this.buffer.width, this.buffer.height);
   ctx.save();
-  ctx.imageSmoothingEnabled = false;
-  ctx.webkitImageSmoothingEnabled = false;
-  ctx.mozImageSmoothingEnabled = false;
-  ctx.msImageSmoothingEnabled = false;
   this.scene.repaint(ctx, 0, 0);
-  if (!this.active) {
-    var size = 50;
-    ctx.fillStyle = 'rgba(0,0,64, 0.5)'; // gray out.
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    ctx.fillStyle = 'lightgray';
-    ctx.beginPath();		// draw a play button.
-    ctx.moveTo(this.canvas.width/2-size, this.canvas.height/2-size);
-    ctx.lineTo(this.canvas.width/2-size, this.canvas.height/2+size);
-    ctx.lineTo(this.canvas.width/2+size, this.canvas.height/2);
-    ctx.fill();
-  }
   ctx.restore();
 };
 
@@ -180,7 +166,7 @@ Game.prototype.addElement = function(bounds)
   e.style.width = bounds.width+'px';
   e.style.height = bounds.height+'px';
   e.style.padding = '0px';
-  this.canvas.parentNode.appendChild(e);
+  this.screen.parentNode.appendChild(e);
   return e;
 }
 

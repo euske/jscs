@@ -8,19 +8,41 @@ function run()
     return d;
   }
   
+  var scale = 2;
   var framerate = 30;
   var images = getprops(document.getElementsByTagName('img'));
   var audios = getprops(document.getElementsByTagName('audio'));
   var labels = getprops(document.getElementsByClassName('label'));
-  var canvas = document.getElementById('canvas');
-  var ctx = canvas.getContext('2d');
-  var game = new Game(framerate, canvas, images, audios, labels);
+  var screen = document.getElementById('screen');
+  var buffer = document.createElement('canvas');
+  buffer.width = screen.width/scale;
+  buffer.height = screen.height/scale;
+  
+  var game = new Game(framerate, screen, buffer, images, audios, labels);
   var timer;
+  var scrctx = screen.getContext('2d');
+  scrctx.imageSmoothingEnabled = false;
+  scrctx.webkitImageSmoothingEnabled = false;
+  scrctx.mozImageSmoothingEnabled = false;
+  scrctx.msImageSmoothingEnabled = false;
+  
+  var bufctx = buffer.getContext('2d');
+  bufctx.imageSmoothingEnabled = false;
+  bufctx.webkitImageSmoothingEnabled = false;
+  bufctx.mozImageSmoothingEnabled = false;
+  bufctx.msImageSmoothingEnabled = false;
+
+  function repaint() {
+    scrctx.drawImage(buffer,
+		     0, 0, buffer.width, buffer.height,
+		     0, 0, screen.width, screen.height);
+  }    
   
   function idle() {
     if (game.active) {
       game.idle();
-      game.repaint(ctx);
+      game.repaint(bufctx);
+      repaint();
     }
   };
   
@@ -48,15 +70,26 @@ function run()
   function focus(e) {
     if (!game.active) {
       game.focus(e);
-      game.repaint(ctx);
+      repaint();
     }
   };
   
   function blur(e) {
     if (game.active) {
       game.blur(e);
-      game.repaint(ctx);
+      repaint();
     }
+    var size = 50;
+    scrctx.save();
+    scrctx.fillStyle = 'rgba(0,0,64, 0.5)'; // gray out.
+    scrctx.fillRect(0, 0, screen.width, screen.height);
+    scrctx.fillStyle = 'lightgray';
+    scrctx.beginPath();		// draw a play button.
+    scrctx.moveTo(screen.width/2-size, screen.height/2-size);
+    scrctx.lineTo(screen.width/2-size, screen.height/2+size);
+    scrctx.lineTo(screen.width/2+size, screen.height/2);
+    scrctx.fill();
+    scrctx.restore();
   };
   
   window.addEventListener('keydown', keydown);

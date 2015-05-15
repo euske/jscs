@@ -190,10 +190,10 @@ Player.prototype.pick = function ()
       var particle = new Particle(Sprite.YAY, a.bounds, this.scene.game.framerate);
       this.scene.addParticle(particle);
       // balloon
-      var canvas = this.scene.game.canvas;
+      var screen = this.scene.game.screen;
       var text = "Got a thingy!";
       var e = this.scene.game.addElement(
-	new Rectangle(20, 20, canvas.width-60, 60))
+	new Rectangle(20, 20, screen.width-60, 60))
       e.align = "left";
       e.style.padding = "10px";
       e.style.background = "white";
