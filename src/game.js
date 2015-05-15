@@ -121,7 +121,9 @@ Game.prototype.idle = function ()
 {
   this.player.move(this._vx, this._vy);
   this.player.pick();
-  this.scene.setCenter(this.player.bounds.inset(-200, -100));
+  var rect = this.player.bounds.inset(-this.buffer.width/4,
+				      -this.buffer.height/4);
+  this.scene.setCenter(rect);
   this.scene.idle();
 };
 
