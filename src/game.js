@@ -14,14 +14,9 @@ function Game(framerate, frame, images, audios, labels)
 
   // Initialize the off-screen bitmap.
   var scale = 2;
-  this.screen = document.createElement('canvas');
-  this.screen.width = this.frame.width/scale;
-  this.screen.height = this.frame.height/scale;
-  this.ctx = this.screen.getContext('2d');
-  this.ctx.imageSmoothingEnabled = false;
-  this.ctx.webkitImageSmoothingEnabled = false;
-  this.ctx.mozImageSmoothingEnabled = false;
-  this.ctx.msImageSmoothingEnabled = false;
+  this.screen = createCanvas(this.frame.width/scale,
+			     this.frame.height/scale);
+  this.ctx = getEdgeyContext(this.screen)
   
   this._key_left = false;
   this._key_right = false;

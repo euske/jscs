@@ -261,3 +261,23 @@ function collideRect(r0, r1, v)
   }
   return v;
 }
+
+// createCanvas(width, height)
+function createCanvas(width, height)
+{
+  var canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  return canvas;
+}
+
+// getEdgeyContext(canvas)
+function getEdgeyContext(canvas)
+{
+  var ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.webkitImageSmoothingEnabled = false;
+  ctx.mozImageSmoothingEnabled = false;
+  ctx.msImageSmoothingEnabled = false;
+  return ctx;
+}

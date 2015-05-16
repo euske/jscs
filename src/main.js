@@ -18,12 +18,8 @@ function run()
   var labels = getprops(document.getElementsByClassName('label'));
   var frame = document.getElementById('main');
   var game = new Game(framerate, frame, images, audios, labels);
+  var ctx = getEdgeyContext(frame)
   var timer;
-  var ctx = frame.getContext('2d');
-  ctx.imageSmoothingEnabled = false;
-  ctx.webkitImageSmoothingEnabled = false;
-  ctx.mozImageSmoothingEnabled = false;
-  ctx.msImageSmoothingEnabled = false;
   
   function repaint() {
     ctx.drawImage(game.screen,
