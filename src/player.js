@@ -41,7 +41,7 @@ Player.prototype.idle = function ()
   }
 };
 
-Player.prototype.repaint = Actor.prototype.repaint;
+Player.prototype.render = Actor.prototype.render;
 
 Player.prototype.move = function (vx, vy)
 {

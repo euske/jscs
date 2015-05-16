@@ -203,9 +203,9 @@ Game.prototype.repaint = function ()
   // GAME SPECIFIC CODE
   this.ctx.clearRect(0, 0, this.screen.width, this.screen.height);
   this.ctx.save();
-  this.scene.repaint(this.ctx,
-		     (this.screen.width-this.scene.window.width)/2,
-		     (this.screen.height-this.scene.window.height)/2);
+  this.scene.render(this.ctx,
+		    (this.screen.width-this.scene.window.width)/2,
+		    (this.screen.height-this.scene.window.height)/2);
   this.ctx.restore();
 };
 

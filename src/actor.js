@@ -83,7 +83,7 @@ Particle.prototype.idle = function()
   this.alive = (this.scene.ticks < this.end);
 };
 
-Particle.prototype.repaint = function(ctx, x, y)
+Particle.prototype.render = function(ctx, x, y)
 {
   if (this.scene == null) return;
   var sprites = this.scene.game.images.sprites;
@@ -119,7 +119,7 @@ Actor.prototype.idle = function()
   // OVERRIDE
 };
 
-Actor.prototype.repaint = function(ctx, x, y)
+Actor.prototype.render = function(ctx, x, y)
 {
   // OVERRIDE
   if (this.scene == null) return;

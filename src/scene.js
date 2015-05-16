@@ -109,7 +109,7 @@ Scene.prototype.idle = function ()
   this.ticks++;
 };
 
-Scene.prototype.repaint = function (ctx, bx, by)
+Scene.prototype.render = function (ctx, bx, by)
 {
   // OVERRIDE
 
@@ -124,7 +124,7 @@ Scene.prototype.repaint = function (ctx, bx, by)
   var fx = x0*this.tilesize-this.window.x;
   var fy = y0*this.tilesize-this.window.y;
 
-  // Define the perspective function.
+  // Define the depth function.
   //     (x0,y0) -- (x1,y0) fd+
   //        |          |
   // fd- (x0,y1) -- (x1,y1)
@@ -132,12 +132,12 @@ Scene.prototype.repaint = function (ctx, bx, by)
 
   // Set the drawing order.
   var n = fd(x1,y0)+1;
-  var diags = new Array(n);
+  var depth = new Array(n);
   for (var i = 0; i < n; i++) {
-    diags[i] = new Array();
+    depth[i] = new Array();
   }
   function add(d, actor, x, y) {
-    diags[d].push(function () { actor.repaint(ctx, x, y); });
+    depth[d].push(function () { actor.render(ctx, x, y); });
   }
   for (var i = 0; i < this.actors.length; i++) {
     var actor = this.actors[i];
@@ -161,7 +161,7 @@ Scene.prototype.repaint = function (ctx, bx, by)
   };
   tilemap.render(ctx,
 		 this.game.images.tiles, ft,
-		 diags, fd, 
+		 depth, fd, 
 		 bx+fx, by+fy,
 		 x0, y0, x1-x0+1, y1-y0+1);
 
@@ -169,9 +169,9 @@ Scene.prototype.repaint = function (ctx, bx, by)
   for (var i = 0; i < this.particles.length; i++) {
     var particle = this.particles[i];
     if (particle.scene != this) continue;
-    particle.repaint(ctx,
-		     bx-this.window.x+particle.bounds.x,
-		     by-this.window.y+particle.bounds.y);
+    particle.render(ctx,
+		    bx-this.window.x+particle.bounds.x,
+		    by-this.window.y+particle.bounds.y);
   }
 
 };

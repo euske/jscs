@@ -98,17 +98,17 @@ TileMap.prototype.getRange = function (f)
   return map;
 }
 
-TileMap.prototype.render = function (ctx, tiles, ft, diags, fd,
+TileMap.prototype.render = function (ctx, tiles, ft, depth, fd,
 				     x0, y0, x, y, w, h)
 {
-  // Sort them in z-order.
+  // Sort tiles in the depth order.
   for (var dy = 0; dy < h; dy++) {
     for (var dx = 0; dx < w; dx++) {
       var d = fd(x+dx, y+dy);
-      if (0 <= d && d < diags.length) {
+      if (0 <= d && d < depth.length) {
 	var c = ft(x+dx, y+dy);
 	if (0 <= c) {
-	  diags[d].push({ c:c, dx:dx, dy:dy });
+	  depth[d].push({ c:c, dx:dx, dy:dy });
 	}
       }
     }
@@ -118,8 +118,8 @@ TileMap.prototype.render = function (ctx, tiles, ft, diags, fd,
   var ts = this.tilesize;
   var tw = tiles.height;
   y0 = y0+ts-tw;
-  for (var d = 0; d < diags.length; d++) {
-    var a = diags[d];
+  for (var d = 0; d < depth.length; d++) {
+    var a = depth[d];
     for (var i = 0; i < a.length; i++) {
       var obj = a[i];
       if (typeof(obj) === 'function') {
