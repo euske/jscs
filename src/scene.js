@@ -1,13 +1,12 @@
 // scene.js
 // Scene object takes care of every in-game object and the scrollable map.
 
-function Scene(game, tilesize, window)
+function Scene(game, tilesize)
 {
   this.game = game;
   this.tilesize = tilesize;
-  this.window = window;
-  this.width = window.width;
-  this.height = window.height;
+  this.window = new Rectangle(0, 0, game.screen.width, game.screen.height);
+  this.world = new Rectangle(0, 0, game.screen.width, game.screen.height);
 }
 
 Scene.prototype.addTask = function (task)
@@ -66,8 +65,8 @@ Scene.prototype.setCenter = function (rect)
   } else if (this.window.y+this.window.height < rect.y+rect.height) {
     this.window.y = rect.y+rect.height - this.window.height;
   }
-  this.window.x = clamp(0, this.window.x, this.width-this.window.width);
-  this.window.y = clamp(0, this.window.y, this.height-this.window.height);
+  this.window.x = clamp(0, this.window.x, this.world.width-this.window.width);
+  this.window.y = clamp(0, this.window.y, this.world.height-this.window.height);
 };
 
 Scene.prototype.collide = function (actor0)
@@ -117,50 +116,50 @@ Scene.prototype.repaint = function (ctx, bx, by)
   // Fill with the background color.
   ctx.fillStyle = 'rgb(0,0,128)';
   ctx.fillRect(bx, by, this.window.width, this.window.height);
-  
+
   var x0 = Math.floor(this.window.x/this.tilesize);
   var y0 = Math.floor(this.window.y/this.tilesize);
   var x1 = Math.ceil((this.window.x+this.window.width)/this.tilesize);
   var y1 = Math.ceil((this.window.y+this.window.height)/this.tilesize);
   var fx = x0*this.tilesize-this.window.x;
   var fy = y0*this.tilesize-this.window.y;
-  var nrows = y1-y0;
-  
-  var actors = new Array(nrows);
-  for (var dy = 0; dy < nrows; dy++) {
-    actors[dy] = []
+
+  //     (x0,y0) -- (x1,y0) fd+
+  //        |          |
+  // fd- (x0,y1) -- (x1,y1)
+  var fd = function (x,y) { return (x-x0)+(y1-y); }
+  var n = fd(x1,y0)+1;
+  var diags = new Array(n);
+  for (var i = 0; i < n; i++) {
+    diags[i] = new Array();
+  }
+  function add(d, actor, x, y) {
+    diags[d].push(function () { actor.repaint(ctx, x, y); });
   }
   for (var i = 0; i < this.actors.length; i++) {
     var actor = this.actors[i];
     if (actor.scene != this) continue;
     var b = actor.bounds;
-    if (this.window.x < b.x+b.width &&
-	b.x < this.window.x+this.window.width) {
-      var dy = Math.floor((b.y+b.height/2-this.window.y)/this.tilesize);
-      if (0 <= dy && dy < nrows) {
-	actors[dy].push(actor);
+    if (this.window.overlap(b)) {
+      var dx = Math.floor((b.x+b.width/2)/this.tilesize);
+      var dy = Math.floor((b.y+b.height/2)/this.tilesize);
+      var d = fd(dx, dy);
+      if (0 <= d && d < n) {
+	add(d, actor, bx+b.x-this.window.x, by+b.y-this.window.y);
       }
     }
   }
 
   var tilemap = this.tilemap;
-  var f = function (x,y) {
+  var ft = function (x,y) {
     var c = tilemap.get(x,y);
     return (c == Tile.NONE? -1 : c);
   };
-  for (var dy = 0; dy < nrows; dy++) {
-    tilemap.render(ctx,
-		   this.game.images.tiles, f,
-		   bx+fx, by+fy+dy*this.tilesize,
-		   x0, y0+dy, x1-x0+1, 1);
-    var row = actors[dy];
-    for (var i = 0; i < row.length; i++) {
-      var actor = row[i];
-      actor.repaint(ctx,
-		    bx-this.window.x+actor.bounds.x,
-		    by-this.window.y+actor.bounds.y);
-    }
-  }
+  tilemap.render(ctx,
+		 this.game.images.tiles, ft,
+		 diags, fd, 
+		 bx+fx, by+fy,
+		 x0, y0, x1-x0+1, y1-y0+1);
 
   for (var i = 0; i < this.particles.length; i++) {
     var particle = this.particles[i];
@@ -197,8 +196,10 @@ Scene.prototype.init = function ()
   ]);
   
   this.tilemap = new TileMap(this.tilesize, map);
-  this.width = this.tilemap.width * this.tilesize;
-  this.height = this.tilemap.height * this.tilesize;
+  this.world.width = this.tilemap.width * this.tilesize;
+  this.world.height = this.tilemap.height * this.tilesize;
+  this.window.width = Math.min(this.world.width, this.window.width);
+  this.window.height = Math.min(this.world.height, this.window.height);
   this.tasks = [];
   this.actors = [];
   this.particles = [];

@@ -26,18 +26,26 @@ TileMap.prototype.set = function (x, y, v)
   }
 };
 
-TileMap.prototype.render = function (ctx, tiles, f, x0, y0, x, y, w, h)
+TileMap.prototype.render = function (ctx, tiles, ft, diags, fd,
+				     x0, y0, x, y, w, h)
 {
   var ts = this.tilesize;
   // Align the bottom left corner.
   y0 = y0+ts-tiles.height;
   for (var dy = 0; dy < h; dy++) {
     for (var dx = 0; dx < w; dx++) {
-      var c = f(x+dx, y+dy);
+      var c = ft(x+dx, y+dy);
       if (0 <= c) {
 	ctx.drawImage(tiles,
 		      ts*c, 0, ts, tiles.height,
 		      x0+ts*dx, y0+ts*dy, ts, tiles.height);
+      }
+      var d = fd(x+dx, y+dy);
+      if (0 <= d && d < diags.length) {
+	var a = diags[d];
+	for (var i = 0; i < a.length; i++) {
+	  a[i]();
+	}
       }
     }
   }

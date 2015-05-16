@@ -103,6 +103,11 @@ function Actor(bounds)
   this.hitbox = bounds;
 }
 
+Actor.prototype.toString = function ()
+{
+  return "<Actor: "+this.bounds+">";
+}
+
 Actor.prototype.start = Task.prototype.start;
 
 Actor.prototype.idle = function()
@@ -126,6 +131,8 @@ function StaticActor(bounds, sprite)
   this.hitbox = bounds.inset(16, 16);
   this.sprite = sprite
 }
+
+StaticActor.prototype.toString = Actor.prototype.toString;
 
 StaticActor.prototype.start = Actor.prototype.start;
 

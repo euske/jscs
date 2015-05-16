@@ -21,6 +21,11 @@ function Player(bounds)
   this._gy = 0;
 }
 
+Player.prototype.toString = function ()
+{
+  return "<Player: "+this.bounds+">";
+}
+
 Player.prototype.start = Actor.prototype.start;
 
 Player.prototype.idle = function ()

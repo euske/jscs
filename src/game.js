@@ -97,6 +97,13 @@ Game.prototype.keydown = function (ev)
     break;
   case 112:			// F1
     break;
+  case 27:			// ESC
+    if (this.active) {
+      this.blur();
+    } else {
+      this.focus();
+    }
+    break;
   }
 };
 
@@ -135,13 +142,13 @@ Game.prototype.focus = function (ev)
 {
   // OVERRIDE
   this.active = true;
-  this.audios.music.play();
+  //this.audios.music.play();
 };
 
 Game.prototype.blur = function (ev)
 {
   // OVERRIDE
-  this.audios.music.pause();
+  //this.audios.music.pause();
   this.active = false;
 };
 
@@ -149,10 +156,10 @@ Game.prototype.init = function ()
 {
   // OVERRIDE
   // GAME SPECIFIC CODE
-  var tilesize = 32;
-  var window = new Rectangle(0, 0, this.screen.width, this.screen.height);
   removeChildren(this.frame.parentNode, 'div');
-  this.scene = new Scene(this, tilesize, window);
+
+  var tilesize = 32;
+  this.scene = new Scene(this, tilesize);
   this.scene.init();
   
   var bounds = new Rectangle(0, 0, tilesize, tilesize);
@@ -184,8 +191,8 @@ Game.prototype.idle = function ()
   // OVERRIDE
   // GAME SPECIFIC CODE
   this.player.move(this._vx, this._vy);
-  var rect = this.player.bounds.inset(-this.screen.width/4,
-				      -this.screen.height/4);
+  var window = this.scene.window;
+  var rect = this.player.bounds.inset(-window.width/4, -window.height/4);
   this.scene.setCenter(rect);
   this.scene.idle();
 };
@@ -196,7 +203,9 @@ Game.prototype.repaint = function ()
   // GAME SPECIFIC CODE
   this.ctx.clearRect(0, 0, this.screen.width, this.screen.height);
   this.ctx.save();
-  this.scene.repaint(this.ctx, 0, 0);
+  this.scene.repaint(this.ctx,
+		     (this.screen.width-this.scene.window.width)/2,
+		     (this.screen.height-this.scene.window.height)/2);
   this.ctx.restore();
 };
 
