@@ -6,6 +6,8 @@ function Scene(game, tilesize, window)
   this.game = game;
   this.tilesize = tilesize;
   this.window = window;
+  this.width = window.width;
+  this.height = window.height;
 }
 
 Scene.prototype.addTask = function (task)
@@ -64,8 +66,8 @@ Scene.prototype.setCenter = function (rect)
   } else if (this.window.y+this.window.height < rect.y+rect.height) {
     this.window.y = rect.y+rect.height - this.window.height;
   }
-  this.window.x = clamp(0, this.window.x, this.mapWidth-this.window.width);
-  this.window.y = clamp(0, this.window.y, this.mapHeight-this.window.height);
+  this.window.x = clamp(0, this.window.x, this.width-this.window.width);
+  this.window.y = clamp(0, this.window.y, this.height-this.window.height);
 };
 
 Scene.prototype.collide = function (actor0)
@@ -83,54 +85,36 @@ Scene.prototype.collide = function (actor0)
   return a;
 };
 
+Scene.prototype.moveObjects = function (objs)
+{
+  var removed = [];
+  for (var i = 0; i < objs.length; i++) {
+    var obj = objs[i];
+    if (obj.scene == null) {
+      obj.start(this);
+    }
+    obj.idle();
+    if (!obj.alive) {
+      removed.push(obj);
+    }
+  }
+  removeArray(objs, removed);
+}
+
 Scene.prototype.idle = function ()
 {
-  var removed;
-
-  removed = [];
-  for (var i = 0; i < this.tasks.length; i++) {
-    var task = this.tasks[i];
-    if (task.scene == null) {
-      task.start(this);
-    }
-    task.idle();
-    if (!task.alive) {
-      removed.push(task);
-    }
-  }
-  removeArray(this.tasks, removed);
-  
-  removed = [];
-  for (var i = 0; i < this.actors.length; i++) {
-    var actor = this.actors[i];
-    if (actor.scene == null) {
-      actor.start(this);
-    }
-    actor.idle();
-    if (!actor.alive) {
-      removed.push(actor);
-    }
-  }
-  removeArray(this.actors, removed);
-  
-  removed = [];
-  for (var i = 0; i < this.particles.length; i++) {
-    var particle = this.particles[i];
-    if (particle.scene == null) {
-      particle.start(this);
-    }
-    particle.idle();
-    if (!particle.alive) {
-      removed.push(particle);
-    }
-  }
-  removeArray(this.particles, removed);
-
+  // OVERRIDE
+  this.moveObjects(this.tasks);
+  this.moveObjects(this.actors);
+  this.moveObjects(this.particles);
   this.ticks++;
 };
 
 Scene.prototype.repaint = function (ctx, bx, by)
 {
+  // OVERRIDE
+
+  // Fill with the background color.
   ctx.fillStyle = 'rgb(0,0,128)';
   ctx.fillRect(bx, by, this.window.width, this.window.height);
   
@@ -213,8 +197,8 @@ Scene.prototype.init = function ()
   ]);
   
   this.tilemap = new TileMap(this.tilesize, map);
-  this.mapWidth = this.tilemap.width * this.tilesize;
-  this.mapHeight = this.tilemap.height * this.tilesize;
+  this.width = this.tilemap.width * this.tilesize;
+  this.height = this.tilemap.height * this.tilesize;
   this.tasks = [];
   this.actors = [];
   this.particles = [];

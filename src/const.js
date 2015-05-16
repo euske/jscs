@@ -1,5 +1,7 @@
 // const.js
 
+// GAME SPECIFIC CODE
+
 Sprite = {
   PLAYER: 0,
   BLOCK: 1,

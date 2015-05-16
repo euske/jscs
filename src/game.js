@@ -63,6 +63,7 @@ Game.prototype.removeElement = function(e)
 
 Game.prototype.keydown = function (ev)
 {
+  // OVERRIDE
   switch (ev.keyCode) {
   case 37:			// LEFT
   case 65:			// A
@@ -101,6 +102,7 @@ Game.prototype.keydown = function (ev)
 
 Game.prototype.keyup = function (ev)
 {
+  // OVERRIDE
   switch (ev.keyCode) {
   case 37:			// LEFT
   case 65:			// A
@@ -131,12 +133,14 @@ Game.prototype.keyup = function (ev)
 
 Game.prototype.focus = function (ev)
 {
+  // OVERRIDE
   this.active = true;
   this.audios.music.play();
 };
 
 Game.prototype.blur = function (ev)
 {
+  // OVERRIDE
   this.audios.music.pause();
   this.active = false;
 };

@@ -4,7 +4,7 @@
 
 function run()
 {
-  // NO NEED TO CHANGE THIS CODE.
+  // NO NEED TO CHANGE
   
   function getprops(a) {
     var d = {};

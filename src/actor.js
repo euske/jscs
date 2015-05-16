@@ -133,6 +133,7 @@ StaticActor.prototype.idle = Actor.prototype.idle;
 
 StaticActor.prototype.repaint = function(ctx, x, y)
 {
+  // OVERRIDE
   if (this.scene == null) return;
   var ts = this.scene.tilesize;
   ctx.drawImage(this.scene.game.images.sprites,
