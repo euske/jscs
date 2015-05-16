@@ -3,36 +3,9 @@
 
 function Scene(game, tilesize, window)
 {
-  var map = copyArray([
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 2,2,0,0, 0,0,0,0],
-    
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,2,0, 0,0,0,0, 0,2,2,0],
-    [0,0,0,0, 0,0,0,0, 1,1,1,1, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    
-    [0,0,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0, 1,1,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,2,0, 0,2,0,0, 0,0,0,0],
-    [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
-  ]);
-  
   this.game = game;
   this.tilesize = tilesize;
   this.window = window;
-  this.tilemap = new TileMap(tilesize, map);
-  this.mapWidth = this.tilemap.width * tilesize;
-  this.mapHeight = this.tilemap.height * tilesize;
-  this.tasks = [];
-  this.actors = [];
-  this.particles = [];
-  this.ticks = 0;
 }
 
 Scene.prototype.addTask = function (task)
@@ -95,6 +68,21 @@ Scene.prototype.setCenter = function (rect)
   this.window.y = clamp(0, this.window.y, this.mapHeight-this.window.height);
 };
 
+Scene.prototype.collide = function (actor0)
+{
+  var a = []
+  if (actor0.scene == this && actor0.hitbox != null) {
+    for (var i = 0; i < this.actors.length; i++) {
+      var actor1 = this.actors[i];
+      if (actor1.scene == this && actor1.hitbox != null &&
+	  actor1 !== actor0 && actor1.hitbox.overlap(actor0.hitbox)) {
+	a.push(actor1);
+      }
+    }
+  }
+  return a;
+};
+
 Scene.prototype.idle = function ()
 {
   var removed;
@@ -144,7 +132,7 @@ Scene.prototype.idle = function ()
 Scene.prototype.repaint = function (ctx, bx, by)
 {
   ctx.fillStyle = 'rgb(0,0,128)';
-  ctx.fillRect(0, 0, this.window.width, this.window.height);
+  ctx.fillRect(bx, by, this.window.width, this.window.height);
   
   var x0 = Math.floor(this.window.x/this.tilesize);
   var y0 = Math.floor(this.window.y/this.tilesize);
@@ -200,31 +188,46 @@ Scene.prototype.repaint = function (ctx, bx, by)
 
 };
 
-Scene.prototype.collide = function (actor0)
-{
-  var a = []
-  if (actor0.scene == this && actor0.hitbox != null) {
-    for (var i = 0; i < this.actors.length; i++) {
-      var actor1 = this.actors[i];
-      if (actor1.scene == this && actor1.hitbox != null &&
-	  actor1 !== actor0 && actor1.hitbox.overlap(actor0.hitbox)) {
-	a.push(actor1);
-      }
-    }
-  }
-  return a;
-};
-
 Scene.prototype.init = function ()
 {
+  // OVERRIDE
+  // GAME SPECIFIC CODE HERE
+  var map = copyArray([
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 2,2,0,0, 0,0,0,0],
+    
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,2,0, 0,0,0,0, 0,2,2,0],
+    [0,0,0,0, 0,0,0,0, 1,1,1,1, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    
+    [0,0,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    [0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0, 1,1,0,0],
+    [0,0,0,0, 0,0,0,0, 0,0,2,0, 0,2,0,0, 0,0,0,0],
+    [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+  ]);
+  
+  this.tilemap = new TileMap(this.tilesize, map);
+  this.mapWidth = this.tilemap.width * this.tilesize;
+  this.mapHeight = this.tilemap.height * this.tilesize;
+  this.tasks = [];
+  this.actors = [];
+  this.particles = [];
+  this.ticks = 0;
+
   var scene = this;
   var tilemap = this.tilemap;
   var f = function (x,y) {
     if (Tile.isCollectible(tilemap.get(x,y))) {
       var rect = tilemap.map2coord(new Point(x,y));
-      scene.addActor(new Collectible(rect));
+      scene.addActor(new StaticActor(rect, Sprite.COLLECTIBLE));
       tilemap.set(x, y, Tile.NONE);
     }
   };
-  tilemap.apply(null, f);
+  this.tilemap.apply(null, f);
 };

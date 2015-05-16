@@ -1,5 +1,7 @@
 // player.js
 
+// GAME SPECIFIC CODE
+
 // Player
 function Player(bounds)
 {
@@ -21,6 +23,18 @@ function Player(bounds)
 
 Player.prototype.start = Actor.prototype.start;
 
+Player.prototype.idle = function ()
+{
+  if (this.scene == null) return;
+  var r = this.scene.collide(this);
+  for (var i = 0; i < r.length; i++) {
+    var a = r[i];
+    if (a instanceof StaticActor) {
+      this.pick(a);
+    }
+  }
+};
+
 Player.prototype.repaint = function (ctx, x, y)
 {
   if (this.scene == null) return;
@@ -28,10 +42,6 @@ Player.prototype.repaint = function (ctx, x, y)
   ctx.drawImage(this.scene.game.images.sprites,
 		Sprite.PLAYER*ts, 0, ts, ts,
 		x, y, this.bounds.width, this.bounds.height);
-};
-
-Player.prototype.idle = function ()
-{
 };
 
 Player.prototype.move = function (vx, vy)
@@ -48,44 +58,6 @@ Player.prototype.move = function (vx, vy)
   this._gy = Math.min(d.y + this.gravity, this.maxspeed);
 };
 
-Player.prototype.pick = function ()
-{
-  if (this.scene == null) return;
-  var r = this.scene.collide(this);
-  for (var i = 0; i < r.length; i++) {
-    var a = r[i];
-    if (a instanceof Collectible) {
-      a.alive = false;
-      this.picked.signal();
-      var particle = new Particle(Sprite.YAY, a.bounds, this.scene.game.framerate);
-      this.scene.addParticle(particle);
-      // balloon
-      var screen = this.scene.game.screen;
-      var text = "Got a thingy!";
-      var e = this.scene.game.addElement(
-	new Rectangle(20, 20, screen.width-60, 60))
-      e.align = "left";
-      e.style.padding = "10px";
-      e.style.color = "black";
-      e.style.background = "white";
-      e.style.border = "solid black 2px";
-      var balloon = new Task(function (task) {
-	if ((task.scene.ticks % 2) == 0) {
-	  if (task.i < text.length) {
-	    task.i++;
-	    e.innerHTML = text.substring(0, task.i);
-	  } else {
-	    task.scene.game.removeElement(e);
-	    task.alive = false;
-	  }
-	}
-      });
-      balloon.i = 0;
-      this.scene.addTask(balloon);
-    }
-  }
-};
-
 Player.prototype.jump = function ()
 {
   if (this.scene == null) return;
@@ -96,4 +68,38 @@ Player.prototype.jump = function ()
     this._gy = this.jumpacc;
     this.jumped.signal();
   }
+};
+
+Player.prototype.pick = function (a)
+{
+  // pick it.
+  a.alive = false;
+  this.picked.signal();
+  
+  // show a particle.
+  var particle = new Particle(a.bounds, Sprite.YAY, this.scene.game.framerate);
+  this.scene.addParticle(particle);
+  
+  // show a balloon.
+  var frame = this.scene.game.frame;
+  var text = "Got a thingy!";
+  var e = this.scene.game.addElement(new Rectangle(20, 20, frame.width-60, 60))
+  e.align = "left";
+  e.style.padding = "10px";
+  e.style.color = "black";
+  e.style.background = "white";
+  e.style.border = "solid black 2px";
+  var i = 0;
+  function balloon(task) {
+    if ((task.scene.ticks % 2) == 0) {
+      if (i < text.length) {
+	i++;
+	e.innerHTML = text.substring(0, i);
+      } else {
+	task.scene.game.removeElement(e);
+	task.alive = false;
+      }
+    }
+  }
+  this.scene.addTask(new Task(balloon));
 };

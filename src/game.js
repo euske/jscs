@@ -1,17 +1,28 @@
 // game.js
+
 // Game class handles the event loop and global state management.
 // It also has shared resources (images, audios, etc.)
 
-function Game(framerate, screen, buffer, images, audios, labels)
+function Game(framerate, frame, images, audios, labels)
 {
   this.framerate = framerate;
-  this.screen = screen;
-  this.buffer = buffer;
+  this.frame = frame;
   this.images = images;
   this.audios = audios;
   this.labels = labels;
   this.active = false;
-  this.state = 0;
+
+  // Initialize the off-screen bitmap.
+  var scale = 2;
+  this.screen = document.createElement('canvas');
+  this.screen.width = this.frame.width/scale;
+  this.screen.height = this.frame.height/scale;
+  this.ctx = this.screen.getContext('2d');
+  this.ctx.imageSmoothingEnabled = false;
+  this.ctx.webkitImageSmoothingEnabled = false;
+  this.ctx.mozImageSmoothingEnabled = false;
+  this.ctx.msImageSmoothingEnabled = false;
+  
   this._key_left = false;
   this._key_right = false;
   this._key_up = false;
@@ -20,34 +31,35 @@ function Game(framerate, screen, buffer, images, audios, labels)
   this._vy = 0;
 }
 
-Game.prototype.init = function ()
+Game.prototype.renderString = function(font, text, scale, x, y)
 {
-  var tilesize = 32;
-  var window = new Rectangle(0, 0, this.buffer.width, this.buffer.height);
-  var rect = new Rectangle(0, 0, tilesize, tilesize);
-  var game = this;
-  removeChildren(this.screen.parentNode, 'div');
-  this.scene = new Scene(this, tilesize, window);
-  this.scene.init();
-  this.player = new Player(rect);
-  function player_jumped(e) {
-    game.audios.jump.currentTime = 0;
-    game.audios.jump.play();
+  var fs = font.height;
+  for (var i = 0; i < text.length; i++) {
+    var c = text.charCodeAt(i);
+    this.ctx.drawImage(font,
+		       (c-32)*fs, 0, fs, fs,
+		       x, y, fs*scale, fs*scale);
+    x += fs*scale;
   }
-  function player_picked(e) {
-    game.audios.pick.currentTime = 0;
-    game.audios.pick.play();
-    game.addScore(+1);
-  }
-  this.player.picked.subscribe(player_picked);
-  this.player.jumped.subscribe(player_jumped);
-  this.scene.addActor(this.player);
-  this.score_node = this.addElement(new Rectangle(10, 10, 100, 20));
-  this.score_node.align = 'left';
-  this.score_node.style.color = 'white';
-  this.score = 0;
-  this.addScore(0);
-};
+}
+
+Game.prototype.addElement = function(bounds)
+{
+  var e = document.createElement('div');
+  e.style.position = 'absolute';
+  e.style.left = bounds.x+'px';
+  e.style.top = bounds.y+'px';
+  e.style.width = bounds.width+'px';
+  e.style.height = bounds.height+'px';
+  e.style.padding = '0px';
+  this.frame.parentNode.appendChild(e);
+  return e;
+}
+
+Game.prototype.removeElement = function(e)
+{
+  e.parentNode.removeChild(e);
+}
 
 Game.prototype.keydown = function (ev)
 {
@@ -80,7 +92,7 @@ Game.prototype.keydown = function (ev)
   case 32:			// SPACE
   case 90:			// Z
   case 88:			// X
-    this.player.jump();
+    this.action();
     break;
   case 112:			// F1
     break;
@@ -117,16 +129,6 @@ Game.prototype.keyup = function (ev)
   }
 };
 
-Game.prototype.idle = function ()
-{
-  this.player.move(this._vx, this._vy);
-  this.player.pick();
-  var rect = this.player.bounds.inset(-this.buffer.width/4,
-				      -this.buffer.height/4);
-  this.scene.setCenter(rect);
-  this.scene.idle();
-};
-
 Game.prototype.focus = function (ev)
 {
   this.active = true;
@@ -139,46 +141,71 @@ Game.prototype.blur = function (ev)
   this.active = false;
 };
 
-Game.prototype.repaint = function (ctx)
+Game.prototype.init = function ()
 {
-  ctx.clearRect(0, 0, this.buffer.width, this.buffer.height);
-  ctx.save();
-  this.scene.repaint(ctx, 0, 0);
-  ctx.restore();
+  // OVERRIDE
+  // GAME SPECIFIC CODE
+  var tilesize = 32;
+  var window = new Rectangle(0, 0, this.screen.width, this.screen.height);
+  removeChildren(this.frame.parentNode, 'div');
+  this.scene = new Scene(this, tilesize, window);
+  this.scene.init();
+  
+  var bounds = new Rectangle(0, 0, tilesize, tilesize);
+  this.player = new Player(bounds);
+  this.scene.addActor(this.player);
+  
+  var game = this;
+  function player_jumped(e) {
+    game.audios.jump.currentTime = 0;
+    game.audios.jump.play();
+  }
+  function player_picked(e) {
+    game.audios.pick.currentTime = 0;
+    game.audios.pick.play();
+    game.addScore(+1);
+  }
+  this.player.picked.subscribe(player_picked);
+  this.player.jumped.subscribe(player_jumped);
+  
+  this.score_node = this.addElement(new Rectangle(10, 10, 100, 20));
+  this.score_node.align = 'left';
+  this.score_node.style.color = 'white';
+  this.score = 0;
+  this.addScore(0);
 };
 
-Game.prototype.renderString = function(ctx, font, text, scale, x, y)
+Game.prototype.idle = function ()
 {
-  var fs = font.height;
-  for (var i = 0; i < text.length; i++) {
-    var c = text.charCodeAt(i);
-    ctx.drawImage(font,
-		  (c-32)*fs, 0, fs, fs,
-		  x, y, fs*scale, fs*scale);
-    x += fs*scale;
-  }
-}
+  // OVERRIDE
+  // GAME SPECIFIC CODE
+  this.player.move(this._vx, this._vy);
+  var rect = this.player.bounds.inset(-this.screen.width/4,
+				      -this.screen.height/4);
+  this.scene.setCenter(rect);
+  this.scene.idle();
+};
 
-Game.prototype.addElement = function(bounds)
+Game.prototype.repaint = function ()
 {
-  var e = document.createElement('div');
-  e.style.position = 'absolute';
-  e.style.left = bounds.x+'px';
-  e.style.top = bounds.y+'px';
-  e.style.width = bounds.width+'px';
-  e.style.height = bounds.height+'px';
-  e.style.padding = '0px';
-  this.screen.parentNode.appendChild(e);
-  return e;
-}
+  // OVERRIDE
+  // GAME SPECIFIC CODE
+  this.ctx.clearRect(0, 0, this.screen.width, this.screen.height);
+  this.ctx.save();
+  this.scene.repaint(this.ctx, 0, 0);
+  this.ctx.restore();
+};
 
-Game.prototype.removeElement = function(e)
+Game.prototype.action = function()
 {
-  e.parentNode.removeChild(e);
-}
+  // OVERRIDE
+  // GAME SPECIFIC CODE
+  this.player.jump();
+};
 
 Game.prototype.addScore = function (d)
 {
+  // GAME SPECIFIC CODE
   this.score += d;
   this.score_node.innerHTML = ('Score: '+this.score);
 };

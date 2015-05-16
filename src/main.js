@@ -1,47 +1,40 @@
 // main.js
 
+// Browser interaction.
+
 function run()
 {
+  // NO NEED TO CHANGE THIS CODE.
+  
   function getprops(a) {
     var d = {};
     for (var i = 0; i < a.length; i++) { d[a[i].id] = a[i]; }
     return d;
   }
   
-  var scale = 2;
   var framerate = 30;
   var images = getprops(document.getElementsByTagName('img'));
   var audios = getprops(document.getElementsByTagName('audio'));
   var labels = getprops(document.getElementsByClassName('label'));
-  var screen = document.getElementById('screen');
-  var buffer = document.createElement('canvas');
-  buffer.width = screen.width/scale;
-  buffer.height = screen.height/scale;
-  
-  var game = new Game(framerate, screen, buffer, images, audios, labels);
+  var frame = document.getElementById('main');
+  var game = new Game(framerate, frame, images, audios, labels);
   var timer;
-  var scrctx = screen.getContext('2d');
-  scrctx.imageSmoothingEnabled = false;
-  scrctx.webkitImageSmoothingEnabled = false;
-  scrctx.mozImageSmoothingEnabled = false;
-  scrctx.msImageSmoothingEnabled = false;
+  var ctx = frame.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.webkitImageSmoothingEnabled = false;
+  ctx.mozImageSmoothingEnabled = false;
+  ctx.msImageSmoothingEnabled = false;
   
-  var bufctx = buffer.getContext('2d');
-  bufctx.imageSmoothingEnabled = false;
-  bufctx.webkitImageSmoothingEnabled = false;
-  bufctx.mozImageSmoothingEnabled = false;
-  bufctx.msImageSmoothingEnabled = false;
-
   function repaint() {
-    scrctx.drawImage(buffer,
-		     0, 0, buffer.width, buffer.height,
-		     0, 0, screen.width, screen.height);
+    ctx.drawImage(game.screen,
+		  0, 0, game.screen.width, game.screen.height,
+		  0, 0, frame.width, frame.height);
   }    
   
   function idle() {
     if (game.active) {
       game.idle();
-      game.repaint(bufctx);
+      game.repaint();
       repaint();
     }
   };
@@ -80,16 +73,16 @@ function run()
       repaint();
     }
     var size = 50;
-    scrctx.save();
-    scrctx.fillStyle = 'rgba(0,0,64, 0.5)'; // gray out.
-    scrctx.fillRect(0, 0, screen.width, screen.height);
-    scrctx.fillStyle = 'lightgray';
-    scrctx.beginPath();		// draw a play button.
-    scrctx.moveTo(screen.width/2-size, screen.height/2-size);
-    scrctx.lineTo(screen.width/2-size, screen.height/2+size);
-    scrctx.lineTo(screen.width/2+size, screen.height/2);
-    scrctx.fill();
-    scrctx.restore();
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,64, 0.5)'; // gray out.
+    ctx.fillRect(0, 0, frame.width, frame.height);
+    ctx.fillStyle = 'lightgray';
+    ctx.beginPath();		// draw a play button.
+    ctx.moveTo(frame.width/2-size, frame.height/2-size);
+    ctx.lineTo(frame.width/2-size, frame.height/2+size);
+    ctx.lineTo(frame.width/2+size, frame.height/2);
+    ctx.fill();
+    ctx.restore();
   };
   
   window.addEventListener('keydown', keydown);

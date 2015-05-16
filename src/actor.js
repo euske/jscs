@@ -1,13 +1,12 @@
 // actor.js
 
-// Task
+// Task: a single procedure that runs at each frame.
 function Task(body)
 {
   this.scene = null;
   this.alive = true;
 
-  var task = this;
-  this.idle = function () { body(task); };
+  this.body = body;
 }
 
 Task.prototype.start = function (scene)
@@ -15,7 +14,13 @@ Task.prototype.start = function (scene)
   this.scene = scene;
 };
 
-// Queue
+Task.prototype.idle = function ()
+{
+  this.body(this);
+}
+
+
+// Queue: a list of Tasks that runs sequentially.
 function Queue(tasks)
 {
   this.scene = null;
@@ -25,19 +30,6 @@ function Queue(tasks)
 }
 
 Queue.prototype.start = Task.prototype.start;
-
-Queue.prototype.add = function (task)
-{
-  this.tasks.push(task);
-};
-
-Queue.prototype.remove = function (task)
-{
-  var i = this.tasks.indexOf(task);
-  if (0 <= i) {
-    this.tasks.splice(i, 1);
-  }
-};
 
 Queue.prototype.idle = function ()
 {
@@ -53,8 +45,55 @@ Queue.prototype.idle = function ()
   this.alive = false;
 };
 
+Queue.prototype.add = function (task)
+{
+  this.tasks.push(task);
+};
 
-// Actor
+Queue.prototype.remove = function (task)
+{
+  var i = this.tasks.indexOf(task);
+  if (0 <= i) {
+    this.tasks.splice(i, 1);
+  }
+};
+
+
+// Particle: a moving object that doesn't interact.
+function Particle(bounds, sprite, duration)
+{
+  this.scene = null;
+  this.alive = true;
+  
+  this.bounds = bounds;
+  this.sprite = sprite
+  this.duration = duration;
+}
+
+Particle.prototype.start = function (scene)
+{
+  this.scene = scene;
+  this.end = scene.ticks+this.duration;
+}
+
+Particle.prototype.idle = function()
+{
+  // OVERRIDE
+  this.bounds.y -= 1;
+  this.alive = (this.scene.ticks < this.end);
+};
+
+Particle.prototype.repaint = function(ctx, x, y)
+{
+  if (this.scene == null) return;
+  var ts = this.scene.tilesize;
+  ctx.drawImage(this.scene.game.images.sprites,
+		this.sprite*ts, 0, ts, ts,
+		x, y, this.bounds.width, this.bounds.height);
+};
+
+
+// Actor: a character that can interact with other characters.
 function Actor(bounds)
 {
   this.scene = null;
@@ -66,32 +105,33 @@ function Actor(bounds)
 
 Actor.prototype.start = Task.prototype.start;
 
-Actor.prototype.repaint = function(ctx, x, y)
-{
-};
-
 Actor.prototype.idle = function()
 {
+  // OVERRIDE
 };
 
-// Particle
-function Particle(sprite, bounds, duration)
+Actor.prototype.repaint = function(ctx, x, y)
+{
+  // OVERRIDE
+};
+
+
+// StaticActor: an Actor that has a fixed sprite.
+function StaticActor(bounds, sprite)
 {
   this.scene = null;
   this.alive = true;
   
-  this.sprite = sprite
   this.bounds = bounds;
-  this.duration = duration;
+  this.hitbox = bounds.inset(16, 16);
+  this.sprite = sprite
 }
 
-Particle.prototype.start = function (scene)
-{
-  this.scene = scene;
-  this.end = scene.ticks+this.duration;
-}
+StaticActor.prototype.start = Actor.prototype.start;
 
-Particle.prototype.repaint = function(ctx, x, y)
+StaticActor.prototype.idle = Actor.prototype.idle;
+
+StaticActor.prototype.repaint = function(ctx, x, y)
 {
   if (this.scene == null) return;
   var ts = this.scene.tilesize;
@@ -99,33 +139,3 @@ Particle.prototype.repaint = function(ctx, x, y)
 		this.sprite*ts, 0, ts, ts,
 		x, y, this.bounds.width, this.bounds.height);
 };
-
-Particle.prototype.idle = function()
-{
-  this.bounds.y -= 1;
-  this.alive = (this.scene.ticks < this.end);
-};
-
-
-// Collectible
-function Collectible(rect)
-{
-  this.scene = null;
-  this.alive = true;
-  
-  this.bounds = rect;
-  this.hitbox = rect.inset(16, 16);
-}
-
-Collectible.prototype.start = Actor.prototype.start;
-
-Collectible.prototype.repaint = function(ctx, x, y)
-{
-  if (this.scene == null) return;
-  var ts = this.scene.tilesize;
-  ctx.drawImage(this.scene.game.images.sprites,
-		Sprite.COLLECTIBLE*ts, 0, ts, ts,
-		x, y, this.bounds.width, this.bounds.height);
-};
-
-Collectible.prototype.idle = Actor.prototype.idle;

@@ -81,7 +81,7 @@ function removeChildren(n, name)
   }
 }
 
-// Slot
+// Slot: an event system
 function Slot(object)
 {
   this.object = object
