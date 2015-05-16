@@ -162,8 +162,8 @@ Game.prototype.init = function ()
   this.scene = new Scene(this, tilesize);
   this.scene.init();
   
-  var bounds = new Rectangle(0, 0, tilesize, tilesize);
-  this.player = new Player(bounds);
+  var rect = new Rectangle(1, 10, 1, 1);
+  this.player = new Player(this.scene.tilemap.map2coord(rect));
   this.scene.addActor(this.player);
   
   var game = this;

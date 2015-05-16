@@ -26,31 +26,6 @@ TileMap.prototype.set = function (x, y, v)
   }
 };
 
-TileMap.prototype.render = function (ctx, tiles, ft, diags, fd,
-				     x0, y0, x, y, w, h)
-{
-  var ts = this.tilesize;
-  // Align the bottom left corner.
-  y0 = y0+ts-tiles.height;
-  for (var dy = 0; dy < h; dy++) {
-    for (var dx = 0; dx < w; dx++) {
-      var c = ft(x+dx, y+dy);
-      if (0 <= c) {
-	ctx.drawImage(tiles,
-		      ts*c, 0, ts, tiles.height,
-		      x0+ts*dx, y0+ts*dy, ts, tiles.height);
-      }
-      var d = fd(x+dx, y+dy);
-      if (0 <= d && d < diags.length) {
-	var a = diags[d];
-	for (var i = 0; i < a.length; i++) {
-	  a[i]();
-	}
-      }
-    }
-  }
-};
-
 TileMap.prototype.coord2map = function (rect)
 {
   var ts = this.tilesize;
@@ -122,3 +97,38 @@ TileMap.prototype.getRange = function (f)
   }
   return map;
 }
+
+TileMap.prototype.render = function (ctx, tiles, ft, diags, fd,
+				     x0, y0, x, y, w, h)
+{
+  // Sort them in z-order.
+  for (var dy = 0; dy < h; dy++) {
+    for (var dx = 0; dx < w; dx++) {
+      var d = fd(x+dx, y+dy);
+      if (0 <= d && d < diags.length) {
+	var c = ft(x+dx, y+dy);
+	if (0 <= c) {
+	  diags[d].push({ c:c, dx:dx, dy:dy });
+	}
+      }
+    }
+  }
+  
+  // Align the pos to the bottom left corner.
+  var ts = this.tilesize;
+  var tw = tiles.height;
+  y0 = y0+ts-tw;
+  for (var d = 0; d < diags.length; d++) {
+    var a = diags[d];
+    for (var i = 0; i < a.length; i++) {
+      var obj = a[i];
+      if (typeof(obj) === 'function') {
+	obj();
+      } else {
+	ctx.drawImage(tiles,
+		      tw*obj.c, 0, tw, tw,
+		      x0+ts*obj.dx, y0+ts*obj.dy, tw, tw);
+      }
+    }
+  }
+};

@@ -7,6 +7,7 @@ function Player(bounds)
 {
   this.scene = null;
   this.alive = true;
+  this.sprite = Sprite.PLAYER;
   
   this.speed = 8;
   this.gravity = 2;
@@ -34,20 +35,13 @@ Player.prototype.idle = function ()
   var r = this.scene.collide(this);
   for (var i = 0; i < r.length; i++) {
     var a = r[i];
-    if (a instanceof StaticActor) {
+    if (a instanceof Actor && a.sprite == Sprite.COLLECTIBLE) {
       this.pick(a);
     }
   }
 };
 
-Player.prototype.repaint = function (ctx, x, y)
-{
-  if (this.scene == null) return;
-  var ts = this.scene.tilesize;
-  ctx.drawImage(this.scene.game.images.sprites,
-		Sprite.PLAYER*ts, 0, ts, ts,
-		x, y, this.bounds.width, this.bounds.height);
-};
+Player.prototype.repaint = Actor.prototype.repaint;
 
 Player.prototype.move = function (vx, vy)
 {

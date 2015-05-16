@@ -86,21 +86,25 @@ Particle.prototype.idle = function()
 Particle.prototype.repaint = function(ctx, x, y)
 {
   if (this.scene == null) return;
-  var ts = this.scene.tilesize;
-  ctx.drawImage(this.scene.game.images.sprites,
-		this.sprite*ts, 0, ts, ts,
-		x, y, this.bounds.width, this.bounds.height);
+  var sprites = this.scene.game.images.sprites;
+  var tw = sprites.height;
+  var w = this.bounds.width;
+  var h = this.bounds.height;
+  ctx.drawImage(sprites,
+		this.sprite*tw, tw-h, w, h,
+		x, y, w, h);
 };
 
 
 // Actor: a character that can interact with other characters.
-function Actor(bounds)
+function Actor(bounds, sprite)
 {
   this.scene = null;
   this.alive = true;
   
   this.bounds = bounds;
   this.hitbox = bounds;
+  this.sprite = sprite;
 }
 
 Actor.prototype.toString = function ()
@@ -118,32 +122,12 @@ Actor.prototype.idle = function()
 Actor.prototype.repaint = function(ctx, x, y)
 {
   // OVERRIDE
-};
-
-
-// StaticActor: an Actor that has a fixed sprite.
-function StaticActor(bounds, sprite)
-{
-  this.scene = null;
-  this.alive = true;
-  
-  this.bounds = bounds;
-  this.hitbox = bounds.inset(16, 16);
-  this.sprite = sprite
-}
-
-StaticActor.prototype.toString = Actor.prototype.toString;
-
-StaticActor.prototype.start = Actor.prototype.start;
-
-StaticActor.prototype.idle = Actor.prototype.idle;
-
-StaticActor.prototype.repaint = function(ctx, x, y)
-{
-  // OVERRIDE
   if (this.scene == null) return;
-  var ts = this.scene.tilesize;
-  ctx.drawImage(this.scene.game.images.sprites,
-		this.sprite*ts, 0, ts, ts,
-		x, y, this.bounds.width, this.bounds.height);
+  var sprites = this.scene.game.images.sprites;
+  var tw = sprites.height;
+  var w = this.bounds.width;
+  var h = this.bounds.height;
+  ctx.drawImage(sprites,
+		this.sprite*tw, tw-h, w, h,
+		x, y, w, h);
 };

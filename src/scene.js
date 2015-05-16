@@ -124,10 +124,13 @@ Scene.prototype.repaint = function (ctx, bx, by)
   var fx = x0*this.tilesize-this.window.x;
   var fy = y0*this.tilesize-this.window.y;
 
+  // Define the perspective function.
   //     (x0,y0) -- (x1,y0) fd+
   //        |          |
   // fd- (x0,y1) -- (x1,y1)
   var fd = function (x,y) { return (x-x0)+(y1-y); }
+
+  // Set the drawing order.
   var n = fd(x1,y0)+1;
   var diags = new Array(n);
   for (var i = 0; i < n; i++) {
@@ -150,6 +153,7 @@ Scene.prototype.repaint = function (ctx, bx, by)
     }
   }
 
+  // Draw the tilemap.
   var tilemap = this.tilemap;
   var ft = function (x,y) {
     var c = tilemap.get(x,y);
@@ -161,6 +165,7 @@ Scene.prototype.repaint = function (ctx, bx, by)
 		 bx+fx, by+fy,
 		 x0, y0, x1-x0+1, y1-y0+1);
 
+  // Draw the particles.
   for (var i = 0; i < this.particles.length; i++) {
     var particle = this.particles[i];
     if (particle.scene != this) continue;
@@ -184,14 +189,14 @@ Scene.prototype.init = function ()
     
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,2,0, 0,0,0,0, 0,2,2,0],
+    [0,0,0,0, 0,0,0,0, 0,0,2,1, 0,0,0,0, 0,2,2,0],
     [0,0,0,0, 0,0,0,0, 1,1,1,1, 0,0,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
     
     [0,0,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 1,1,0,0, 0,0,0,0, 1,1,0,0],
-    [0,0,0,0, 0,0,0,0, 0,0,2,0, 0,2,0,0, 0,0,0,0],
+    [0,0,0,0, 1,0,0,0, 0,0,2,0, 0,2,0,0, 0,0,0,0],
     [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
   ]);
   
@@ -210,7 +215,7 @@ Scene.prototype.init = function ()
   var f = function (x,y) {
     if (Tile.isCollectible(tilemap.get(x,y))) {
       var rect = tilemap.map2coord(new Point(x,y));
-      scene.addActor(new StaticActor(rect, Sprite.COLLECTIBLE));
+      scene.addActor(new Actor(rect, Sprite.COLLECTIBLE));
       tilemap.set(x, y, Tile.NONE);
     }
   };
