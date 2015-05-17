@@ -1,6 +1,6 @@
 // const.js
 
-// GAME SPECIFIC CODE
+// [GAME SPECIFIC CODE]
 
 Sprite = {
   PLAYER: 0,

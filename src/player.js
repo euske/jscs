@@ -1,6 +1,6 @@
 // player.js
 
-// GAME SPECIFIC CODE
+// [GAME SPECIFIC CODE]
 
 // Player
 function Player(bounds)

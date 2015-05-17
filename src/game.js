@@ -12,6 +12,10 @@ function Game(framerate, frame, images, audios, labels)
   this.labels = labels;
   this.active = false;
 
+  // [GAME SPECIFIC CODE]
+  this.sprites = this.images.sprites;
+  this.tiles = this.images.tiles;
+
   // Initialize the off-screen bitmap.
   var scale = 2;
   this.screen = createCanvas(this.frame.width/scale,
@@ -58,7 +62,7 @@ Game.prototype.removeElement = function(e)
 
 Game.prototype.keydown = function (ev)
 {
-  // OVERRIDE
+  // [OVERRIDE]
   switch (ev.keyCode) {
   case 37:			// LEFT
   case 65:			// A
@@ -104,7 +108,7 @@ Game.prototype.keydown = function (ev)
 
 Game.prototype.keyup = function (ev)
 {
-  // OVERRIDE
+  // [OVERRIDE]
   switch (ev.keyCode) {
   case 37:			// LEFT
   case 65:			// A
@@ -135,22 +139,22 @@ Game.prototype.keyup = function (ev)
 
 Game.prototype.focus = function (ev)
 {
-  // OVERRIDE
+  // [OVERRIDE]
   this.active = true;
   //this.audios.music.play();
 };
 
 Game.prototype.blur = function (ev)
 {
-  // OVERRIDE
+  // [OVERRIDE]
   //this.audios.music.pause();
   this.active = false;
 };
 
 Game.prototype.init = function ()
 {
-  // OVERRIDE
-  // GAME SPECIFIC CODE
+  // [OVERRIDE]
+  // [GAME SPECIFIC CODE]
   removeChildren(this.frame.parentNode, 'div');
 
   var tilesize = 32;
@@ -183,8 +187,8 @@ Game.prototype.init = function ()
 
 Game.prototype.idle = function ()
 {
-  // OVERRIDE
-  // GAME SPECIFIC CODE
+  // [OVERRIDE]
+  // [GAME SPECIFIC CODE]
   this.player.move(this._vx, this._vy);
   var window = this.scene.window;
   var rect = this.player.bounds.inset(-window.width/4, -window.height/4);
@@ -194,8 +198,8 @@ Game.prototype.idle = function ()
 
 Game.prototype.repaint = function ()
 {
-  // OVERRIDE
-  // GAME SPECIFIC CODE
+  // [OVERRIDE]
+  // [GAME SPECIFIC CODE]
   this.ctx.clearRect(0, 0, this.screen.width, this.screen.height);
   this.ctx.save();
   this.scene.render(this.ctx,
@@ -206,14 +210,14 @@ Game.prototype.repaint = function ()
 
 Game.prototype.action = function()
 {
-  // OVERRIDE
-  // GAME SPECIFIC CODE
+  // [OVERRIDE]
+  // [GAME SPECIFIC CODE]
   this.player.jump();
 };
 
 Game.prototype.addScore = function (d)
 {
-  // GAME SPECIFIC CODE
+  // [GAME SPECIFIC CODE]
   this.score += d;
   this.score_node.innerHTML = ('Score: '+this.score);
 };

@@ -78,7 +78,7 @@ Particle.prototype.start = function (scene)
 
 Particle.prototype.idle = function()
 {
-  // OVERRIDE
+  // [OVERRIDE]
   this.bounds.y -= 1;
   this.alive = (this.scene.ticks < this.end);
 };
@@ -86,7 +86,7 @@ Particle.prototype.idle = function()
 Particle.prototype.render = function(ctx, x, y)
 {
   if (this.scene == null) return;
-  var sprites = this.scene.game.images.sprites;
+  var sprites = this.scene.game.sprites;
   var tw = sprites.height;
   var w = this.bounds.width;
   var h = this.bounds.height;
@@ -116,14 +116,14 @@ Actor.prototype.start = Task.prototype.start;
 
 Actor.prototype.idle = function()
 {
-  // OVERRIDE
+  // [OVERRIDE]
 };
 
 Actor.prototype.render = function(ctx, x, y)
 {
-  // OVERRIDE
+  // [OVERRIDE]
   if (this.scene == null) return;
-  var sprites = this.scene.game.images.sprites;
+  var sprites = this.scene.game.sprites;
   var tw = sprites.height;
   var w = this.bounds.width;
   var h = this.bounds.height;

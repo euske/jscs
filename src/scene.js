@@ -102,7 +102,7 @@ Scene.prototype.moveObjects = function (objs)
 
 Scene.prototype.idle = function ()
 {
-  // OVERRIDE
+  // [OVERRIDE]
   this.moveObjects(this.tasks);
   this.moveObjects(this.actors);
   this.moveObjects(this.particles);
@@ -111,7 +111,7 @@ Scene.prototype.idle = function ()
 
 Scene.prototype.render = function (ctx, bx, by)
 {
-  // OVERRIDE
+  // [OVERRIDE]
 
   // Fill with the background color.
   ctx.fillStyle = 'rgb(0,0,128)';
@@ -160,7 +160,7 @@ Scene.prototype.render = function (ctx, bx, by)
     return (c == Tile.NONE? -1 : c);
   };
   tilemap.render(ctx,
-		 this.game.images.tiles, ft,
+		 this.game.tiles, ft,
 		 depth, fd, 
 		 bx+fx, by+fy,
 		 x0, y0, x1-x0+1, y1-y0+1);
@@ -178,8 +178,8 @@ Scene.prototype.render = function (ctx, bx, by)
 
 Scene.prototype.init = function ()
 {
-  // OVERRIDE
-  // GAME SPECIFIC CODE HERE
+  // [OVERRIDE]
+  // [GAME SPECIFIC CODE]
   var map = copyArray([
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
     [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
