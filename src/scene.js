@@ -16,10 +16,7 @@ Scene.prototype.addTask = function (task)
 
 Scene.prototype.removeTask = function (task)
 {
-  var i = this.tasks.indexOf(task);
-  if (0 <= i) {
-    this.tasks.splice(i, 1);
-  }
+  removeArray(this.tasks, task);
 };
 
 Scene.prototype.addActor = function (actor)
@@ -30,10 +27,7 @@ Scene.prototype.addActor = function (actor)
 
 Scene.prototype.removeActor = function (actor)
 {
-  var i = this.actors.indexOf(actor);
-  if (0 <= i) {
-    this.actors.splice(i, 1);
-  }
+  removeArray(this.actors, actor);
 };
 
 Scene.prototype.addParticle = function (particle)
@@ -43,10 +37,7 @@ Scene.prototype.addParticle = function (particle)
 
 Scene.prototype.removeParticle = function (particle)
 {
-  var i = this.particles.indexOf(particle);
-  if (0 <= i) {
-    this.particles.splice(i, 1);
-  }
+  removeArray(this.particles, particle);
 };
 
 Scene.prototype.setCenter = function (rect)

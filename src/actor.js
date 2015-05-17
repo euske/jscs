@@ -3,11 +3,15 @@
 // Task: a single procedure that runs at each frame.
 function Task(body)
 {
-  this.scene = null;
-  this.alive = true;
-
+  this.init();
   this.body = body;
 }
+
+Task.prototype.init = function ()
+{
+  this.scene = null;
+  this.alive = true;
+};
 
 Task.prototype.start = function (scene)
 {
@@ -23,11 +27,11 @@ Task.prototype.idle = function ()
 // Queue: a list of Tasks that runs sequentially.
 function Queue(tasks)
 {
-  this.scene = null;
-  this.alive = true;
-  
+  this.init();
   this.tasks = tasks;
 }
+
+Queue.prototype.init = Task.prototype.init;
 
 Queue.prototype.start = Task.prototype.start;
 
@@ -52,23 +56,24 @@ Queue.prototype.add = function (task)
 
 Queue.prototype.remove = function (task)
 {
-  var i = this.tasks.indexOf(task);
-  if (0 <= i) {
-    this.tasks.splice(i, 1);
-  }
+  removeArray(this.tasks, task);
 };
 
 
 // Particle: a moving object that doesn't interact.
 function Particle(bounds, sprite, duration)
 {
-  this.scene = null;
-  this.alive = true;
-  
+  this.init();
   this.bounds = bounds;
   this.sprite = sprite
   this.duration = duration;
 }
+
+Particle.prototype.init = function ()
+{
+  this.scene = null;
+  this.alive = true;
+};
 
 Particle.prototype.start = function (scene)
 {
@@ -83,7 +88,7 @@ Particle.prototype.idle = function()
   this.alive = (this.scene.ticks < this.end);
 };
 
-Particle.prototype.render = function(ctx, x, y)
+Particle.prototype.render = function (ctx, x, y)
 {
   if (this.scene == null) return;
   var sprites = this.scene.game.sprites;
@@ -99,9 +104,7 @@ Particle.prototype.render = function(ctx, x, y)
 // Actor: a character that can interact with other characters.
 function Actor(bounds, sprite)
 {
-  this.scene = null;
-  this.alive = true;
-  
+  this.init();
   this.bounds = bounds;
   this.hitbox = bounds;
   this.sprite = sprite;
@@ -112,6 +115,12 @@ Actor.prototype.toString = function ()
   return "<Actor: "+this.bounds+">";
 }
 
+Actor.prototype.init = function ()
+{
+  this.scene = null;
+  this.alive = true;
+};
+
 Actor.prototype.start = Task.prototype.start;
 
 Actor.prototype.idle = function()
@@ -119,7 +128,7 @@ Actor.prototype.idle = function()
   // [OVERRIDE]
 };
 
-Actor.prototype.render = function(ctx, x, y)
+Actor.prototype.render = function (ctx, x, y)
 {
   // [OVERRIDE]
   if (this.scene == null) return;
@@ -130,4 +139,11 @@ Actor.prototype.render = function(ctx, x, y)
   ctx.drawImage(sprites,
 		this.sprite*tw, tw-h, w, h,
 		x, y, w, h);
+};
+
+Actor.prototype.move = function (dx, dy)
+{
+  // [OVERRIDE]
+  this.bounds = this.bounds.move(dx, dy);
+  this.hitbox = this.hitbox.move(dx, dy);
 };

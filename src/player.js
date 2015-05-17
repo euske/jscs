@@ -5,8 +5,7 @@
 // Player
 function Player(bounds)
 {
-  this.scene = null;
-  this.alive = true;
+  this.init();
   this.sprite = Sprite.PLAYER;
   
   this.speed = 8;
@@ -26,6 +25,8 @@ Player.prototype.toString = function ()
 {
   return "<Player: "+this.bounds+">";
 }
+
+Player.prototype.init = Actor.prototype.init;
 
 Player.prototype.start = Actor.prototype.start;
 

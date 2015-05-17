@@ -61,10 +61,17 @@ function copyArray(a)
 // removeArray(a, b): remove objects in b from a.
 function removeArray(a, b)
 {
-  for (var i = 0; i < b.length; i++) {
-    var j = a.indexOf(b[i]);
-    if (0 <= j) {
-      a.splice(j, 1);
+  if (a instanceof Array) {
+    for (var i = 0; i < b.length; i++) {
+      var j = a.indexOf(b[i]);
+      if (0 <= j) {
+	a.splice(j, 1);
+      }
+    }
+  } else {
+    var i = a.indexOf(b);
+    if (0 <= i) {
+      a.splice(i, 1);
     }
   }
   return a;
@@ -93,10 +100,7 @@ Slot.prototype.subscribe = function (recv)
 };
 Slot.prototype.unsubscribe = function (recv)
 {
-  var i = this.receivers.indexOf(recv);
-  if (0 <= i) {
-    this.receivers.splice(i, 1);
-  }
+  removeArray(this.receivers, recv);
 };
 Slot.prototype.signal = function (arg)
 {
@@ -161,10 +165,17 @@ Rectangle.prototype.inset = function (dw, dh)
   var h = this.height - dh;
   return new Rectangle(cx-w/2, cy-h/2, w, h);
 };
-Rectangle.prototype.includes = function (x, y)
+Rectangle.prototype.contains = function (x, y)
 {
   return (this.x <= x && this.y <= y &&
 	  x <= this.x+this.width && y <= this.y+this.height);
+};
+Rectangle.prototype.overlap = function (rect)
+{
+  return !(this.x+this.width <= rect.x ||
+	   this.y+this.height <= rect.y ||
+	   rect.x+rect.width <= this.x ||
+	   rect.y+rect.height <= this.y);
 };
 Rectangle.prototype.clamp = function (rect)
 {
@@ -189,13 +200,6 @@ Rectangle.prototype.intersection = function (rect)
   var x1 = Math.min(this.x+this.width, rect.x+rect.width);
   var y1 = Math.min(this.y+this.height, rect.y+rect.height);
   return new Rectangle(x0, y0, x1-x0, y1-y0);
-};
-Rectangle.prototype.overlap = function (rect)
-{
-  return !(this.x+this.width <= rect.x ||
-	   this.y+this.height <= rect.y ||
-	   rect.x+rect.width <= this.x ||
-	   rect.y+rect.height <= this.y);
 };
 
 // collideRect: 2D collision detection
