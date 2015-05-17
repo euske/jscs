@@ -18,7 +18,7 @@ function run()
   var labels = getprops(document.getElementsByClassName('label'));
   var frame = document.getElementById('main');
   var game = new Game(framerate, frame, images, audios, labels);
-  var ctx = getEdgeyContext(frame)
+  var ctx = getEdgeyContext(frame);
   var timer;
   
   function repaint() {
