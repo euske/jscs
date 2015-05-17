@@ -77,17 +77,6 @@ function removeArray(a, b)
   return a;
 }
 
-// removeChildren(n, name): remove all child nodes with the given name.
-function removeChildren(n, name)
-{
-  for (var i = 0; i < n.childNodes.length; i++) {
-    var c = n.childNodes[i];
-    if (c.nodeName == name) {
-      n.removeChild(c);
-    }
-  }
-}
-
 // Slot: an event system
 function Slot(object)
 {
@@ -264,6 +253,17 @@ function collideRect(r0, r1, v)
     v = collideHLine(r1.x, r1.x+r1.width, r1.y, r0, v);
   }
   return v;
+}
+
+// removeChildren(n, name): remove all child nodes with the given name.
+function removeChildren(n, name)
+{
+  for (var i = 0; i < n.childNodes.length; i++) {
+    var c = n.childNodes[i];
+    if (c.nodeName == name) {
+      n.removeChild(c);
+    }
+  }
 }
 
 // createCanvas(width, height)
