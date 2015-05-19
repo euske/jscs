@@ -285,3 +285,32 @@ function getEdgeyContext(canvas)
   ctx.msImageSmoothingEnabled = false;
   return ctx;
 }
+
+// image2array(img)
+function image2array(img)
+{
+  var width = img.width;
+  var height = img.height;
+  var canvas = createCanvas(width, height);
+  var ctx = getEdgeyContext(canvas);
+  ctx.drawImage(img, 0, 0);
+  var data = ctx.getImageData(0, 0, width, height).data;
+  var i = 0;
+  var c2v = new Object();
+  for (var v = 0; v < width; v++, i+=4) {
+    var c = ((data[i] << 16) | (data[i+1] << 8) | data[i+2]); // RGBA
+    if (!c2v.hasOwnProperty(c)) {
+      c2v[c] = v;
+    }
+  }
+  var map = new Array(height-1);
+  for (var y = 1; y < height; y++) {
+    var a = new Array(width);
+    for (var x = 0; x < width; x++, i+=4) {
+      var c = ((data[i] << 16) | (data[i+1] << 8) | data[i+2]); // RGBA
+      a[x] = c2v[c];
+    }
+    map[y-1] = a;
+  }
+  return map;
+}
