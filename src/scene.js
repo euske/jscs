@@ -62,11 +62,11 @@ Scene.prototype.setCenter = function (rect)
 
 Scene.prototype.collide = function (actor0)
 {
-  var a = []
-  if (actor0.scene == this && actor0.hitbox != null) {
+  var a = [];
+  if (actor0.alive && actor0.scene == this && actor0.hitbox != null) {
     for (var i = 0; i < this.actors.length; i++) {
       var actor1 = this.actors[i];
-      if (actor1.scene == this && actor1.hitbox != null &&
+      if (actor1.alive && actor1.scene == this && actor1.hitbox != null &&
 	  actor1 !== actor0 && actor1.hitbox.overlap(actor0.hitbox)) {
 	a.push(actor1);
       }
@@ -77,13 +77,20 @@ Scene.prototype.collide = function (actor0)
 
 Scene.prototype.moveObjects = function (objs)
 {
-  var removed = [];
   for (var i = 0; i < objs.length; i++) {
     var obj = objs[i];
     if (obj.scene == null) {
       obj.start(this);
     }
     obj.idle();
+  }
+}
+
+Scene.prototype.cleanObjects = function (objs)
+{
+  var removed = [];
+  for (var i = 0; i < objs.length; i++) {
+    var obj = objs[i];
     if (!obj.alive) {
       removed.push(obj);
     }
@@ -97,6 +104,9 @@ Scene.prototype.idle = function ()
   this.moveObjects(this.tasks);
   this.moveObjects(this.actors);
   this.moveObjects(this.particles);
+  this.cleanObjects(this.tasks);
+  this.cleanObjects(this.actors);
+  this.cleanObjects(this.particles);
   this.ticks++;
 };
 
