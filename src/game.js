@@ -26,6 +26,7 @@ function Game(framerate, frame, images, audios, labels)
   this._key_right = false;
   this._key_up = false;
   this._key_down = false;
+  this._key_action = false;
   this._vx = 0;
   this._vy = 0;
 }
@@ -92,7 +93,10 @@ Game.prototype.keydown = function (ev)
   case 32:			// SPACE
   case 90:			// Z
   case 88:			// X
-    this.action();
+    if (!this._key_action) {
+      this._key_action = true;
+      this.action();
+    }
     break;
   case 112:			// F1
     break;
@@ -133,6 +137,12 @@ Game.prototype.keyup = function (ev)
   case 74:			// J
     this._key_down = false;
     this._vy = (this._key_up) ? -1 : 0;
+    break;
+  case 13:			// ENTER
+  case 32:			// SPACE
+  case 90:			// Z
+  case 88:			// X
+    this._key_action = false;
     break;
   }
 };
