@@ -266,7 +266,7 @@ function removeChildren(n, name)
   }
 }
 
-// createCanvas(width, height)
+// createCanvas(width, height): create a canvas with the given size.
 function createCanvas(width, height)
 {
   var canvas = document.createElement('canvas');
@@ -275,7 +275,7 @@ function createCanvas(width, height)
   return canvas;
 }
 
-// getEdgeyContext(canvas)
+// getEdgeyContext(canvas): returns a pixellated canvas 2D context.
 function getEdgeyContext(canvas)
 {
   var ctx = canvas.getContext('2d');
@@ -286,9 +286,10 @@ function getEdgeyContext(canvas)
   return ctx;
 }
 
-// image2array(img)
+// image2array(img): converts an image to 2D array.
 function image2array(img)
 {
+  var header = 1;
   var width = img.width;
   var height = img.height;
   var canvas = createCanvas(width, height);
@@ -297,20 +298,22 @@ function image2array(img)
   var data = ctx.getImageData(0, 0, width, height).data;
   var i = 0;
   var c2v = new Object();
-  for (var v = 0; v < width; v++, i+=4) {
-    var c = ((data[i] << 16) | (data[i+1] << 8) | data[i+2]); // RGBA
-    if (!c2v.hasOwnProperty(c)) {
-      c2v[c] = v;
+  for (var y = 0; y < header; y++) {
+    for (var x = 0; x < width; x++, i+=4) {
+      var c = ((data[i] << 16) | (data[i+1] << 8) | data[i+2]); // RGBA
+      if (!c2v.hasOwnProperty(c)) {
+	c2v[c] = y*width + x;
+      }
     }
   }
-  var map = new Array(height-1);
-  for (var y = 1; y < height; y++) {
+  var map = new Array(height-header);
+  for (var y = 0; y < height-header; y++) {
     var a = new Array(width);
     for (var x = 0; x < width; x++, i+=4) {
       var c = ((data[i] << 16) | (data[i+1] << 8) | data[i+2]); // RGBA
       a[x] = c2v[c];
     }
-    map[y-1] = a;
+    map[y] = a;
   }
   return map;
 }

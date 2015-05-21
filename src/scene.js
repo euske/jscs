@@ -118,51 +118,41 @@ Scene.prototype.render = function (ctx, bx, by)
   ctx.fillStyle = 'rgb(0,0,128)';
   ctx.fillRect(bx, by, this.window.width, this.window.height);
 
-  var x0 = Math.floor(this.window.x/this.tilesize);
-  var y0 = Math.floor(this.window.y/this.tilesize);
-  var x1 = Math.ceil((this.window.x+this.window.width)/this.tilesize);
-  var y1 = Math.ceil((this.window.y+this.window.height)/this.tilesize);
-  var fx = x0*this.tilesize-this.window.x;
-  var fy = y0*this.tilesize-this.window.y;
-
-  // Define the depth function.
-  //     (x0,y0) -- (x1,y0) fd+
-  //        |          |
-  // fd- (x0,y1) -- (x1,y1)
-  var fd = function (x,y) { return (x-x0)+(y1-y); }
+  var tilesize = this.tilesize;
+  var window = this.window;
+  var tilemap = this.tilemap;
+  var x0 = Math.floor(window.x/tilesize);
+  var y0 = Math.floor(window.y/tilesize);
+  var x1 = Math.ceil((window.x+window.width)/tilesize);
+  var y1 = Math.ceil((window.y+window.height)/tilesize);
+  var fx = x0*tilesize-window.x;
+  var fy = y0*tilesize-window.y;
 
   // Set the drawing order.
-  var n = fd(x1,y0)+1;
-  var depth = new Array(n);
-  for (var i = 0; i < n; i++) {
-    depth[i] = new Array();
-  }
-  function add(d, actor, x, y) {
-    depth[d].push(function () { actor.render(ctx, x, y); });
-  }
+  var actors = new Array();
   for (var i = 0; i < this.actors.length; i++) {
     var actor = this.actors[i];
-    if (actor.scene != this) continue;
-    var b = actor.bounds;
-    if (this.window.overlap(b)) {
-      var dx = Math.floor((b.x+b.width/2)/this.tilesize);
-      var dy = Math.floor((b.y+b.height/2)/this.tilesize);
-      var d = fd(dx, dy);
-      if (0 <= d && d < n) {
-	add(d, actor, bx+b.x-this.window.x, by+b.y-this.window.y);
-      }
+    var bounds = actor.bounds;
+    if (actor.scene == this && bounds.overlap(window)) {
+      var x = Math.floor((bounds.x+bounds.width/2)/tilesize);
+      var y = Math.floor((bounds.y+bounds.height/2)/tilesize);
+      actors[x+","+y] = actor;
     }
   }
 
   // Draw the tilemap.
-  var tilemap = this.tilemap;
   var ft = function (x,y) {
+    var k = x+","+y;
+    if (actors.hasOwnProperty(k)) {
+      var a = actors[k];
+      var b = a.bounds;
+      a.render(ctx, bx+b.x-window.x, by+b.y-window.y);
+    }
     var c = tilemap.get(x,y);
     return (c == Tile.NONE? -1 : c);
   };
   tilemap.render(ctx,
-		 this.game.tiles, ft,
-		 depth, fd, 
+		 this.game.tiles, ft, 
 		 bx+fx, by+fy,
 		 x0, y0, x1-x0+1, y1-y0+1);
 
@@ -171,8 +161,8 @@ Scene.prototype.render = function (ctx, bx, by)
     var particle = this.particles[i];
     if (particle.scene != this) continue;
     particle.render(ctx,
-		    bx-this.window.x+particle.bounds.x,
-		    by-this.window.y+particle.bounds.y);
+		    bx-window.x+particle.bounds.x,
+		    by-window.y+particle.bounds.y);
   }
 
 };

@@ -98,36 +98,21 @@ TileMap.prototype.getRange = function (f)
   return map;
 }
 
-TileMap.prototype.render = function (ctx, tiles, ft, depth, fd,
-				     x0, y0, x, y, w, h)
+TileMap.prototype.render = function (ctx, tiles, ft, 
+				     bx, by, x0, y0, w, h)
 {
-  // Sort tiles in the depth order.
-  for (var dy = 0; dy < h; dy++) {
-    for (var dx = 0; dx < w; dx++) {
-      var d = fd(x+dx, y+dy);
-      if (0 <= d && d < depth.length) {
-	var c = ft(x+dx, y+dy);
-	if (0 <= c) {
-	  depth[d].push({ c:c, dx:dx, dy:dy });
-	}
-      }
-    }
-  }
-  
   // Align the pos to the bottom left corner.
   var ts = this.tilesize;
   var tw = tiles.height;
-  y0 = y0+ts-tw;
-  for (var d = 0; d < depth.length; d++) {
-    var a = depth[d];
-    for (var i = 0; i < a.length; i++) {
-      var obj = a[i];
-      if (typeof(obj) === 'function') {
-	obj();
-      } else {
+  by = by+ts-tw;
+  // Draw tiles from the bottom-left first.
+  for (var dy = h-1; 0 <= dy; dy--) {
+    for (var dx = 0; dx < w; dx++) {
+      var c = ft(x0+dx, y0+dy);
+      if (0 <= c) {
 	ctx.drawImage(tiles,
-		      tw*obj.c, 0, tw, tw,
-		      x0+ts*obj.dx, y0+ts*obj.dy, tw, tw);
+		      tw*c, 0, tw, tw,
+		      bx+ts*dx, by+ts*dy, tw, tw);
       }
     }
   }

@@ -168,3 +168,6 @@ utils.js
  * `collideRect(r0, r1, v)`
    <br> Clips the motion vector v so that the rect r0 doesn't
    intersect with the rect r1.
+
+ * `image2array(img)`
+   <br> Converts an image to 2D array.
