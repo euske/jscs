@@ -201,7 +201,7 @@ Game.prototype.idle = function ()
   // [GAME SPECIFIC CODE]
   this.player.move(this._vx, this._vy);
   var window = this.scene.window;
-  var rect = this.player.bounds.inset(-window.width/4, -window.height/4);
+  var rect = this.player.bounds.inset(-window.width/2, -window.height/2);
   this.scene.setCenter(rect);
   this.scene.idle();
 };

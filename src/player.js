@@ -48,13 +48,21 @@ Player.prototype.move = function (vx, vy)
 {
   if (this.scene == null) return;
   var tilemap = this.scene.tilemap;
-  var v = new Point(this.speed * vx, this._gy);
   var f = (function (x,y) { return Tile.isObstacle(tilemap.get(x,y)); });
-  var d = tilemap.collide(this.hitbox, new Point(v.x, v.y), f);
-  d.x = tilemap.collide(this.hitbox, new Point(v.x, d.y), f).x;
-  d.y = tilemap.collide(this.hitbox, new Point(d.x, v.y), f).y;
+  vx *= this.speed;
+  vy = this._gy;
+  var d1 = tilemap.collide(this.hitbox, new Point(vx, vy), f);
+  this.hitbox = this.hitbox.move(d1.x, d1.y);
+  vx -= d1.x;
+  vy -= d1.y;
+  var d2 = tilemap.collide(this.hitbox, new Point(vx, 0), f);
+  this.hitbox = this.hitbox.move(d2.x, d2.y);
+  vx -= d2.x;
+  vy -= d2.y;
+  var d3 = tilemap.collide(this.hitbox, new Point(0, vy), f);
+  this.hitbox = this.hitbox.move(d3.x, d3.y);
+  var d = new Point(d1.x+d2.x+d3.x, d1.y+d2.y+d3.y);
   this.bounds = this.bounds.move(d.x, d.y);
-  this.hitbox = this.hitbox.move(d.x, d.y);
   this._gy = Math.min(d.y + this.gravity, this.maxspeed);
 };
 

@@ -82,6 +82,7 @@ TileMap.prototype.collide = function (rect, v, f)
       if (f(x, y)) {
 	var bounds = new Rectangle(x*ts, y*ts, ts, ts);
 	v = collideRect(bounds, rect, v);
+	// assert(!rect.move(v.x, v.y).overlap(bounds));
       }
     }
   }

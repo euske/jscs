@@ -207,7 +207,7 @@ function collideHLine(x0, x1, y, rect, v)
     return v;
   }
   // assert(v.y != 0);
-  var dx = Math.floor(v.x*dy / v.y);
+  var dx = v.x*dy / v.y;
   if ((v.x <= 0 && x1+dx <= left) ||
       (0 <= v.x && right <= x0+dx) ||
       (x1+dx < left || right < x0+dx)) {
@@ -231,7 +231,7 @@ function collideVLine(y0, y1, x, rect, v)
     return v;
   }
   // assert(v.x != 0);
-  var dy = Math.floor(v.y*dx / v.x);
+  var dy = v.y*dx / v.x;
   if ((v.y <= 0 && y1+dy <= top) ||
       (0 <= v.y && bottom <= y0+dy) ||
       (y1+dy < top || bottom < y0+dy)) {
