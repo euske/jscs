@@ -95,7 +95,7 @@ Game.prototype.keydown = function (ev)
   case 88:			// X
     if (!this._key_action) {
       this._key_action = true;
-      this.action();
+      this.scene.action();
     }
     break;
   case 112:			// F1
@@ -167,26 +167,8 @@ Game.prototype.init = function ()
   // [GAME SPECIFIC CODE]
   removeChildren(this.frame.parentNode, 'div');
 
-  var tilesize = 32;
-  this.scene = new Scene(this, tilesize);
+  this.scene = new Scene(this);
   this.scene.init();
-  
-  var rect = new Rectangle(1, 10, 1, 1);
-  this.player = new Player(this.scene.tilemap.map2coord(rect));
-  this.scene.addActor(this.player);
-  
-  var game = this;
-  function player_jumped(e) {
-    game.audios.jump.currentTime = 0;
-    game.audios.jump.play();
-  }
-  function player_picked(e) {
-    game.audios.pick.currentTime = 0;
-    game.audios.pick.play();
-    game.addScore(+1);
-  }
-  this.player.picked.subscribe(player_picked);
-  this.player.jumped.subscribe(player_jumped);
   
   this.score_node = this.addElement(new Rectangle(10, 10, 100, 20));
   this.score_node.align = 'left';
@@ -199,10 +181,7 @@ Game.prototype.idle = function ()
 {
   // [OVERRIDE]
   // [GAME SPECIFIC CODE]
-  this.player.move(this._vx, this._vy);
-  var window = this.scene.window;
-  var rect = this.player.bounds.inset(-window.width/2, -window.height/2);
-  this.scene.setCenter(rect);
+  this.scene.move(this._vx, this._vy);
   this.scene.idle();
 };
 
@@ -216,13 +195,6 @@ Game.prototype.repaint = function ()
 		    (this.screen.width-this.scene.window.width)/2,
 		    (this.screen.height-this.scene.window.height)/2);
   this.ctx.restore();
-};
-
-Game.prototype.action = function()
-{
-  // [OVERRIDE]
-  // [GAME SPECIFIC CODE]
-  this.player.jump();
 };
 
 Game.prototype.addScore = function (d)

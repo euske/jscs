@@ -1,10 +1,10 @@
 // scene.js
 // Scene object takes care of every in-game object and the scrollable map.
 
-function Scene(game, tilesize)
+function Scene(game)
 {
+  this.tilesize = 32;
   this.game = game;
-  this.tilesize = tilesize;
   this.window = new Rectangle(0, 0, game.screen.width, game.screen.height);
   this.world = new Rectangle(0, 0, game.screen.width, game.screen.height);
 }
@@ -98,7 +98,7 @@ Scene.prototype.cleanObjects = function (objs)
   removeArray(objs, removed);
 }
 
-Scene.prototype.idle = function ()
+Scene.prototype.idle = function (vx, vy)
 {
   // [OVERRIDE]
   this.moveObjects(this.tasks);
@@ -211,4 +211,35 @@ Scene.prototype.init = function ()
     }
   };
   this.tilemap.apply(null, f);
+
+  var rect = new Rectangle(1, 10, 1, 1);
+  this.player = new Player(this.tilemap.map2coord(rect));
+  this.addActor(this.player);
+  
+  var game = this.game;
+  function player_jumped(e) {
+    game.audios.jump.currentTime = 0;
+    game.audios.jump.play();
+  }
+  function player_picked(e) {
+    game.audios.pick.currentTime = 0;
+    game.audios.pick.play();
+    game.addScore(+1);
+  }
+  this.player.picked.subscribe(player_picked);
+  this.player.jumped.subscribe(player_jumped);
+};
+
+Scene.prototype.move = function(vx, vy)
+{
+  // [GAME SPECIFIC CODE]
+  this.player.move(vx, vy);
+  var rect = this.player.bounds.inset(-this.window.width/2, -this.window.height/2);
+  this.setCenter(rect);
+};
+
+Scene.prototype.action = function()
+{
+  // [GAME SPECIFIC CODE]
+  this.player.jump();
 };
