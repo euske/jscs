@@ -258,9 +258,11 @@ function collideRect(r0, r1, v)
 // removeChildren(n, name): remove all child nodes with the given name.
 function removeChildren(n, name)
 {
-  for (var i = 0; i < n.childNodes.length; i++) {
+  name = name.toLowerCase();
+  // Iterate backwards to simplify array removal. (thanks to @the31)
+  for (var i = n.childNodes.length-1; 0 <= i; i--) {
     var c = n.childNodes[i];
-    if (c.nodeName == name) {
+    if (c.nodeName.toLowerCase() === name) {
       n.removeChild(c);
     }
   }
