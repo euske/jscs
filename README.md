@@ -5,6 +5,8 @@ jscs
 
 A minimalistic framework for tile-based 2D games in JavaScript.
 
+Sample game: http://euske.github.io/jscs/index.html
+
 main.js
 -------
  * `run()`
