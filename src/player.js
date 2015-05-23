@@ -69,34 +69,9 @@ Player.prototype.jump = function ()
 
 Player.prototype.pick = function (a)
 {
-  // pick it.
   a.alive = false;
   this.picked.signal();
-  
   // show a particle.
   var particle = new Particle(a.bounds, Sprite.YAY, this.scene.game.framerate);
   this.scene.addParticle(particle);
-  
-  // show a balloon.
-  var frame = this.scene.game.frame;
-  var text = "Got a thingy!";
-  var e = this.scene.game.addElement(new Rectangle(20, 20, frame.width-60, 60))
-  e.align = "left";
-  e.style.padding = "10px";
-  e.style.color = "black";
-  e.style.background = "white";
-  e.style.border = "solid black 2px";
-  var i = 0;
-  function balloon(task) {
-    if ((task.scene.ticks % 2) == 0) {
-      if (i < text.length) {
-	i++;
-	e.innerHTML = text.substring(0, i);
-      } else {
-	task.scene.game.removeElement(e);
-	task.alive = false;
-      }
-    }
-  }
-  this.scene.addTask(new Task(balloon));
 };

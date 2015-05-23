@@ -204,6 +204,7 @@ Scene.prototype.init = function ()
   this.ticks = 0;
 
   this.collectibles = 0;
+  var game = this.game;
   var scene = this;
   var tilemap = this.tilemap;
   var f = function (x,y) {
@@ -220,7 +221,6 @@ Scene.prototype.init = function ()
   this.player = new Player(this.tilemap.map2coord(rect));
   this.addActor(this.player);
   
-  var game = this.game;
   function player_jumped(e) {
     game.audios.jump.currentTime = 0;
     game.audios.jump.play();
@@ -229,6 +229,31 @@ Scene.prototype.init = function ()
     game.audios.pick.currentTime = 0;
     game.audios.pick.play();
     game.addScore(+1);
+    
+    // show a balloon.
+    var frame = game.frame;
+    var text = "Got a thingy!";
+    var e = game.addElement(new Rectangle(20, 20, frame.width-60, 60))
+    e.align = "left";
+    e.style.padding = "10px";
+    e.style.color = "black";
+    e.style.background = "white";
+    e.style.border = "solid black 2px";
+    var i = 0;
+    function balloon(task) {
+      if ((task.scene.ticks % 2) == 0) {
+	if (i < text.length) {
+	  i++;
+	  e.innerHTML = text.substring(0, i);
+	} else {
+	  task.scene.game.removeElement(e);
+	  task.alive = false;
+	}
+      }
+    }
+    scene.addTask(new Task(balloon));
+
+    // count the score.
     scene.collectibles--;
     if (scene.collectibles == 0) {
       scene.changed.signal();

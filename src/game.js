@@ -178,7 +178,7 @@ Game.prototype.init = function (state)
   switch (state) {
   case 0:
     this.scene = new Title(this);
-    this.scene.init("<b>Sample Game</b><p>Made with JSCS");
+    this.scene.init("<b>Sample Game</b><p>Made with JSCS<p>Press Enter to start.");
     this.scene.changed.subscribe(title_changed);
     break;
   case 1:
@@ -193,7 +193,7 @@ Game.prototype.init = function (state)
     break;
   case 2:
     this.scene = new Title(this);
-    this.scene.init("<b>You Won!</b><p>Enter to restart the game.");
+    this.scene.init("<b>You Won!</b><p>Press Enter to restart.");
     this.scene.changed.subscribe(title_changed);
     break;
   }
