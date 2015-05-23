@@ -86,7 +86,7 @@ function run()
   window.addEventListener('focus', focus);
   window.addEventListener('blur', blur);
   
-  game.init();
+  game.init(0);
   game.focus(null);
   timer = window.setInterval(idle, 1000/framerate);
 }

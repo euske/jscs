@@ -11,6 +11,7 @@ function Game(framerate, frame, images, audios, labels)
   this.audios = audios;
   this.labels = labels;
   this.active = false;
+  this.msgs = [];
 
   // [GAME SPECIFIC CODE]
   this.sprites = this.images.sprites;
@@ -161,20 +162,46 @@ Game.prototype.blur = function (ev)
   this.active = false;
 };
 
-Game.prototype.init = function ()
+Game.prototype.init = function (state)
 {
   // [OVERRIDE]
   // [GAME SPECIFIC CODE]
   removeChildren(this.frame.parentNode, 'div');
 
-  this.scene = new Scene(this);
-  this.scene.init();
-  
-  this.score_node = this.addElement(new Rectangle(10, 10, 100, 20));
-  this.score_node.align = 'left';
-  this.score_node.style.color = 'white';
-  this.score = 0;
-  this.addScore(0);
+  var game = this;
+  function title_changed(e) {
+    game.post(function () { game.init(1); });
+  }
+  function level_finished(e) {
+    game.post(function () { game.init(2); });
+  }
+  switch (state) {
+  case 0:
+    this.scene = new Title(this);
+    this.scene.init("<b>Sample Game</b><p>Made with JSCS");
+    this.scene.changed.subscribe(title_changed);
+    break;
+  case 1:
+    this.scene = new Scene(this);
+    this.scene.init();
+    this.scene.changed.subscribe(level_finished);
+    this.score_node = this.addElement(new Rectangle(10, 10, 100, 20));
+    this.score_node.align = 'left';
+    this.score_node.style.color = 'white';
+    this.score = 0;
+    this.addScore(0);
+    break;
+  case 2:
+    this.scene = new Title(this);
+    this.scene.init("<b>You Won!</b><p>Enter to restart the game.");
+    this.scene.changed.subscribe(title_changed);
+    break;
+  }
+};
+
+Game.prototype.post = function (msg)
+{
+  this.msgs.push(msg);
 };
 
 Game.prototype.idle = function ()
@@ -183,6 +210,11 @@ Game.prototype.idle = function ()
   // [GAME SPECIFIC CODE]
   this.scene.move(this._vx, this._vy);
   this.scene.idle();
+
+  while (0 < this.msgs.length) {
+    var msg = this.msgs.shift();
+    msg();
+  }
 };
 
 Game.prototype.repaint = function ()
@@ -191,9 +223,7 @@ Game.prototype.repaint = function ()
   // [GAME SPECIFIC CODE]
   this.ctx.clearRect(0, 0, this.screen.width, this.screen.height);
   this.ctx.save();
-  this.scene.render(this.ctx,
-		    (this.screen.width-this.scene.window.width)/2,
-		    (this.screen.height-this.scene.window.height)/2);
+  this.scene.render(this.ctx, 0, 0);
   this.ctx.restore();
 };
 

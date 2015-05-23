@@ -44,7 +44,7 @@ Queue.prototype.idle = function ()
     }
     task.idle();
     if (task.alive) return;
-    this.tasks.splice(0, 1);
+    this.tasks.shift();
   }
   this.alive = false;
 };

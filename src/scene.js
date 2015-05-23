@@ -7,6 +7,8 @@ function Scene(game)
   this.game = game;
   this.window = new Rectangle(0, 0, game.screen.width, game.screen.height);
   this.world = new Rectangle(0, 0, game.screen.width, game.screen.height);
+
+  this.changed = new Slot(this);
 }
 
 Scene.prototype.addTask = function (task)
@@ -129,7 +131,7 @@ Scene.prototype.render = function (ctx, bx, by)
   var fy = y0*tilesize-window.y;
 
   // Set the drawing order.
-  var actors = new Array();
+  var actors = [];
   for (var i = 0; i < this.actors.length; i++) {
     var actor = this.actors[i];
     var bounds = actor.bounds;
@@ -201,12 +203,14 @@ Scene.prototype.init = function ()
   this.particles = [];
   this.ticks = 0;
 
+  this.collectibles = 0;
   var scene = this;
   var tilemap = this.tilemap;
   var f = function (x,y) {
     if (Tile.isCollectible(tilemap.get(x,y))) {
       var rect = tilemap.map2coord(new Point(x,y));
       scene.addActor(new Actor(rect, Sprite.COLLECTIBLE));
+      scene.collectibles++;
       tilemap.set(x, y, Tile.NONE);
     }
   };
@@ -225,6 +229,10 @@ Scene.prototype.init = function ()
     game.audios.pick.currentTime = 0;
     game.audios.pick.play();
     game.addScore(+1);
+    scene.collectibles--;
+    if (scene.collectibles == 0) {
+      scene.changed.signal();
+    }
   }
   this.player.picked.subscribe(player_picked);
   this.player.jumped.subscribe(player_jumped);
