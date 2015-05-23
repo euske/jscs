@@ -98,7 +98,7 @@ Scene.prototype.cleanObjects = function (objs)
   removeArray(objs, removed);
 }
 
-Scene.prototype.idle = function (vx, vy)
+Scene.prototype.idle = function ()
 {
   // [OVERRIDE]
   this.moveObjects(this.tasks);

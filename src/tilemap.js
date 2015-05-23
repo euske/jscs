@@ -60,8 +60,9 @@ TileMap.prototype.apply = function (rect, f)
   }
   for (var dy = 0; dy < rect.height; dy++) {
     for (var dx = 0; dx < rect.width; dx++) {
-      if (f(rect.x+dx, rect.y+dy)) {
-	return true;
+      var x = rect.x+dx, y = rect.y+dy;
+      if (f(x, y)) {
+	return new Point(x,y);
       }
     }
   }
@@ -87,6 +88,22 @@ TileMap.prototype.collide = function (rect, v, f)
     }
   }
   return v;
+};
+
+TileMap.prototype.getMove = function (rect, v, f)
+{
+  var vx = v.x;
+  var vy = v.y;
+  var d1 = this.collide(rect, new Point(vx, vy), f);
+  rect = rect.move(d1.x, d1.y);
+  vx -= d1.x;
+  vy -= d1.y;
+  var d2 = this.collide(rect, new Point(vx, 0), f);
+  rect = rect.move(d2.x, d2.y);
+  vx -= d2.x;
+  vy -= d2.y;
+  var d3 = this.collide(rect, new Point(0, vy), f);
+  return new Point(d1.x+d2.x+d3.x, d1.y+d2.y+d3.y);
 };
 
 TileMap.prototype.getRange = function (f)
