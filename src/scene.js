@@ -138,7 +138,11 @@ Scene.prototype.render = function (ctx, bx, by)
     if (actor.scene == this && bounds.overlap(window)) {
       var x = Math.floor((bounds.x+bounds.width/2)/tilesize);
       var y = Math.floor((bounds.y+bounds.height/2)/tilesize);
-      actors[x+","+y] = actor;
+      var k = x+","+y;
+      if (!actors.hasOwnProperty(k)) {
+	actors[k] = [];
+      }
+      actors[k].push(actor);
     }
   }
 
@@ -146,9 +150,12 @@ Scene.prototype.render = function (ctx, bx, by)
   var ft = function (x,y) {
     var k = x+","+y;
     if (actors.hasOwnProperty(k)) {
-      var a = actors[k];
-      var b = a.bounds;
-      a.render(ctx, bx+b.x-window.x, by+b.y-window.y);
+      var r = actors[k];
+      for (var i = 0; i < r.length; i++) {
+	var a = r[i];
+	var b = a.bounds;
+	a.render(ctx, bx+b.x-window.x, by+b.y-window.y);
+      }
     }
     var c = tilemap.get(x,y);
     return (c == Tile.NONE? -1 : c);
@@ -256,7 +263,7 @@ Scene.prototype.init = function ()
     // count the score.
     scene.collectibles--;
     if (scene.collectibles == 0) {
-      scene.changed.signal();
+      scene.changed.signal('WON');
     }
   }
   this.player.picked.subscribe(player_picked);

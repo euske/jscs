@@ -169,7 +169,7 @@ Game.prototype.init = function (state)
   removeChildren(this.frame.parentNode, 'div');
 
   var game = this;
-  function title_changed(e) {
+  function title_changed(e, arg) {
     game.post(function () { game.init(1); });
   }
   function level_finished(e) {
