@@ -248,12 +248,12 @@ Scene.prototype.init = function ()
     e.style.border = "solid black 2px";
     var i = 0;
     function balloon(task) {
-      if ((task.scene.ticks % 2) == 0) {
+      if ((scene.ticks % 2) == 0) {
 	if (i < text.length) {
 	  i++;
 	  e.innerHTML = text.substring(0, i);
 	} else {
-	  task.scene.game.removeElement(e);
+	  game.removeElement(e);
 	  task.alive = false;
 	}
       }
@@ -263,7 +263,12 @@ Scene.prototype.init = function ()
     // count the score.
     scene.collectibles--;
     if (scene.collectibles == 0) {
-      scene.changed.signal('WON');
+      // delay calling.
+      scene.addTask(new Task(function (task) {
+	if (task.ticks0+game.framerate < scene.ticks) {
+	  scene.changed.signal('WON');
+	}
+      }));
     }
   }
   this.player.picked.subscribe(player_picked);

@@ -5,15 +5,12 @@
 // Player
 function Player(bounds)
 {
-  this.init();
-  this.sprite = Sprite.PLAYER;
-  
+  Actor.call(this, bounds, Sprite.PLAYER);
   this.speed = 8;
   this.gravity = 2;
   this.maxspeed = 16;
   this.jumpacc = -16;
   
-  this.bounds = bounds;
   this.hitbox = bounds.inset(4, 4);
   this.picked = new Slot(this);
   this.jumped = new Slot(this);
@@ -21,14 +18,12 @@ function Player(bounds)
   this._gy = 0;
 }
 
+Player.prototype = Object.create(Actor.prototype);
+
 Player.prototype.toString = function ()
 {
   return "<Player: "+this.bounds+">";
 }
-
-Player.prototype.init = Actor.prototype.init;
-
-Player.prototype.start = Actor.prototype.start;
 
 Player.prototype.idle = function ()
 {
@@ -42,16 +37,13 @@ Player.prototype.idle = function ()
   }
 };
 
-Player.prototype.render = Actor.prototype.render;
-
 Player.prototype.move = function (vx, vy)
 {
   if (this.scene == null) return;
   var tilemap = this.scene.tilemap;
   var f = (function (x,y) { return Tile.isObstacle(tilemap.get(x,y)); });
   var v = tilemap.getMove(this.hitbox, new Point(vx*this.speed, this._gy), f);
-  this.hitbox = this.hitbox.move(v.x, v.y);
-  this.bounds = this.bounds.move(v.x, v.y);
+  Actor.prototype.move.call(this, v.x, v.y);
   this._gy = Math.min(v.y + this.gravity, this.maxspeed);
 };
 
