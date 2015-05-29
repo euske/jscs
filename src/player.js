@@ -9,13 +9,15 @@ function Player(bounds)
   this.speed = 8;
   this.gravity = 2;
   this.maxspeed = 16;
-  this.jumpacc = -16;
+  this.jumpacc = -8;
+  this.maxacctime = 8;
   
   this.hitbox = bounds.inset(4, 4);
   this.picked = new Slot(this);
   this.jumped = new Slot(this);
 
   this._gy = 0;
+  this._jumpt = -1;
 }
 
 Player.prototype = Object.create(Actor.prototype);
@@ -44,18 +46,27 @@ Player.prototype.move = function (vx, vy)
   var f = (function (x,y) { return Tile.isObstacle(tilemap.get(x,y)); });
   var v = tilemap.getMove(this.hitbox, new Point(vx*this.speed, this._gy), f);
   Actor.prototype.move.call(this, v.x, v.y);
-  this._gy = Math.min(v.y + this.gravity, this.maxspeed);
+  if (0 <= this._jumpt && this._jumpt < this.maxacctime) {
+    this._jumpt++;
+  } else {
+    this._gy = Math.min(v.y + this.gravity, this.maxspeed);
+  }
 };
 
-Player.prototype.jump = function ()
+Player.prototype.jump = function (jumping)
 {
   if (this.scene == null) return;
   var tilemap = this.scene.tilemap;
   var f = (function (x,y) { return Tile.isObstacle(tilemap.get(x,y)); });
-  var d = tilemap.collide(this.hitbox, new Point(0, this._gy), f);
-  if (0 < this._gy && d.y == 0) {
-    this._gy = this.jumpacc;
-    this.jumped.signal();
+  if (jumping) {
+    var d = tilemap.collide(this.hitbox, new Point(0, this._gy), f);
+    if (0 < this._gy && d.y == 0) {
+      this._gy = this.jumpacc;
+      this._jumpt = 0;
+      this.jumped.signal();
+    }
+  } else {
+    this._jumpt = -1;
   }
 };
 

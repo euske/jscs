@@ -275,7 +275,7 @@ Scene.prototype.init = function ()
   this.player.jumped.subscribe(player_jumped);
 };
 
-Scene.prototype.move = function(vx, vy)
+Scene.prototype.move = function (vx, vy)
 {
   // [GAME SPECIFIC CODE]
   this.player.move(vx, vy);
@@ -283,8 +283,8 @@ Scene.prototype.move = function(vx, vy)
   this.setCenter(rect);
 };
 
-Scene.prototype.action = function()
+Scene.prototype.action = function (action)
 {
   // [GAME SPECIFIC CODE]
-  this.player.jump();
+  this.player.jump(action);
 };

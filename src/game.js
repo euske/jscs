@@ -96,7 +96,7 @@ Game.prototype.keydown = function (ev)
   case 88:			// X
     if (!this._key_action) {
       this._key_action = true;
-      this.scene.action();
+      this.scene.action(true);
     }
     break;
   case 112:			// F1
@@ -143,7 +143,10 @@ Game.prototype.keyup = function (ev)
   case 32:			// SPACE
   case 90:			// Z
   case 88:			// X
-    this._key_action = false;
+    if (this._key_action) {
+      this._key_action = false;
+      this.scene.action(false);
+    }
     break;
   }
 };
