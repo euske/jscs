@@ -34,7 +34,7 @@ Title.prototype.move = function (vx, vy)
 {
 };
 
-Title.prototype.action = function ()
+Title.prototype.action = function (action)
 {
   this.changed.signal();
 };

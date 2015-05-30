@@ -32,7 +32,7 @@ function Game(framerate, frame, images, audios, labels)
   this._vy = 0;
 }
 
-Game.prototype.renderString = function(font, text, scale, x, y)
+Game.prototype.renderString = function (font, text, scale, x, y)
 {
   var fs = font.height;
   for (var i = 0; i < text.length; i++) {
@@ -44,7 +44,7 @@ Game.prototype.renderString = function(font, text, scale, x, y)
   }
 }
 
-Game.prototype.addElement = function(bounds)
+Game.prototype.addElement = function (bounds)
 {
   var e = document.createElement('div');
   e.style.position = 'absolute';
@@ -57,7 +57,7 @@ Game.prototype.addElement = function(bounds)
   return e;
 }
 
-Game.prototype.removeElement = function(e)
+Game.prototype.removeElement = function (e)
 {
   e.parentNode.removeChild(e);
 }

@@ -70,7 +70,7 @@ function Particle(bounds, sprite, duration)
 
 Particle.prototype = Object.create(Task.prototype);
 
-Particle.prototype.update = function()
+Particle.prototype.update = function ()
 {
   // [OVERRIDE]
   this.bounds.y -= 1;
@@ -106,7 +106,7 @@ Actor.prototype.toString = function ()
   return "<Actor: "+this.bounds+">";
 }
 
-Actor.prototype.update = function()
+Actor.prototype.update = function ()
 {
   // [OVERRIDE]
 };
