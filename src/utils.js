@@ -15,6 +15,12 @@ function clamp(v0, v, v1)
   return Math.min(Math.max(v, v0), v1);
 }
 
+// blink(t, d): returns true if t is within the on interval.
+function blink(t, d)
+{
+  return ((t % d) < d/2);
+}
+
 // rnd(n): returns a random number.
 function rnd(a, b)
 {
