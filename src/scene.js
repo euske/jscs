@@ -140,26 +140,25 @@ Scene.prototype.render = function (ctx, bx, by)
 
   // Set the drawing order.
   var objs = [];
-  var scene = this;
-  function add(obj) {
+  for (var i = 0; i < this.sprites.length; i++) {
+    var obj = this.sprites[i];
+    if (obj.scene != this) continue;
+    if (obj.bounds === null) continue;
     var bounds = obj.bounds;
-    if (obj.scene == scene && bounds.overlap(window)) {
+    if (bounds.overlap(window)) {
       var x = Math.floor((bounds.x+bounds.width/2)/tilesize);
       var y = Math.floor((bounds.y+bounds.height/2)/tilesize);
-      var k = x+","+y;
+      var k = x+','+y;
       if (!objs.hasOwnProperty(k)) {
 	objs[k] = [];
       }
       objs[k].push(obj);
     }
   }
-  for (var i = 0; i < this.sprites.length; i++) {
-    add(this.sprites[i]);
-  }
 
   // Draw the tilemap.
   var ft = function (x,y) {
-    var k = x+","+y;
+    var k = x+','+y;
     if (objs.hasOwnProperty(k)) {
       var r = objs[k];
       for (var i = 0; i < r.length; i++) {
@@ -240,13 +239,13 @@ Scene.prototype.init = function ()
     
     // show a balloon.
     var frame = game.frame;
-    var text = "Got a thingy!";
+    var text = 'Got a thingy!';
     var e = game.addElement(new Rectangle(20, 20, frame.width-60, 60))
-    e.align = "left";
-    e.style.padding = "10px";
-    e.style.color = "black";
-    e.style.background = "white";
-    e.style.border = "solid black 2px";
+    e.align = 'left';
+    e.style.padding = '10px';
+    e.style.color = 'black';
+    e.style.background = 'white';
+    e.style.border = 'solid black 2px';
     var i = 0;
     function balloon(task) {
       if ((scene.ticks % 2) == 0) {

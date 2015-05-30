@@ -103,7 +103,7 @@ Actor.prototype = Object.create(Task.prototype);
 
 Actor.prototype.toString = function ()
 {
-  return "<Actor: "+this.bounds+">";
+  return '<Actor: '+this.bounds+'>';
 }
 
 Actor.prototype.update = function ()

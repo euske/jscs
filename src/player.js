@@ -24,7 +24,7 @@ Player.prototype = Object.create(Actor.prototype);
 
 Player.prototype.toString = function ()
 {
-  return "<Player: "+this.bounds+">";
+  return '<Player: '+this.bounds+'>';
 }
 
 Player.prototype.update = function ()
