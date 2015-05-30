@@ -32,9 +32,14 @@ function Game(framerate, frame, images, audios, labels)
   this._vy = 0;
 }
 
-Game.prototype.renderString = function (font, text, scale, x, y)
+Game.prototype.renderString = function (font, text, scale, x, y, align)
 {
   var fs = font.height;
+  if (align == 'right') {
+    x -= fs*scale*text.length;
+  } else if (align == 'center') {
+    x -= fs*scale*text.length/2;
+  }
   for (var i = 0; i < text.length; i++) {
     var c = text.charCodeAt(i);
     this.ctx.drawImage(font,

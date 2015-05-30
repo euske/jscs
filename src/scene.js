@@ -75,10 +75,10 @@ Scene.prototype.setCenter = function (rect)
 Scene.prototype.collide = function (obj0)
 {
   var a = [];
-  if (obj0.alive && obj0.scene == this && obj0.hitbox != null) {
+  if (obj0.alive && obj0.scene === this && obj0.hitbox !== null) {
     for (var i = 0; i < this.colliders.length; i++) {
       var obj1 = this.colliders[i];
-      if (obj1.alive && obj1.scene == this && obj1.hitbox != null &&
+      if (obj1.alive && obj1.scene === this && obj1.hitbox !== null &&
 	  obj1 !== obj0 && obj1.hitbox.overlap(obj0.hitbox)) {
 	a.push(obj1);
       }
@@ -91,7 +91,7 @@ Scene.prototype.updateObjects = function (objs)
 {
   for (var i = 0; i < objs.length; i++) {
     var obj = objs[i];
-    if (obj.scene == null) {
+    if (obj.scene === null) {
       obj.start(this);
     }
     obj.update();
@@ -142,7 +142,7 @@ Scene.prototype.render = function (ctx, bx, by)
   var objs = [];
   for (var i = 0; i < this.sprites.length; i++) {
     var obj = this.sprites[i];
-    if (obj.scene != this) continue;
+    if (obj.scene !== this) continue;
     if (obj.bounds === null) continue;
     var bounds = obj.bounds;
     if (bounds.overlap(window)) {
@@ -174,6 +174,15 @@ Scene.prototype.render = function (ctx, bx, by)
 		 this.game.tiles, ft, 
 		 bx+fx, by+fy,
 		 x0, y0, x1-x0+1, y1-y0+1);
+
+  // Draw floating objects.
+  for (var i = 0; i < this.sprites.length; i++) {
+    var obj = this.sprites[i];
+    if (obj.scene != this) continue;
+    if (obj.bounds === null) {
+      obj.render(ctx, bx, by);
+    }
+  }
 };
 
 Scene.prototype.init = function ()
@@ -273,6 +282,15 @@ Scene.prototype.init = function ()
   }
   this.player.picked.subscribe(player_picked);
   this.player.jumped.subscribe(player_jumped);
+
+  var banner = new Particle(null, game.framerate*2);
+  banner.render = function (ctx, x, y) {
+    if (blink(scene.ticks, game.framerate/2)) {
+      game.renderString(game.images.font_w, 'GET ALL TEH DAMN THINGIES!', 1,
+			x+scene.window.width/2, y+50, 'center');
+    }
+  };
+  this.addParticle(banner);
 };
 
 Scene.prototype.move = function (vx, vy)

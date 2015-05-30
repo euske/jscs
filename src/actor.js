@@ -38,7 +38,7 @@ Queue.prototype.update = function ()
 {
   while (0 < this.tasks.length) {
     var task = this.tasks[0];
-    if (task.scene == null) {
+    if (task.scene === null) {
       task.start(this.scene);
     }
     task.update();
@@ -60,11 +60,10 @@ Queue.prototype.remove = function (task)
 
 
 // Particle: a moving object that doesn't interact.
-function Particle(bounds, sprite, duration)
+function Particle(bounds, duration)
 {
   Task.call(this);
   this.bounds = bounds;
-  this.sprite = sprite
   this.duration = duration;
 }
 
@@ -72,14 +71,30 @@ Particle.prototype = Object.create(Task.prototype);
 
 Particle.prototype.update = function ()
 {
-  // [OVERRIDE]
-  this.bounds.y -= 1;
   this.alive = (this.scene.ticks < this.ticks0+this.duration);
 };
 
 Particle.prototype.render = function (ctx, x, y)
 {
-  if (this.scene == null) return;
+};
+
+function SpriteParticle(bounds, duration, sprite)
+{
+  Particle.call(this, bounds, duration);
+  this.sprite = sprite;
+}
+
+SpriteParticle.prototype = Object.create(Particle.prototype);
+
+SpriteParticle.prototype.update = function ()
+{
+  // [OVERRIDE]
+  Particle.prototype.update.call(this);
+  this.bounds.y -= 1;
+};
+
+SpriteParticle.prototype.render = function (ctx, x, y)
+{
   var sprites = this.scene.game.sprites;
   var tw = sprites.height;
   var w = this.bounds.width;
@@ -114,7 +129,6 @@ Actor.prototype.update = function ()
 Actor.prototype.render = function (ctx, x, y)
 {
   // [OVERRIDE]
-  if (this.scene == null) return;
   var sprites = this.scene.game.sprites;
   var tw = sprites.height;
   var w = this.bounds.width;

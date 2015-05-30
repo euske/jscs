@@ -55,7 +55,7 @@ TileMap.prototype.map2coord = function (rect)
 
 TileMap.prototype.apply = function (rect, f)
 {
-  if (rect == null) {
+  if (rect === null) {
     rect = new Rectangle(0, 0, this.width, this.height);
   }
   for (var dy = 0; dy < rect.height; dy++) {
@@ -71,7 +71,7 @@ TileMap.prototype.apply = function (rect, f)
 
 TileMap.prototype.collide = function (rect, v, f)
 {
-  if (rect == null) return false;
+  if (rect === null) return false;
   var ts = this.tilesize;
   var r = rect.move(v.x, v.y).union(rect);
   var x0 = Math.floor(r.x/ts);

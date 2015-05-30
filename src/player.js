@@ -29,7 +29,6 @@ Player.prototype.toString = function ()
 
 Player.prototype.update = function ()
 {
-  if (this.scene == null) return;
   var r = this.scene.collide(this);
   for (var i = 0; i < r.length; i++) {
     var a = r[i];
@@ -41,7 +40,7 @@ Player.prototype.update = function ()
 
 Player.prototype.move = function (vx, vy)
 {
-  if (this.scene == null) return;
+  if (this.scene === null) return;
   var tilemap = this.scene.tilemap;
   var f = (function (x,y) { return Tile.isObstacle(tilemap.get(x,y)); });
   var v = tilemap.getMove(this.hitbox, new Point(vx*this.speed, this._gy), f);
@@ -55,7 +54,7 @@ Player.prototype.move = function (vx, vy)
 
 Player.prototype.jump = function (jumping)
 {
-  if (this.scene == null) return;
+  if (this.scene === null) return;
   var tilemap = this.scene.tilemap;
   var f = (function (x,y) { return Tile.isObstacle(tilemap.get(x,y)); });
   if (jumping) {
@@ -75,6 +74,6 @@ Player.prototype.pick = function (a)
   a.alive = false;
   this.picked.signal();
   // show a particle.
-  var particle = new Particle(a.bounds, Sprite.YAY, this.scene.game.framerate);
+  var particle = new SpriteParticle(a.bounds, this.scene.game.framerate, Sprite.YAY);
   this.scene.addParticle(particle);
 };
