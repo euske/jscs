@@ -77,7 +77,7 @@ Scene.prototype.collide = function (actor0)
   return a;
 };
 
-Scene.prototype.moveObjects = function (objs)
+Scene.prototype.updateObjects = function (objs)
 {
   for (var i = 0; i < objs.length; i++) {
     var obj = objs[i];
@@ -103,9 +103,9 @@ Scene.prototype.cleanObjects = function (objs)
 Scene.prototype.update = function ()
 {
   // [OVERRIDE]
-  this.moveObjects(this.tasks);
-  this.moveObjects(this.actors);
-  this.moveObjects(this.particles);
+  this.updateObjects(this.tasks);
+  this.updateObjects(this.actors);
+  this.updateObjects(this.particles);
   this.cleanObjects(this.tasks);
   this.cleanObjects(this.actors);
   this.cleanObjects(this.particles);
@@ -131,26 +131,32 @@ Scene.prototype.render = function (ctx, bx, by)
   var fy = y0*tilesize-window.y;
 
   // Set the drawing order.
-  var actors = [];
-  for (var i = 0; i < this.actors.length; i++) {
-    var actor = this.actors[i];
-    var bounds = actor.bounds;
-    if (actor.scene == this && bounds.overlap(window)) {
+  var objs = [];
+  var scene = this;
+  function add(obj) {
+    var bounds = obj.bounds;
+    if (obj.scene == scene && bounds.overlap(window)) {
       var x = Math.floor((bounds.x+bounds.width/2)/tilesize);
       var y = Math.floor((bounds.y+bounds.height/2)/tilesize);
       var k = x+","+y;
-      if (!actors.hasOwnProperty(k)) {
-	actors[k] = [];
+      if (!objs.hasOwnProperty(k)) {
+	objs[k] = [];
       }
-      actors[k].push(actor);
+      objs[k].push(obj);
     }
+  }
+  for (var i = 0; i < this.actors.length; i++) {
+    add(this.actors[i]);
+  }
+  for (var i = 0; i < this.particles.length; i++) {
+    add(this.particles[i]);
   }
 
   // Draw the tilemap.
   var ft = function (x,y) {
     var k = x+","+y;
-    if (actors.hasOwnProperty(k)) {
-      var r = actors[k];
+    if (objs.hasOwnProperty(k)) {
+      var r = objs[k];
       for (var i = 0; i < r.length; i++) {
 	var a = r[i];
 	var b = a.bounds;
@@ -168,7 +174,7 @@ Scene.prototype.render = function (ctx, bx, by)
   // Draw the particles.
   for (var i = 0; i < this.particles.length; i++) {
     var particle = this.particles[i];
-    if (particle.scene != this) continue;
+    if (particle.scene != scene) continue;
     particle.render(ctx,
 		    bx-window.x+particle.bounds.x,
 		    by-window.y+particle.bounds.y);
