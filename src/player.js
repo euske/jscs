@@ -27,7 +27,7 @@ Player.prototype.toString = function ()
   return "<Player: "+this.bounds+">";
 }
 
-Player.prototype.idle = function ()
+Player.prototype.update = function ()
 {
   if (this.scene == null) return;
   var r = this.scene.collide(this);

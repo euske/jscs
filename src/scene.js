@@ -84,7 +84,7 @@ Scene.prototype.moveObjects = function (objs)
     if (obj.scene == null) {
       obj.start(this);
     }
-    obj.idle();
+    obj.update();
   }
 }
 
@@ -100,7 +100,7 @@ Scene.prototype.cleanObjects = function (objs)
   removeArray(objs, removed);
 }
 
-Scene.prototype.idle = function ()
+Scene.prototype.update = function ()
 {
   // [OVERRIDE]
   this.moveObjects(this.tasks);

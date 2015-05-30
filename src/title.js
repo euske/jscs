@@ -20,7 +20,7 @@ Title.prototype.init = function (text)
   e.innerHTML = text;
 };
 
-Title.prototype.idle = function ()
+Title.prototype.update = function ()
 {
 };
 

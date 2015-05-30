@@ -19,7 +19,7 @@ Task.prototype.start = function (scene)
   this.ticks0 = scene.ticks;
 };
 
-Task.prototype.idle = function ()
+Task.prototype.update = function ()
 {
   this.body(this);
 }
@@ -34,14 +34,14 @@ function Queue(tasks)
 
 Queue.prototype = Object.create(Task.prototype);
 
-Queue.prototype.idle = function ()
+Queue.prototype.update = function ()
 {
   while (0 < this.tasks.length) {
     var task = this.tasks[0];
     if (task.scene == null) {
       task.start(this.scene);
     }
-    task.idle();
+    task.update();
     if (task.alive) return;
     this.tasks.shift();
   }
@@ -70,7 +70,7 @@ function Particle(bounds, sprite, duration)
 
 Particle.prototype = Object.create(Task.prototype);
 
-Particle.prototype.idle = function()
+Particle.prototype.update = function()
 {
   // [OVERRIDE]
   this.bounds.y -= 1;
@@ -106,7 +106,7 @@ Actor.prototype.toString = function ()
   return "<Actor: "+this.bounds+">";
 }
 
-Actor.prototype.idle = function()
+Actor.prototype.update = function()
 {
   // [OVERRIDE]
 };

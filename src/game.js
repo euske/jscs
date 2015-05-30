@@ -207,12 +207,12 @@ Game.prototype.post = function (msg)
   this.msgs.push(msg);
 };
 
-Game.prototype.idle = function ()
+Game.prototype.update = function ()
 {
   // [OVERRIDE]
   // [GAME SPECIFIC CODE]
   this.scene.move(this._vx, this._vy);
-  this.scene.idle();
+  this.scene.update();
 
   while (0 < this.msgs.length) {
     var msg = this.msgs.shift();

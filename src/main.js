@@ -27,9 +27,9 @@ function run()
 		  0, 0, frame.width, frame.height);
   }    
   
-  function idle() {
+  function update() {
     if (game.active) {
-      game.idle();
+      game.update();
       game.repaint();
       repaint();
     }
@@ -88,5 +88,5 @@ function run()
   
   game.init(0);
   game.focus(null);
-  timer = window.setInterval(idle, 1000/framerate);
+  timer = window.setInterval(update, 1000/framerate);
 }
