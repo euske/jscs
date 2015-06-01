@@ -12,6 +12,7 @@ function Game(framerate, frame, images, audios, labels)
   this.labels = labels;
   this.active = false;
   this.msgs = [];
+  this.music = null;
 
   // [GAME SPECIFIC CODE]
   this.sprites = this.images.sprites;
@@ -160,13 +161,17 @@ Game.prototype.focus = function (ev)
 {
   // [OVERRIDE]
   this.active = true;
-  //this.audios.music.play();
+  if (this.music !== null) {
+    this.music.play();
+  }
 };
 
 Game.prototype.blur = function (ev)
 {
   // [OVERRIDE]
-  //this.audios.music.pause();
+  if (this.music !== null) {
+    this.music.pause();
+  }
   this.active = false;
 };
 
@@ -175,6 +180,9 @@ Game.prototype.init = function (state)
   // [OVERRIDE]
   // [GAME SPECIFIC CODE]
   removeChildren(this.frame.parentNode, 'div');
+  if (this.music !== null) {
+    this.music.pause();
+  }
 
   var game = this;
   function title_changed(e, arg) {
@@ -188,6 +196,7 @@ Game.prototype.init = function (state)
     this.scene = new Title(this);
     this.scene.init('<b>Sample Game</b><p>Made with JSCS<p>Press Enter to start.');
     this.scene.changed.subscribe(title_changed);
+    this.music = null;
     break;
   case 1:
     this.scene = new Scene(this);
@@ -198,12 +207,18 @@ Game.prototype.init = function (state)
     this.score_node.style.color = 'white';
     this.score = 0;
     this.addScore(0);
+    this.music = this.audios.music;
     break;
   case 2:
     this.scene = new Title(this);
     this.scene.init('<b>You Won!</b><p>Press Enter to restart.');
     this.scene.changed.subscribe(title_changed);
+    this.music = null;
     break;
+  }
+
+  if (this.music !== null) {
+    this.music.play();
   }
 };
 
