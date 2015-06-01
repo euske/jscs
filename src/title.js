@@ -2,9 +2,10 @@
 
 function Title(game)
 {
-  this.game = game;
-  this.changed = new Slot(this);
+  Scene.call(this, game);
 }
+
+Title.prototype = Object.create(Scene.prototype);
 
 Title.prototype.init = function (text)
 {
@@ -20,21 +21,9 @@ Title.prototype.init = function (text)
   e.innerHTML = text;
 };
 
-Title.prototype.update = function ()
-{
-};
-
-Title.prototype.render = function (ctx, bx, by)
-{
-  ctx.fillStyle = 'rgb(0,0,0)';
-  ctx.fillRect(bx, by, this.game.screen.width, this.game.screen.height);
-};
-
-Title.prototype.move = function (vx, vy)
-{
-};
-
 Title.prototype.action = function (action)
 {
-  this.changed.signal();
+  if (action) {
+    this.changed.signal();
+  }
 };

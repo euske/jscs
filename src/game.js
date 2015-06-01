@@ -199,7 +199,7 @@ Game.prototype.init = function (state)
     this.music = null;
     break;
   case 1:
-    this.scene = new Scene(this);
+    this.scene = new Level(this);
     this.scene.init();
     this.scene.changed.subscribe(level_finished);
     this.score_node = this.addElement(new Rectangle(10, 10, 100, 20));

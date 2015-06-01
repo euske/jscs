@@ -5,6 +5,36 @@ function Scene(game)
 {
   this.game = game;
   this.changed = new Slot(this);
+}
+
+Scene.prototype.init = function ()
+{
+};
+
+Scene.prototype.update = function ()
+{
+};
+
+Scene.prototype.render = function (ctx, bx, by)
+{
+  ctx.fillStyle = 'rgb(0,0,0)';
+  ctx.fillRect(bx, by, this.game.screen.width, this.game.screen.height);
+};
+
+Scene.prototype.move = function (vx, vy)
+{
+};
+
+Scene.prototype.action = function (action)
+{
+};
+
+
+//  Level
+// 
+function Level(game)
+{
+  Scene.call(this, game);
   
   this.tilesize = 32;
   this.window = new Rectangle(0, 0, game.screen.width, game.screen.height);
@@ -16,43 +46,35 @@ function Scene(game)
   this.ticks = 0;
 }
 
-Scene.prototype.addTask = function (task)
+Level.prototype = Object.create(Scene.prototype);
+  
+Level.prototype.addObject = function (obj)
 {
-  this.tasks.push(task);
+  if (obj.update !== undefined) {
+    this.tasks.push(obj);
+  }
+  if (obj.render !== undefined) {
+    this.sprites.push(obj);
+  }
+  if (obj.hitbox !== undefined) {
+    this.colliders.push(obj);
+  }
 };
 
-Scene.prototype.removeTask = function (task)
+Level.prototype.removeObject = function (obj)
 {
-  removeArray(this.tasks, task);
+  if (obj.update !== undefined) {
+    removeArray(this.tasks, obj);
+  }
+  if (obj.render !== undefined) {
+    removeArray(this.sprites, obj);
+  }
+  if (obj.hitbox !== undefined) {
+    removeArray(this.colliders, obj);
+  }
 };
 
-Scene.prototype.addParticle = function (particle)
-{
-  this.tasks.push(particle);
-  this.sprites.push(particle);
-};
-
-Scene.prototype.removeParticle = function (particle)
-{
-  removeArray(this.tasks, particle);
-  removeArray(this.sprites, particle);
-};
-
-Scene.prototype.addActor = function (actor)
-{
-  this.tasks.push(actor);
-  this.sprites.push(actor);
-  this.colliders.push(actor);
-};
-
-Scene.prototype.removeActor = function (actor)
-{
-  removeArray(this.tasks, actor);
-  removeArray(this.sprites, actor);
-  removeArray(this.colliders, actor);
-};
-
-Scene.prototype.setCenter = function (rect)
+Level.prototype.setCenter = function (rect)
 {
   if (this.window.width < rect.width) {
     this.window.x = (rect.width-this.window.width)/2;
@@ -72,7 +94,24 @@ Scene.prototype.setCenter = function (rect)
   this.window.y = clamp(0, this.window.y, this.world.height-this.window.height);
 };
 
-Scene.prototype.collide = function (obj0)
+Level.prototype.updateObjects = function (objs)
+{
+  for (var i = 0; i < objs.length; i++) {
+    var obj = objs[i];
+    if (obj.scene === null) {
+      obj.start(this);
+    }
+    obj.update();
+  }
+}
+
+Level.prototype.cleanObjects = function (objs)
+{
+  function f(obj) { return !obj.alive; }
+  removeArray(objs, f);
+}
+
+Level.prototype.collide = function (obj0)
 {
   var a = [];
   if (obj0.alive && obj0.scene === this && obj0.hitbox !== null) {
@@ -87,30 +126,7 @@ Scene.prototype.collide = function (obj0)
   return a;
 };
 
-Scene.prototype.updateObjects = function (objs)
-{
-  for (var i = 0; i < objs.length; i++) {
-    var obj = objs[i];
-    if (obj.scene === null) {
-      obj.start(this);
-    }
-    obj.update();
-  }
-}
-
-Scene.prototype.cleanObjects = function (objs)
-{
-  var removed = [];
-  for (var i = 0; i < objs.length; i++) {
-    var obj = objs[i];
-    if (!obj.alive) {
-      removed.push(obj);
-    }
-  }
-  removeArray(objs, removed);
-}
-
-Scene.prototype.update = function ()
+Level.prototype.update = function ()
 {
   // [OVERRIDE]
   this.updateObjects(this.tasks);
@@ -120,7 +136,7 @@ Scene.prototype.update = function ()
   this.ticks++;
 };
 
-Scene.prototype.render = function (ctx, bx, by)
+Level.prototype.render = function (ctx, bx, by)
 {
   // [OVERRIDE]
 
@@ -185,7 +201,7 @@ Scene.prototype.render = function (ctx, bx, by)
   }
 };
 
-Scene.prototype.init = function ()
+Level.prototype.init = function ()
 {
   // [OVERRIDE]
   // [GAME SPECIFIC CODE]
@@ -226,7 +242,7 @@ Scene.prototype.init = function ()
   var f = function (x,y) {
     if (Tile.isCollectible(tilemap.get(x,y))) {
       var rect = tilemap.map2coord(new Point(x,y));
-      scene.addActor(new Actor(rect, Sprite.COLLECTIBLE));
+      scene.addObject(new Actor(rect, Sprite.COLLECTIBLE));
       scene.collectibles++;
       tilemap.set(x, y, Tile.NONE);
     }
@@ -235,7 +251,7 @@ Scene.prototype.init = function ()
 
   var rect = new Rectangle(1, 10, 1, 1);
   this.player = new Player(this.tilemap.map2coord(rect));
-  this.addActor(this.player);
+  this.addObject(this.player);
   
   function player_jumped(e) {
     game.audios.jump.currentTime = 0;
@@ -267,13 +283,13 @@ Scene.prototype.init = function ()
 	}
       }
     }
-    scene.addTask(new Task(balloon));
+    scene.addObject(new Task(balloon));
 
     // count the score.
     scene.collectibles--;
     if (scene.collectibles == 0) {
       // delay calling.
-      scene.addTask(new Task(function (task) {
+      scene.addObject(new Task(function (task) {
 	if (task.ticks0+game.framerate < scene.ticks) {
 	  scene.changed.signal('WON');
 	}
@@ -290,10 +306,10 @@ Scene.prototype.init = function ()
 			x+scene.window.width/2, y+50, 'center');
     }
   };
-  this.addParticle(banner);
+  this.addObject(banner);
 };
 
-Scene.prototype.move = function (vx, vy)
+Level.prototype.move = function (vx, vy)
 {
   // [GAME SPECIFIC CODE]
   this.player.move(vx, vy);
@@ -301,7 +317,7 @@ Scene.prototype.move = function (vx, vy)
   this.setCenter(rect);
 };
 
-Scene.prototype.action = function (action)
+Level.prototype.action = function (action)
 {
   // [GAME SPECIFIC CODE]
   this.player.jump(action);

@@ -64,18 +64,17 @@ function copyArray(a)
   }
 }
 
-// removeArray(a, b): remove objects in b from a.
-function removeArray(a, b)
+// removeArray(a, f): remove objects from a.
+function removeArray(a, f)
 {
-  if (a instanceof Array) {
-    for (var i = 0; i < b.length; i++) {
-      var j = a.indexOf(b[i]);
-      if (0 <= j) {
-	a.splice(j, 1);
+  if (typeof(f) === 'function') {
+    for (var i = a.length-1; 0 <= i; i--) {
+      if (f(a[i])) {
+	a.splice(i, 1);
       }
     }
   } else {
-    var i = a.indexOf(b);
+    var i = a.indexOf(f);
     if (0 <= i) {
       a.splice(i, 1);
     }

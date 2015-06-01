@@ -32,12 +32,14 @@ game.js
    
    - `addElement(bounds)`
      <br> Creates a new HTML div element and put it on a screen.
+   - `removeElement(elem)`
+     <br> Removes an HTML element from the screen.
 
    - `init()`
      <br> Game initialization.
      [A game specific code goes here.]
    
-   - `idle()`
+   - `update()`
      <br> Called for every frame.
      [A game specific code goes here.]
    
@@ -47,38 +49,40 @@ game.js
 
 scene.js
 --------
- * `new Scene(game, tilesize)`
-   <br> Holds all entities that are shown in the game world.
-
-   - `addTask(task)`
-   - `removeTask(task)`
-     <br> Adds/Removes a Task object to the scene.
-     
-   - `addActor(actor)`
-   - `removeActor(actor)`
-     <br> Adds/Removes an Actor object to the scene.
-     
-   - `addParticle(particle)`
-   - `removeParticle(particle)`
-     <br> Adds/Removes a Particle object to the scene.
-     
-   - `setCenter(rect)`
-     <br> Moves the screen view so that it contains the given rect.
-      
-   - `collide(actor)`
-     <br> Returns a list of Actor objects that collide with the Actor object.
-
+ * `new Scene(game)`
+   <br> Responsible for event handling for a particular scene of game.
+        (Title, Game Over, Main Game, etc.)
+ 
    - `init()`
      <br> Scene initialization.
      [A game specific code goes here.]
      
-   - `idle()`
+   - `update()`
      <br> Called for every frame.
      [A game specific code goes here.]
      
    - `render(ctx, x, y)`
      <br> Called when the scene needs to be painted.
      [A game specific code goes here.]
+   
+   - `move(vx, vy)`
+     <br> Receives the controller input.
+     
+   - `action(action)`
+     <br> Receives the action button input.
+
+ * `new Level(game)` [extends Scene]
+   <br> Holds all entities that are shown in the game world.
+
+   - `addObject(obj)`
+   - `removeObject(task)`
+     <br> Adds/Removes a Game object to the scene.
+     
+   - `setCenter(rect)`
+     <br> Moves the screen view so that it contains the given rect.
+      
+   - `collide(actor)`
+     <br> Returns a list of Actor objects that collide with the Actor object.
 
 actor.js
 --------
@@ -87,32 +91,25 @@ actor.js
    
    - `init()`
    - `start()`
-   - `idle()`
+   - `update()`
    
- * new Queue(tasks)
+ * new Queue(tasks) [extends Task]
    <br> A list of Task objects that are executed sequentially.
    
-   - `init()`
-   - `start()`
-   - `idle()`
    - `add(task)`
    - `remove(task)`
    
- * new Particle(bounds, sprite, duration)
+ * new Particle(bounds, duration) [extends Task]
    <br> A visible object that does not interact with other characters.
    
-   - `init()`
-   - `start()`
-   - `idle()`
    - `render(ctx, x, y)`
    
- * new Actor(bounds, sprite, duration)
+ * new SpriteParticle(bounds, duration, sprite) [extends Particle]
+   <br> A particle that display a single sprite.
+   
+ * new Actor(bounds, sprite) [extends Particle]
    <br> An moving object that interacts with other Actors.
    
-   - `init()`
-   - `start()`
-   - `idle()`
-   - `render(ctx, x, y)`
    - `move(dx, dy)`
  
 utils.js
@@ -121,6 +118,8 @@ utils.js
    <br> Prints a string to the console.
  * `clamp(v0, v, v1)`
    <br> Keeps a number v within the range [v0, v1].
+ * `blink(t, d)`
+   <br> Returns true if t is within the on interval.
  * `rnd(a[, b])`
    <br> Generates a random number in the range [0, a) or [a, b).
  * `format(v, n, c)`
@@ -128,8 +127,8 @@ utils.js
  
  * `copyArray(a)`
    <br> Deep-copies an array.
- * `removeArray(a, b)`
-   <br> Removes element(s) in b from the array a.
+ * `removeArray(a, f)`
+   <br> Removes element(s) from the array a that matches f.
  
  * `removeChildren(n, name)`
    <br> Removes all DOM children that have the given tag from n.
@@ -144,8 +143,11 @@ utils.js
    <br> An event publisher.
     
    - `subscribe(recv)`
+     <br> Registers a function as an event receiver.
    - `unsubscribe(recv)`
+     <br> Unregisters a function as an event receiver.
    - `signal(arg)`
+     <br> Calls a registerd function of all subscriers.
    
  * `new Point(x, y)`
    <br> A point object.

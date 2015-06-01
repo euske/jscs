@@ -75,5 +75,5 @@ Player.prototype.pick = function (a)
   this.picked.signal();
   // show a particle.
   var particle = new SpriteParticle(a.bounds, this.scene.game.framerate, Sprite.YAY);
-  this.scene.addParticle(particle);
+  this.scene.addObject(particle);
 };
