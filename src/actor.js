@@ -78,10 +78,10 @@ Particle.prototype.render = function (ctx, x, y)
 {
 };
 
-function SpriteParticle(bounds, duration, sprite)
+function SpriteParticle(bounds, duration, tileno)
 {
   Particle.call(this, bounds, duration);
-  this.sprite = sprite;
+  this.tileno = tileno;
 }
 
 SpriteParticle.prototype = Object.create(Particle.prototype);
@@ -100,18 +100,18 @@ SpriteParticle.prototype.render = function (ctx, x, y)
   var w = this.bounds.width;
   var h = this.bounds.height;
   ctx.drawImage(sprites,
-		this.sprite*tw, tw-h, w, h,
+		this.tileno*tw, tw-h, w, h,
 		x, y, w, h);
 };
 
 
 // Actor: a character that can interact with other characters.
-function Actor(bounds, sprite)
+function Actor(bounds, tileno)
 {
   Task.call(this);
   this.bounds = bounds;
   this.hitbox = bounds;
-  this.sprite = sprite;
+  this.tileno = tileno;
 }
 
 Actor.prototype = Object.create(Task.prototype);
@@ -134,7 +134,7 @@ Actor.prototype.render = function (ctx, x, y)
   var w = this.bounds.width;
   var h = this.bounds.height;
   ctx.drawImage(sprites,
-		this.sprite*tw, tw-h, w, h,
+		this.tileno*tw, tw-h, w, h,
 		x, y, w, h);
 };
 

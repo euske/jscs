@@ -32,7 +32,7 @@ Player.prototype.update = function ()
   var r = this.scene.collide(this);
   for (var i = 0; i < r.length; i++) {
     var a = r[i];
-    if (a instanceof Actor && a.sprite == S.COLLECTIBLE) {
+    if (a instanceof Actor && a.tileno == S.COLLECTIBLE) {
       this.pick(a);
     }
   }
