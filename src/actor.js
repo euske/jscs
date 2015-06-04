@@ -59,72 +59,40 @@ Queue.prototype.remove = function (task)
 };
 
 
-// Particle: a moving object that doesn't interact.
-function Particle(bounds, duration)
+// Sprite: a moving object that doesn't interact.
+function Sprite(bounds)
 {
   Task.call(this);
   this.bounds = bounds;
-  this.duration = duration;
 }
 
-Particle.prototype = Object.create(Task.prototype);
+Sprite.prototype = Object.create(Task.prototype);
 
-Particle.prototype.update = function ()
+Sprite.prototype.toString = function ()
 {
-  this.alive = (this.scene.ticks < this.ticks0+this.duration);
+  return '<Sprite: '+this.bounds+'>';
 };
 
-Particle.prototype.render = function (ctx, x, y)
-{
-};
-
-function SpriteParticle(bounds, duration, tileno)
-{
-  Particle.call(this, bounds, duration);
-  this.tileno = tileno;
-}
-
-SpriteParticle.prototype = Object.create(Particle.prototype);
-
-SpriteParticle.prototype.update = function ()
+Sprite.prototype.update = function ()
 {
   // [OVERRIDE]
-  Particle.prototype.update.call(this);
-  this.bounds.y -= 1;
 };
 
-SpriteParticle.prototype.render = function (ctx, x, y)
+Sprite.prototype.render = function (ctx, x, y)
 {
-  var sprites = this.scene.game.sprites;
-  var tw = sprites.height;
-  var w = this.bounds.width;
-  var h = this.bounds.height;
-  ctx.drawImage(sprites,
-		this.tileno*tw, tw-h, w, h,
-		x, y, w, h);
+  // [OVERRIDE]
 };
 
 
 // Actor: a character that can interact with other characters.
-function Actor(bounds, tileno)
+function Actor(bounds, hitbox, tileno)
 {
-  Task.call(this);
-  this.bounds = bounds;
-  this.hitbox = bounds;
+  Sprite.call(this, bounds);
+  this.hitbox = hitbox;
   this.tileno = tileno;
 }
 
-Actor.prototype = Object.create(Task.prototype);
-
-Actor.prototype.toString = function ()
-{
-  return '<Actor: '+this.bounds+'>';
-}
-
-Actor.prototype.update = function ()
-{
-  // [OVERRIDE]
-};
+Actor.prototype = Object.create(Sprite.prototype);
 
 Actor.prototype.render = function (ctx, x, y)
 {

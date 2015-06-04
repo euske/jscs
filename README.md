@@ -99,15 +99,12 @@ actor.js
    - `add(task)`
    - `remove(task)`
    
- * new Particle(bounds, duration) [extends Task]
-   <br> A visible object that does not interact with other characters.
+ * new Sprite(bounds) [extends Task]
+   <br> A visible object that might not interact with other characters.
    
    - `render(ctx, x, y)`
    
- * new SpriteParticle(bounds, duration, sprite) [extends Particle]
-   <br> A particle that display a single sprite.
-   
- * new Actor(bounds, sprite) [extends Particle]
+ * new Actor(bounds, hitbox, tileno) [extends Particle]
    <br> An moving object that interacts with other Actors.
    
    - `move(dx, dy)`

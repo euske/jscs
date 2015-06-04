@@ -242,7 +242,7 @@ Level.prototype.init = function ()
   var f = function (x,y) {
     if (T.isCollectible(tilemap.get(x,y))) {
       var rect = tilemap.map2coord(new Point(x,y));
-      scene.addObject(new Actor(rect, S.COLLECTIBLE));
+      scene.addObject(new Actor(rect, rect, S.COLLECTIBLE));
       scene.collectibles++;
       tilemap.set(x, y, T.NONE);
     }
@@ -299,7 +299,10 @@ Level.prototype.init = function ()
   this.player.picked.subscribe(player_picked);
   this.player.jumped.subscribe(player_jumped);
 
-  var banner = new Particle(null, game.framerate*2);
+  var banner = new Sprite(null);
+  banner.update = function () {
+    banner.alive = (scene.ticks < banner.ticks0+game.framerate*2);
+  };
   banner.render = function (ctx, x, y) {
     if (blink(scene.ticks, game.framerate/2)) {
       game.renderString(game.images.font_w, 'GET ALL TEH DAMN THINGIES!', 1,
