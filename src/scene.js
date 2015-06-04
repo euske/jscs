@@ -184,7 +184,7 @@ Level.prototype.render = function (ctx, bx, by)
       }
     }
     var c = tilemap.get(x,y);
-    return (c == Tile.NONE? -1 : c);
+    return (c == T.NONE? -1 : c);
   };
   tilemap.render(ctx,
 		 this.game.tiles, ft, 
@@ -240,11 +240,11 @@ Level.prototype.init = function ()
   var scene = this;
   var tilemap = this.tilemap;
   var f = function (x,y) {
-    if (Tile.isCollectible(tilemap.get(x,y))) {
+    if (T.isCollectible(tilemap.get(x,y))) {
       var rect = tilemap.map2coord(new Point(x,y));
-      scene.addObject(new Actor(rect, Sprite.COLLECTIBLE));
+      scene.addObject(new Actor(rect, S.COLLECTIBLE));
       scene.collectibles++;
-      tilemap.set(x, y, Tile.NONE);
+      tilemap.set(x, y, T.NONE);
     }
   };
   this.tilemap.apply(null, f);
