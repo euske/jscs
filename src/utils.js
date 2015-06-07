@@ -324,3 +324,10 @@ function image2array(img)
   }
   return map;
 }
+
+// playSound(sound): play a sound resource.
+function playSound(sound)
+{
+  sound.currentTime = 0;
+  sound.play();
+}

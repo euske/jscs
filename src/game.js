@@ -202,11 +202,6 @@ Game.prototype.init = function (state)
     this.scene = new Level(this);
     this.scene.init();
     this.scene.changed.subscribe(level_finished);
-    this.score_node = this.addElement(new Rectangle(10, 10, 100, 20));
-    this.score_node.align = 'left';
-    this.score_node.style.color = 'white';
-    this.score = 0;
-    this.addScore(0);
     this.music = this.audios.music;
     break;
   case 2:
@@ -248,11 +243,4 @@ Game.prototype.repaint = function ()
   this.ctx.save();
   this.scene.render(this.ctx, 0, 0);
   this.ctx.restore();
-};
-
-Game.prototype.addScore = function (d)
-{
-  // [GAME SPECIFIC CODE]
-  this.score += d;
-  this.score_node.innerHTML = ('Score: '+this.score);
 };

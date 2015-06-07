@@ -254,13 +254,12 @@ Level.prototype.init = function ()
   this.addObject(this.player);
   
   function player_jumped(e) {
-    game.audios.jump.currentTime = 0;
-    game.audios.jump.play();
+    playSound(game.audios.jump);
   }
   function player_picked(e) {
-    game.audios.pick.currentTime = 0;
-    game.audios.pick.play();
-    game.addScore(+1);
+    playSound(game.audios.pick);
+    scene.score++;
+    scene.updateScore();
     
     // show a balloon.
     var frame = game.frame;
@@ -299,6 +298,13 @@ Level.prototype.init = function ()
   this.player.picked.subscribe(player_picked);
   this.player.jumped.subscribe(player_jumped);
 
+  this.score_node = game.addElement(new Rectangle(10, 10, 100, 20));
+  this.score_node.align = 'left';
+  this.score_node.style.color = 'white';
+  this.score = 0;
+  this.updateScore();
+
+  // show a banner.
   var banner = new Sprite(null);
   banner.update = function () {
     banner.alive = (scene.ticks < banner.ticks0+game.framerate*2);
@@ -324,4 +330,10 @@ Level.prototype.action = function (action)
 {
   // [GAME SPECIFIC CODE]
   this.player.jump(action);
+};
+
+Level.prototype.updateScore = function ()
+{
+  // [GAME SPECIFIC CODE]
+  this.score_node.innerHTML = ('Score: '+this.score);
 };
