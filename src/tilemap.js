@@ -11,6 +11,8 @@ function TileMap(tilesize, map)
 }
 
 TileMap.prototype.get = function (x, y)
+
+TileMap.prototype.get = function (x, y)
 {
   if (0 <= x && 0 <= y && x < this.width && y < this.height) {
     return this.map[y][x];
@@ -24,6 +26,12 @@ TileMap.prototype.set = function (x, y, v)
   if (0 <= x && 0 <= y && x < this.width && y < this.height) {
     this.map[y][x] = v;
   }
+  this.rangemap = {};
+};
+
+TileMap.prototype.copy = function ()
+{
+  return new TileMap(this.tilesize, copyArray(this.map));
 };
 
 TileMap.prototype.coord2map = function (rect)
@@ -67,6 +75,25 @@ TileMap.prototype.apply = function (rect, f)
     }
   }
   return false;
+};
+
+TileMap.prototype.scroll = function (rect, vx, vy)
+{
+  if (rect === null) {
+    rect = new Rectangle(0, 0, this.width, this.height);
+  }
+  var sx = (vx < 0)? +1 : -1;
+  var sy = (vy < 0)? +1 : -1;
+  for (var dy = 0; dy < rect.height; dy++) {
+    for (var dx = 0; dx < rect.width; dx++) {
+      var x0 = (dx*sx + rect.width)%rect.width;
+      var y0 = (dy*sy + rect.height)%rect.height;
+      var x1 = (x0+vx + rect.width)%rect.width;
+      var y1 = (y0+vy + rect.height)%rect.height;
+      this.set(rect.x+x1, rect.y+y1,
+	       this.get(rect.x+x0, rect.y+y0));
+    }
+  }
 };
 
 TileMap.prototype.collide = function (rect, v, f)

@@ -106,6 +106,9 @@ Level.prototype.update = function ()
   this.cleanObjects(this.sprites);
   this.cleanObjects(this.colliders);
   this.ticks++;
+  if (this.ticks % 10 == 0) {
+    this.tilemap.scroll(null, 1, 0);
+  }
 };
 
 Level.prototype.render = function (ctx, bx, by)
