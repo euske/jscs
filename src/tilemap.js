@@ -82,16 +82,19 @@ TileMap.prototype.scroll = function (rect, vx, vy)
   if (rect === null) {
     rect = new Rectangle(0, 0, this.width, this.height);
   }
-  var sx = (vx < 0)? +1 : -1;
-  var sy = (vy < 0)? +1 : -1;
+  var src = [];
+  for (var dy = 0; dy < rect.height; dy++) {
+    var a = [];
+    for (var dx = 0; dx < rect.width; dx++) {
+      a.push(this.map[rect.y+dy][rect.x+dx]);
+    }
+    src.push(a);
+  }
   for (var dy = 0; dy < rect.height; dy++) {
     for (var dx = 0; dx < rect.width; dx++) {
-      var x0 = (dx*sx + rect.width)%rect.width;
-      var y0 = (dy*sy + rect.height)%rect.height;
-      var x1 = (x0+vx + rect.width)%rect.width;
-      var y1 = (y0+vy + rect.height)%rect.height;
-      this.set(rect.x+x1, rect.y+y1,
-	       this.get(rect.x+x0, rect.y+y0));
+      var x = (dx+vx + rect.width) % rect.width;
+      var y = (dy+vy + rect.height) % rect.height;
+      this.map[rect.y+dy][rect.x+dx] = src[y][x];
     }
   }
 };
