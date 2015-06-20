@@ -34,7 +34,7 @@ FixedSprite.prototype.render = function (ctx, x, y)
 // Player
 function Player(bounds)
 {
-  var hitbox = bounds.inset(4, 4);
+  var hitbox = bounds.inflate(-4, -4);
   Actor.call(this, bounds, hitbox, S.PLAYER);
   this.speed = 8;
   this.gravity = 2;

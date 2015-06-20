@@ -175,12 +175,12 @@ Rectangle.prototype.move = function (dx, dy)
 {
   return new Rectangle(this.x+dx, this.y+dy, this.width, this.height);  
 };
-Rectangle.prototype.inset = function (dw, dh)
+Rectangle.prototype.inflate = function (dw, dh)
 {
   var cx = this.x+this.width/2;
   var cy = this.y+this.height/2;
-  var w = this.width - dw;
-  var h = this.height - dh;
+  var w = this.width + dw;
+  var h = this.height + dh;
   return new Rectangle(cx-w/2, cy-h/2, w, h);
 };
 Rectangle.prototype.contains = function (x, y)

@@ -294,7 +294,7 @@ Level.prototype.move = function (vx, vy)
 {
   // [GAME SPECIFIC CODE]
   this.player.move(vx, vy);
-  var rect = this.player.bounds.inset(-this.window.width/2, -this.window.height/2);
+  var rect = this.player.bounds.inflate(this.window.width/2, this.window.height/2);
   this.setCenter(rect);
 };
 
