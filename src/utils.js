@@ -103,27 +103,27 @@ Slot.prototype.signal = function (arg)
   }
 };
 
-// Point
-function Point(x, y)
+// Vec2
+function Vec2(x, y)
 {
   this.x = x;
   this.y = y;
 }
-Point.prototype.toString = function ()
+Vec2.prototype.toString = function ()
 {
   return '('+this.x+', '+this.y+')';
 };
-Point.prototype.equals = function (p)
+Vec2.prototype.equals = function (p)
 {
   return (this.x == p.x && this.y == p.y);
 };
-Point.prototype.copy = function ()
+Vec2.prototype.copy = function ()
 {
-  return new Point(this.x, this.y);
+  return new Vec2(this.x, this.y);
 };
-Point.prototype.move = function (dx, dy)
+Vec2.prototype.move = function (dx, dy)
 {
-  return new Point(this.x+dx, this.y+dy);
+  return new Vec2(this.x+dx, this.y+dy);
 };
 
 // Rectangle
@@ -218,7 +218,7 @@ function collideHLine(x0, x1, y, rect, v)
       (x1+dx < left || right < x0+dx)) {
     return v;
   }
-  return new Point(dx, dy);
+  return new Vec2(dx, dy);
 }
 
 function collideVLine(y0, y1, x, rect, v)
@@ -242,7 +242,7 @@ function collideVLine(y0, y1, x, rect, v)
       (y1+dy < top || bottom < y0+dy)) {
     return v;
   }
-  return new Point(dx, dy);
+  return new Vec2(dx, dy);
 }
 
 function collideRect(r0, r1, v)

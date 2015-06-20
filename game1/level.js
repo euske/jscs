@@ -213,7 +213,7 @@ Level.prototype.init = function ()
   var tilemap = this.tilemap;
   var f = function (x,y) {
     if (T.isCollectible(tilemap.get(x,y))) {
-      var rect = tilemap.map2coord(new Point(x,y));
+      var rect = tilemap.map2coord(new Vec2(x,y));
       scene.addObject(new Actor(rect, rect, S.COLLECTIBLE));
       scene.collectibles++;
       tilemap.set(x, y, T.NONE);

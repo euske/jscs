@@ -72,7 +72,7 @@ Player.prototype.move = function (vx, vy)
   if (this.scene === null) return;
   var tilemap = this.scene.tilemap;
   var f = (function (x,y) { return T.isObstacle(tilemap.get(x,y)); });
-  var v = tilemap.getMove(this.hitbox, new Point(vx*this.speed, this._gy), f);
+  var v = tilemap.getMove(this.hitbox, new Vec2(vx*this.speed, this._gy), f);
   Actor.prototype.move.call(this, v.x, v.y);
   if (0 <= this._jumpt && this._jumpt < this.maxacctime) {
     this._jumpt++;
@@ -87,7 +87,7 @@ Player.prototype.jump = function (jumping)
   var tilemap = this.scene.tilemap;
   var f = (function (x,y) { return T.isObstacle(tilemap.get(x,y)); });
   if (jumping) {
-    var d = tilemap.collide(this.hitbox, new Point(0, this._gy), f);
+    var d = tilemap.collide(this.hitbox, new Vec2(0, this._gy), f);
     if (0 < this._gy && d.y == 0) {
       this._gy = this.jumpacc;
       this._jumpt = 0;
