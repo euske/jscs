@@ -179,9 +179,9 @@ Rectangle.prototype.inflate = function (dw, dh)
 {
   var cx = this.x+this.width/2;
   var cy = this.y+this.height/2;
-  var w = this.width + dw;
-  var h = this.height + dh;
-  return new Rectangle(cx-w/2, cy-h/2, w, h);
+  dw += this.width;
+  dh += this.height;
+  return new Rectangle(cx-dw/2, cy-dh/2, dw, dh);
 };
 Rectangle.prototype.contains = function (x, y)
 {
@@ -194,14 +194,6 @@ Rectangle.prototype.overlap = function (rect)
 	   this.y+this.height <= rect.y ||
 	   rect.x+rect.width <= this.x ||
 	   rect.y+rect.height <= this.y);
-};
-Rectangle.prototype.clamp = function (rect)
-{
-  var x0 = Math.max(this.x, rect.x);
-  var y0 = Math.max(this.y, rect.y);
-  var x1 = Math.min(this.x+this.width, rect.x+rect.width);
-  var y1 = Math.min(this.y+this.height, rect.y+rect.height);
-  return new Rectangle(x0, y0, x1-x0, y1-y0);
 };
 Rectangle.prototype.union = function (rect)
 {
@@ -303,6 +295,82 @@ function collideRect(r0, r1, v)
   }
   return v;
 }
+
+// Box
+function Box(origin, size)
+{
+  this.origin = origin;
+  this.size = size;
+}
+Box.prototype.toString = function () 
+{
+  return '('+this.origin+', '+this.size+')';
+};
+Box.prototype.equals = function (rect)
+{
+  return (this.origin.equals(rect.origin) &&
+	  this.size.equals(rect.size));
+};
+Box.prototype.copy = function ()
+{
+  return new Box(this.origin.copy(), this.size.copy());
+};
+Box.prototype.move = function (dx, dy, dz)
+{
+  return new Box(this.origin.move(dx, dy, dz), this.size);
+};
+Box.prototype.inflate = function (dx, dy, dz)
+{
+  var cx = this.origin.x+this.size.x/2;
+  var cy = this.origin.y+this.size.y/2;
+  var cz = this.origin.z+this.size.z/2;
+  dx += this.size.x;
+  dy += this.size.y;
+  dz += this.size.z;
+  return new Box(new Vec3(cx-dx/2, cy-dy/2, cz-dz/2),
+		 new Vec3(dx, dy, dz));
+};
+Box.prototype.contains = function (p)
+{
+  return (this.origin.x <= p.x && this.origin.y <= p.y && this.origin.z <= p.z &&
+	  p.x <= this.origin.x+this.size.x &&
+	  p.y <= this.origin.y+this.size.y &&
+	  p.z <= this.origin.z+this.size.z);
+};
+Box.prototype.overlap = function (box)
+{
+  return !(this.origin.x+this.size.x <= box.origin.x ||
+	   this.origin.y+this.size.y <= box.origin.y ||
+	   this.origin.z+this.size.z <= box.origin.z ||
+	   box.origin.x+box.size.x <= this.origin.x ||
+	   box.origin.y+box.size.y <= this.origin.y ||
+	   box.origin.z+box.size.z <= this.origin.z);
+};
+Box.prototype.union = function (box)
+{
+  var x0 = Math.min(this.x, rect.x);
+  var y0 = Math.min(this.y, rect.y);
+  var x1 = Math.max(this.x+this.width, rect.x+rect.width);
+  var y1 = Math.max(this.y+this.height, rect.y+rect.height);
+  return new Rectangle(x0, y0, x1-x0, y1-y0);
+};
+Box.prototype.intersection = function (box)
+{
+  var x0 = Math.max(this.origin.x, box.origin.x);
+  var y0 = Math.max(this.origin.y, box.origin.y);
+  var z0 = Math.max(this.origin.z, box.origin.z);
+  var x1 = Math.min(this.origin.x+this.size.x, box.origin.x+box.size.x);
+  var y1 = Math.min(this.origin.y+this.size.y, box.origin.y+box.size.y);
+  var z1 = Math.min(this.origin.z+this.size.z, box.origin.z+box.size.z);
+  return new Box(new Vec3(x0, y0, z0),
+		 new Vec3(x1-x0, y1-y0, z1-z0));
+};
+Box.prototype.center = function ()
+{
+  return new Vec3(this.origin.x+this.size.x/2,
+		  this.origin.y+this.size.y/2,
+		  this.origin.z+this.size.z/2);
+};
 
 // removeChildren(n, name): remove all child nodes with the given name.
 function removeChildren(n, name)
