@@ -126,6 +126,30 @@ Vec2.prototype.move = function (dx, dy)
   return new Vec2(this.x+dx, this.y+dy);
 };
 
+// Vec3
+function Vec3(x, y, z)
+{
+  this.x = x;
+  this.y = y;
+  this.z = z;
+}
+Vec3.prototype.toString = function ()
+{
+  return '('+this.x+', '+this.y+', '+this.z+')';
+};
+Vec3.prototype.equals = function (p)
+{
+  return (this.x == p.x && this.y == p.y && this.z == p.z);
+};
+Vec3.prototype.copy = function ()
+{
+  return new Vec3(this.x, this.y, this.z);
+};
+Vec3.prototype.move = function (dx, dy, dz)
+{
+  return new Point(this.x+dx, this.y+dy, this.z+dz);
+};
+
 // Rectangle
 function Rectangle(x, y, width, height)
 {
@@ -194,6 +218,26 @@ Rectangle.prototype.intersection = function (rect)
   var x1 = Math.min(this.x+this.width, rect.x+rect.width);
   var y1 = Math.min(this.y+this.height, rect.y+rect.height);
   return new Rectangle(x0, y0, x1-x0, y1-y0);
+};
+Rectangle.prototype.right = function ()
+{
+  return this.x+this.width;
+};
+Rectangle.prototype.bottom = function ()
+{
+  return this.y+this.height;
+};
+Rectangle.prototype.xcenter = function ()
+{
+  return this.x+this.width/2;
+};
+Rectangle.prototype.ycenter = function ()
+{
+  return this.y+this.height/2;
+};
+Rectangle.prototype.center = function ()
+{
+  return new Vec2(this.x+this.width/2, this.y+this.height/2);
 };
 
 // collideRect: 2D collision detection
