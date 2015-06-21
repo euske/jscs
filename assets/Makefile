@@ -1,6 +1,7 @@
 # Makefile for assets
 
 PYTHON=python
+SOX=sox
 LAME=lame
 
 ASSETS=jump.mp3 music.mp3 pick.mp3
@@ -13,4 +14,4 @@ clean:
 .SUFFIXES: .png .wav .mp3
 
 .wav.mp3:
-	$(LAME) $< $@
+	$(SOX) $< -t wav - pad 0 0.5 | $(LAME) - $@
