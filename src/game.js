@@ -102,7 +102,9 @@ Game.prototype.keydown = function (ev)
   case 88:			// X
     if (!this._key_action) {
       this._key_action = true;
-      this.scene.action(true);
+      if (this.scene.action !== undefined) {
+	this.scene.action(true);
+      }
     }
     break;
   case 112:			// F1
@@ -151,9 +153,49 @@ Game.prototype.keyup = function (ev)
   case 88:			// X
     if (this._key_action) {
       this._key_action = false;
-      this.scene.action(false);
+      if (this.scene.action !== undefined) {
+	this.scene.action(false);
+      }
     }
     break;
+  }
+};
+
+Game.prototype.mousedown = function (ev)
+{
+  // [OVERRIDE]
+  if (this.scene.mousedown !== undefined) {
+    if (ev.target === this.frame) {
+      this.scene.mousedown(
+	ev.layerX*this.screen.width/this.frame.width,
+	ev.layerY*this.screen.height/this.frame.height,
+	ev.button);
+    }
+  }
+};
+
+Game.prototype.mouseup = function (ev)
+{
+  // [OVERRIDE]
+  if (this.scene.mouseup !== undefined) {
+    if (ev.target === this.frame) {
+      this.scene.mouseup(
+	ev.layerX*this.screen.width/this.frame.width,
+	ev.layerY*this.screen.height/this.frame.height,
+	ev.button);
+    }
+  }
+};
+
+Game.prototype.mousemove = function (ev)
+{
+  // [OVERRIDE]
+  if (this.scene.mousemove !== undefined) {
+    if (ev.target === this.frame) {
+      this.scene.mousemove(
+	ev.layerX*this.screen.width/this.frame.width,
+	ev.layerY*this.screen.height/this.frame.height);
+    }
   }
 };
 

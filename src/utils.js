@@ -219,11 +219,11 @@ Rectangle.prototype.bottom = function ()
 {
   return this.y+this.height;
 };
-Rectangle.prototype.xcenter = function ()
+Rectangle.prototype.centerx = function ()
 {
   return this.x+this.width/2;
 };
-Rectangle.prototype.ycenter = function ()
+Rectangle.prototype.centery = function ()
 {
   return this.y+this.height/2;
 };

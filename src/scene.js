@@ -28,3 +28,15 @@ Scene.prototype.move = function (vx, vy)
 Scene.prototype.action = function (action)
 {
 };
+
+Scene.prototype.mousedown = function (x, y, button)
+{
+};
+
+Scene.prototype.mouseup = function (x, y, button)
+{
+};
+
+Scene.prototype.mousemove = function (x, y)
+{
+};

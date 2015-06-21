@@ -56,6 +56,24 @@ function run()
     }
   };
   
+  function mousedown(e) {
+    if (game.active) {
+      game.mousedown(e);
+    }
+  };
+  
+  function mouseup(e) {
+    if (game.active) {
+      game.mouseup(e);
+    }
+  };
+  
+  function mousemove(e) {
+    if (game.active) {
+      game.mousemove(e);
+    }
+  };
+  
   function focus(e) {
     if (!game.active) {
       game.focus(e);
@@ -83,6 +101,9 @@ function run()
   
   window.addEventListener('keydown', keydown);
   window.addEventListener('keyup', keyup);
+  window.addEventListener('mousedown', mousedown);
+  window.addEventListener('mouseup', mouseup);
+  window.addEventListener('mousemove', mousemove);
   window.addEventListener('focus', focus);
   window.addEventListener('blur', blur);
   
