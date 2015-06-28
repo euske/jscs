@@ -238,22 +238,22 @@ Game.prototype.init = function (state)
     this.scene = new Title(this);
     this.scene.init('<b>Sample Game</b><p>Made with JSCS<p>Press Enter to start.');
     this.scene.changed.subscribe(title_changed);
-    this.music = null;
+    this.music = this.scene.music;
     break;
   case 1:
-    this.scene = new Level(this);
+    this.scene = new Level1(this);
     this.scene.init();
     this.scene.changed.subscribe(level_finished);
-    this.music = this.audios.music;
+    this.music = this.scene.music;
     break;
   case 2:
     this.scene = new Title(this);
     this.scene.init('<b>You Won!</b><p>Press Enter to restart.');
     this.scene.changed.subscribe(title_changed);
-    this.music = null;
+    this.scene.music = this.audios.ending;
     break;
   }
-
+  
   if (this.music !== null) {
     this.music.play();
   }

@@ -2,51 +2,21 @@
 
 // [GAME SPECIFIC CODE]
 
-//  Level
+//  Level1
 // 
-function Level(game)
+function Level1(game)
 {
   Scene.call(this, game);
   
   this.tilesize = 32;
   this.window = new Rectangle(0, 0, game.screen.width, game.screen.height);
   this.world = new Rectangle(0, 0, game.screen.width, game.screen.height);
-
-  this.tasks = [];
-  this.sprites = [];
-  this.colliders = [];
-  this.ticks = 0;
+  this.music = game.audios.music;
 }
 
-Level.prototype = Object.create(Scene.prototype);
+Level1.prototype = Object.create(Level.prototype);
   
-Level.prototype.addObject = function (obj)
-{
-  if (obj.update !== undefined) {
-    this.tasks.push(obj);
-  }
-  if (obj.render !== undefined) {
-    this.sprites.push(obj);
-  }
-  if (obj.hitbox !== undefined) {
-    this.colliders.push(obj);
-  }
-};
-
-Level.prototype.removeObject = function (obj)
-{
-  if (obj.update !== undefined) {
-    removeArray(this.tasks, obj);
-  }
-  if (obj.render !== undefined) {
-    removeArray(this.sprites, obj);
-  }
-  if (obj.hitbox !== undefined) {
-    removeArray(this.colliders, obj);
-  }
-};
-
-Level.prototype.setCenter = function (rect)
+Level1.prototype.setCenter = function (rect)
 {
   if (this.window.width < rect.width) {
     this.window.x = (rect.width-this.window.width)/2;
@@ -66,49 +36,7 @@ Level.prototype.setCenter = function (rect)
   this.window.y = clamp(0, this.window.y, this.world.height-this.window.height);
 };
 
-Level.prototype.updateObjects = function (objs)
-{
-  for (var i = 0; i < objs.length; i++) {
-    var obj = objs[i];
-    if (obj.scene === null) {
-      obj.start(this);
-    }
-    obj.update();
-  }
-}
-
-Level.prototype.cleanObjects = function (objs)
-{
-  function f(obj) { return !obj.alive; }
-  removeArray(objs, f);
-}
-
-Level.prototype.collide = function (obj0)
-{
-  var a = [];
-  if (obj0.alive && obj0.scene === this && obj0.hitbox !== null) {
-    for (var i = 0; i < this.colliders.length; i++) {
-      var obj1 = this.colliders[i];
-      if (obj1.alive && obj1.scene === this && obj1.hitbox !== null &&
-	  obj1 !== obj0 && obj1.hitbox.overlap(obj0.hitbox)) {
-	a.push(obj1);
-      }
-    }
-  }
-  return a;
-};
-
-Level.prototype.update = function ()
-{
-  // [OVERRIDE]
-  this.updateObjects(this.tasks);
-  this.cleanObjects(this.tasks);
-  this.cleanObjects(this.sprites);
-  this.cleanObjects(this.colliders);
-  this.ticks++;
-};
-
-Level.prototype.render = function (ctx, bx, by)
+Level1.prototype.render = function (ctx, bx, by)
 {
   // [OVERRIDE]
 
@@ -166,15 +94,17 @@ Level.prototype.render = function (ctx, bx, by)
   // Draw floating objects.
   for (var i = 0; i < this.sprites.length; i++) {
     var obj = this.sprites[i];
-    if (obj.scene != this) continue;
+    if (obj.scene !== this) continue;
     if (obj.bounds === null) {
       obj.render(ctx, bx, by);
     }
   }
 };
 
-Level.prototype.init = function ()
+Level1.prototype.init = function ()
 {
+  Level.prototype.init.call(this);
+  
   // [OVERRIDE]
   // [GAME SPECIFIC CODE]
   var map = copyArray([
@@ -196,16 +126,11 @@ Level.prototype.init = function ()
     [0,0,0,0, 1,0,0,0, 0,0,2,0, 0,2,0,0, 0,0,0,0],
     [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
   ]);
-  
   this.tilemap = new TileMap(this.tilesize, map);
   this.world.width = this.tilemap.width * this.tilesize;
   this.world.height = this.tilemap.height * this.tilesize;
   this.window.width = Math.min(this.world.width, this.window.width);
   this.window.height = Math.min(this.world.height, this.window.height);
-  this.tasks = [];
-  this.sprites = [];
-  this.colliders = [];
-  this.ticks = 0;
 
   this.collectibles = 0;
   var game = this.game;
@@ -292,21 +217,21 @@ Level.prototype.init = function ()
   this.addObject(banner);
 };
 
-Level.prototype.move = function (vx, vy)
+Level1.prototype.move = function (vx, vy)
 {
   // [GAME SPECIFIC CODE]
-  this.player.move(vx, vy);
+  this.player.usermove(vx, vy);
   var rect = this.player.bounds.inflate(this.window.width/2, this.window.height/2);
   this.setCenter(rect);
 };
 
-Level.prototype.action = function (action)
+Level1.prototype.action = function (action)
 {
   // [GAME SPECIFIC CODE]
   this.player.jump(action);
 };
 
-Level.prototype.updateScore = function ()
+Level1.prototype.updateScore = function ()
 {
   // [GAME SPECIFIC CODE]
   this.score_node.innerHTML = ('Score: '+this.score);

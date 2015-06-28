@@ -11,8 +11,6 @@ function TileMap(tilesize, map)
 }
 
 TileMap.prototype.get = function (x, y)
-
-TileMap.prototype.get = function (x, y)
 {
   if (0 <= x && 0 <= y && x < this.width && y < this.height) {
     return this.map[y][x];

@@ -58,6 +58,7 @@ Player.prototype.toString = function ()
 
 Player.prototype.update = function ()
 {
+  if (this.scene === null) return;
   var r = this.scene.collide(this);
   for (var i = 0; i < r.length; i++) {
     var a = r[i];
@@ -65,21 +66,30 @@ Player.prototype.update = function ()
       this.pick(a);
     }
   }
+  if (0 <= this._jumpt && this._jumpt < this.maxacctime) {
+    this._jumpt++;
+  } else {
+    this._gy = Math.min(this._gy + this.gravity, this.maxspeed);
+  }
 };
 
 Player.prototype.move = function (vx, vy)
 {
-  if (this.scene === null) return;
+  if (this.scene === null) return null;
   var tilemap = this.scene.tilemap;
   var f = (function (x,y) { return T.isObstacle(tilemap.get(x,y)); });
-  var v = tilemap.getMove(this.hitbox, new Vec2(vx*this.speed, this._gy), f);
+  var v = tilemap.getMove(this.hitbox, new Vec2(vx, vy), f);
   Actor.prototype.move.call(this, v.x, v.y);
-  if (0 <= this._jumpt && this._jumpt < this.maxacctime) {
-    this._jumpt++;
-  } else {
-    this._gy = Math.min(v.y + this.gravity, this.maxspeed);
-  }
+  return v;
 };
+
+Player.prototype.usermove = function (vx, vy)
+{
+  var v = this.move(vx*this.speed, this._gy);
+  if (v !== null) {
+    this._gy = v.y;
+  }
+}
 
 Player.prototype.jump = function (jumping)
 {
