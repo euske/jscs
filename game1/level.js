@@ -214,7 +214,7 @@ Level.prototype.init = function ()
   var f = function (x,y) {
     if (T.isCollectible(tilemap.get(x,y))) {
       var rect = tilemap.map2coord(new Vec2(x,y));
-      scene.addObject(new Actor(rect, rect, S.COLLECTIBLE));
+      scene.addObject(new Actor(rect, rect, S.THINGY));
       scene.collectibles++;
       tilemap.set(x, y, T.NONE);
     }
@@ -270,9 +270,11 @@ Level.prototype.init = function ()
   this.player.picked.subscribe(player_picked);
   this.player.jumped.subscribe(player_jumped);
 
-  this.score_node = game.addElement(new Rectangle(10, 10, 100, 20));
+  this.score_node = game.addElement(new Rectangle(10, 10, 160, 32));
   this.score_node.align = 'left';
   this.score_node.style.color = 'white';
+  this.score_node.style['font-size'] = '150%';
+  this.score_node.style['font-weight'] = 'bold';
   this.score = 0;
   this.updateScore();
 
