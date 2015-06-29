@@ -63,7 +63,7 @@ Queue.prototype.remove = function (task)
 function Sprite(bounds)
 {
   Task.call(this);
-  this.bounds = bounds;
+  this.bounds = (bounds === null)? bounds : bounds.copy();
 }
 
 Sprite.prototype = Object.create(Task.prototype);
@@ -88,7 +88,7 @@ Sprite.prototype.render = function (ctx, x, y)
 function Actor(bounds, hitbox, tileno)
 {
   Sprite.call(this, bounds);
-  this.hitbox = hitbox;
+  this.hitbox = (hitbox === null)? hitbox : hitbox.copy();
   this.tileno = tileno;
 }
 

@@ -109,7 +109,8 @@ Level1.prototype.moveAll = function (vx, vy)
   var window = this.window;
   window.x += vx;
   window.y += vy;
-
+  this.player.move(vx, vy);
+  
   var x0 = Math.floor(window.x/tilesize);
   var y0 = Math.floor(window.y/tilesize);
   if (x0 != 0 || y0 != 0) {
@@ -117,31 +118,21 @@ Level1.prototype.moveAll = function (vx, vy)
     this.scrollTile(x0, y0);
     var wx = -x0*tilesize;
     var wy = -y0*tilesize;
+    window.x += wx;
+    window.y += wy;
     for (var i = 0; i < this.sprites.length; i++) {
       var obj = this.sprites[i];
       if (obj.scene !== this) continue;
-      if (obj.bounds !== null) {
-	obj.bounds.x += wx;
-	obj.bounds.y += wy;
-      }
+      if (obj.bounds === null) continue;
+      obj.bounds.x += wx;
+      obj.bounds.y += wy;
     }
     for (var i = 0; i < this.colliders.length; i++) {
       var obj = this.colliders[i];
       if (obj.scene !== this) continue;
-      if (obj.hitbox !== null) {
-	obj.hitbox.x += wx;
-	obj.hitbox.y += wy;
-      }
-    }
-    window.x += wx;
-    window.y += wy;
-  }
-
-  // force moving the player.
-  var obj = this.player;
-  if (obj.scene === this) {
-    if (obj.bounds !== null) {
-      obj.move(vx, vy);
+      if (obj.hitbox === null) continue;
+      obj.hitbox.x += wx;
+      obj.hitbox.y += wy;
     }
   }
 };
