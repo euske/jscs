@@ -65,6 +65,26 @@ Rectangle.prototype.equals = function (rect)
   return (this.x == rect.x && this.y == rect.y &&
 	  this.width == rect.width && this.height == rect.height);
 };
+Rectangle.prototype.right = function ()
+{
+  return this.x+this.width;
+};
+Rectangle.prototype.bottom = function ()
+{
+  return this.y+this.height;
+};
+Rectangle.prototype.centerx = function ()
+{
+  return this.x+this.width/2;
+};
+Rectangle.prototype.centery = function ()
+{
+  return this.y+this.height/2;
+};
+Rectangle.prototype.center = function ()
+{
+  return new Vec2(this.x+this.width/2, this.y+this.height/2);
+};
 Rectangle.prototype.copy = function ()
 {
   return new Rectangle(this.x, this.y, this.width, this.height);
@@ -108,26 +128,6 @@ Rectangle.prototype.intersection = function (rect)
   var x1 = Math.min(this.x+this.width, rect.x+rect.width);
   var y1 = Math.min(this.y+this.height, rect.y+rect.height);
   return new Rectangle(x0, y0, x1-x0, y1-y0);
-};
-Rectangle.prototype.right = function ()
-{
-  return this.x+this.width;
-};
-Rectangle.prototype.bottom = function ()
-{
-  return this.y+this.height;
-};
-Rectangle.prototype.centerx = function ()
-{
-  return this.x+this.width/2;
-};
-Rectangle.prototype.centery = function ()
-{
-  return this.y+this.height/2;
-};
-Rectangle.prototype.center = function ()
-{
-  return new Vec2(this.x+this.width/2, this.y+this.height/2);
 };
 
 // collideRect: 2D collision detection
@@ -204,10 +204,16 @@ Box.prototype.toString = function ()
 {
   return '('+this.origin+', '+this.size+')';
 };
-Box.prototype.equals = function (rect)
+Box.prototype.equals = function (box)
 {
-  return (this.origin.equals(rect.origin) &&
-	  this.size.equals(rect.size));
+  return (this.origin.equals(box.origin) &&
+	  this.size.equals(box.size));
+};
+Box.prototype.center = function ()
+{
+  return new Vec3(this.origin.x+this.size.x/2,
+		  this.origin.y+this.size.y/2,
+		  this.origin.z+this.size.z/2);
 };
 Box.prototype.copy = function ()
 {
@@ -262,11 +268,5 @@ Box.prototype.intersection = function (box)
   var z1 = Math.min(this.origin.z+this.size.z, box.origin.z+box.size.z);
   return new Box(new Vec3(x0, y0, z0),
 		 new Vec3(x1-x0, y1-y0, z1-z0));
-};
-Box.prototype.center = function ()
-{
-  return new Vec3(this.origin.x+this.size.x/2,
-		  this.origin.y+this.size.y/2,
-		  this.origin.z+this.size.z/2);
 };
 

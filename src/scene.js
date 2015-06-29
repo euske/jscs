@@ -108,6 +108,9 @@ Level.prototype.collide = function (obj0)
 Level.prototype.addObject = function (obj)
 {
   if (obj.update !== undefined) {
+    if (obj.scene === null) {
+      obj.start(this);
+    }
     this.tasks.push(obj);
   }
   if (obj.render !== undefined) {
@@ -134,11 +137,7 @@ Level.prototype.removeObject = function (obj)
 Level.prototype.updateObjects = function (objs)
 {
   for (var i = 0; i < objs.length; i++) {
-    var obj = objs[i];
-    if (obj.scene === null) {
-      obj.start(this);
-    }
-    obj.update();
+    objs[i].update();
   }
 }
 

@@ -82,27 +82,6 @@ function removeArray(a, f)
   return a;
 }
 
-// Slot: an event system
-function Slot(object)
-{
-  this.object = object
-  this.receivers = [];
-}
-Slot.prototype.subscribe = function (recv)
-{
-  this.receivers.push(recv);
-};
-Slot.prototype.unsubscribe = function (recv)
-{
-  removeArray(this.receivers, recv);
-};
-Slot.prototype.signal = function (arg)
-{
-  for (var i = 0; i < this.receivers.length; i++) {
-    this.receivers[i](this.object, arg);
-  }
-};
-
 // removeChildren(n, name): remove all child nodes with the given name.
 function removeChildren(n, name)
 {
@@ -174,3 +153,27 @@ function playSound(sound)
   sound.currentTime = 0;
   sound.play();
 }
+
+// Slot: an event system
+function Slot(object)
+{
+  this.object = object
+  this.receivers = [];
+}
+
+Slot.prototype.subscribe = function (recv)
+{
+  this.receivers.push(recv);
+};
+
+Slot.prototype.unsubscribe = function (recv)
+{
+  removeArray(this.receivers, recv);
+};
+
+Slot.prototype.signal = function (arg)
+{
+  for (var i = 0; i < this.receivers.length; i++) {
+    this.receivers[i](this.object, arg);
+  }
+};
