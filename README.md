@@ -26,6 +26,12 @@ game.js
      <br> Handles JavaScript events.
    - `blur(e)`
      <br> Handles JavaScript events.
+   - `mouseup(e)`
+     <br> Handles JavaScript events.
+   - `mousedown(e)`
+     <br> Handles JavaScript events.
+   - `mousemove(e)`
+     <br> Handles JavaScript events.
    
    - `renderString(font, text, scale, x, y)`
      <br> Graphically render text on the canvas in the given font.
@@ -34,6 +40,9 @@ game.js
      <br> Creates a new HTML div element and put it on a screen.
    - `removeElement(elem)`
      <br> Removes an HTML element from the screen.
+
+   - `post(e)`
+     <br> Post an event.
 
    - `init()`
      <br> Game initialization.
@@ -78,9 +87,6 @@ scene.js
    - `removeObject(task)`
      <br> Adds/Removes a Game object to the scene.
      
-   - `setCenter(rect)`
-     <br> Moves the screen view so that it contains the given rect.
-      
    - `collide(actor)`
      <br> Returns a list of Actor objects that collide with the Actor object.
 
@@ -135,6 +141,12 @@ utils.js
  
  * `getEdgeyContext(canvas)`
    <br> Returns a pixellated canvas 2D context.
+
+ * `image2array(img)`
+   <br> Converts an image to 2D array.
+ 
+ * `playSound(sound)`
+   <br> Plays an audio element.
  
  * `new Slot(object)`
    <br> An event publisher.
@@ -146,29 +158,52 @@ utils.js
    - `signal(arg)`
      <br> Calls a registerd function of all subscriers.
    
- * `new Point(x, y)`
-   <br> A point object.
+geom.js
+--------
+ * `new Vec2(x, y)`
+   <br> A 2D vector object.
  
    - `equals(p)`
    - `copy()`
    - `move(dx, dy)`
    
+ * `new Vec3(x, y, z)`
+   <br> A 3D vector object.
+ 
+   - `equals(p)`
+   - `copy()`
+   - `move(dx, dy, dz)`
+   
  * `new Rectangle(x, y, width, height)`
    <br> A rectangle object.
    
    - `equals(rect)`
+   - `right()`
+   - `bottom()`
+   - `centerx()`
+   - `centery()`
+   - `center()`
    - `copy()`
    - `move(dx, dy)`
-   - `inset(dx, dy)`
+   - `inflate(dx, dy)`
    - `contains(x, y)`
    - `overlap(rect)`
-   - `clamp(rect)`
    - `union(rect)`
    - `intersection(rect)`
    
  * `collideRect(r0, r1, v)`
    <br> Clips the motion vector v so that the rect r0 doesn't
    intersect with the rect r1.
-
- * `image2array(img)`
-   <br> Converts an image to 2D array.
+   
+ * `new Box(origin, size)`
+   <br> A box object.
+   
+   - `equals(box)`
+   - `center()`
+   - `copy()`
+   - `move(dx, dy, dz)`
+   - `inflate(dx, dy, dz)`
+   - `contains(p)`
+   - `overlap(box)`
+   - `union(box)`
+   - `intersection(box)`
