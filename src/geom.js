@@ -269,3 +269,107 @@ Box.prototype.intersection = function (box)
   return new Box(new Vec3(x0, y0, z0),
 		 new Vec3(x1-x0, y1-y0, z1-z0));
 };
+
+Box.prototype.collide = function (box, v)
+{
+  var x0 = box.origin.x;
+  var x1 = box.origin.x+box.size.x;
+  var y0 = box.origin.y;
+  var y1 = box.origin.y+box.size.y;
+  var z0 = box.origin.z;
+  var z1 = box.origin.z+box.size.z;
+  var dx, dy, dz;
+  var x, y, z;
+  
+  // YZ plane
+  do {
+    if (0 < v.x) {
+      x = this.origin.x+this.size.x;
+    } else if (v.x < 0) {
+      x = this.origin.x;
+    } else {
+      break;
+    }
+    if (x <= x0 && x0 < x+v.x) {
+      dx = x0 - x;
+    } else if (x1 <= x && x+v.x < x1) {
+      dx = x1 - x;
+    } else {
+      break;
+    }
+    dy = v.y*dx / v.x;
+    dz = v.z*dx / v.x;
+    var y = this.origin.y+dy;
+    var z = this.origin.z+dz;
+    if ((v.y <= 0 && y+this.size.y <= y0) || (0 <= v.y && y1 <= y) ||
+	(v.z <= 0 && z+this.size.z <= z0) || (0 <= v.z && z1 <= z) ||
+	!rect.overlap(new Rectangle(y, z, this.size.y, this.size.z))) {
+      break;
+    }
+    v.x = dx;
+    v.y = dy;
+    v.z = dz;
+  } while (false);
+
+  // ZX plane
+  do {
+    if (0 < v.y) {
+      y = this.origin.y+this.size.y;
+    } else if (v.y < 0) {
+      y = this.origin.y;
+    } else {
+      break;
+    }
+    if (y <= y0 && y0 < y+v.y) {
+      dy = y0 - y;
+    } else if (y1 <= y && y+v.y < y1) {
+      dy = y1 - y;
+    } else {
+      break;
+    }
+    dz = v.z*dy / v.y;
+    dx = v.x*dy / v.y;
+    var z = this.origin.z+dz;
+    var x = this.origin.x+dx;
+    if ((v.z <= 0 && z+this.size.z <= z0) || (0 <= v.z && z1 <= z) ||
+	(v.x <= 0 && x+this.size.x <= x0) || (0 <= v.x && x1 <= x) ||
+	!rect.overlap(new Rectangle(z, x, this.size.z, this.size.x))) {
+      break;
+    }
+    v.x = dx;
+    v.y = dy;
+    v.z = dz;
+  } while (false);
+
+  // XY plane
+  do {
+    if (0 < v.z) {
+      z = this.origin.z+this.size.z;
+    } else if (v.z < 0) {
+      z = this.origin.z;
+    } else {
+      break;
+    }
+    if (z <= z0 && z0 < z+v.z) {
+      dz = z0 - z;
+    } else if (z1 <= z && z+v.z < z1) {
+      dz = z1 - z;
+    } else {
+      break;
+    }
+    dx = v.x*dz / v.z;
+    dy = v.y*dz / v.z;
+    var x = this.origin.x+dx;
+    var y = this.origin.y+dy;
+    if ((v.x <= 0 && x+this.size.x <= x0) || (0 <= v.x && x1 <= x) ||
+	(v.y <= 0 && y+this.size.y <= y0) || (0 <= v.y && y1 <= y) ||
+	!rect.overlap(new Rectangle(x, y, this.size.x, this.size.y))) {
+      break;
+    }
+    v.x = dx;
+    v.y = dy;
+    v.z = dz;
+  } while (false);
+
+  return v;
+};
