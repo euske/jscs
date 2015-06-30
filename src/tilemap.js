@@ -65,14 +65,30 @@ TileMap.prototype.apply = function (rect, f)
     rect = new Rectangle(0, 0, this.width, this.height);
   }
   for (var dy = 0; dy < rect.height; dy++) {
+    var y = rect.y+dy;
     for (var dx = 0; dx < rect.width; dx++) {
-      var x = rect.x+dx, y = rect.y+dy;
+      var x = rect.x+dx;
       if (f(x, y)) {
 	return new Vec2(x,y);
       }
     }
   }
-  return false;
+  return null;
+};
+
+TileMap.prototype.reduce = function (rect, f, v)
+{
+  if (rect === null) {
+    rect = new Rectangle(0, 0, this.width, this.height);
+  }
+  for (var dy = 0; dy < rect.height; dy++) {
+    var y = rect.y+dy;
+    for (var dx = 0; dx < rect.width; dx++) {
+      var x = rect.x+dx;
+      v = f(x, y, v);
+    }
+  }
+  return v;
 };
 
 TileMap.prototype.scroll = function (rect, vx, vy)
@@ -101,21 +117,16 @@ TileMap.prototype.collide = function (rect, v, f)
 {
   if (rect === null) return false;
   var ts = this.tilesize;
-  var r = rect.move(v.x, v.y).union(rect);
-  var x0 = Math.floor(r.x/ts);
-  var y0 = Math.floor(r.y/ts);
-  var x1 = Math.ceil((r.x+r.width)/ts);
-  var y1 = Math.ceil((r.y+r.height)/ts);
-  for (var y = y0; y < y1; y++) {
-    for (var x = x0; x < x1; x++) {
-      if (f(x, y)) {
-	var bounds = new Rectangle(x*ts, y*ts, ts, ts);
-	v = rect.collide(bounds, v);
-	// assert(!rect.move(v.x, v.y).overlap(bounds));
-      }
+  function ff(x, y, v) {
+    if (f(x, y)) {
+      var bounds = new Rectangle(x*ts, y*ts, ts, ts);
+      v = rect.collide(bounds, v);
+      // assert(!rect.move(v.x, v.y).overlap(bounds));
     }
+    return v;
   }
-  return v;
+  var r = rect.move(v.x, v.y).union(rect);
+  return this.reduce(this.coord2map(r), ff, v);
 };
 
 TileMap.prototype.getMove = function (rect, v, f)
