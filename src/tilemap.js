@@ -110,7 +110,7 @@ TileMap.prototype.collide = function (rect, v, f)
     for (var x = x0; x < x1; x++) {
       if (f(x, y)) {
 	var bounds = new Rectangle(x*ts, y*ts, ts, ts);
-	v = collideRect(bounds, rect, v);
+	v = rect.collide(bounds, v);
 	// assert(!rect.move(v.x, v.y).overlap(bounds));
       }
     }

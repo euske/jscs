@@ -129,70 +129,59 @@ Rectangle.prototype.intersection = function (rect)
   var y1 = Math.min(this.y+this.height, rect.y+rect.height);
   return new Rectangle(x0, y0, x1-x0, y1-y0);
 };
-
-// collideRect: 2D collision detection
-function collideHLine(x0, x1, y, rect, v)
+// collide: 2D collision detection
+Rectangle.prototype.collide = function (rect, v)
 {
   var left = rect.x;
   var right = rect.x+rect.width;
   var top = rect.y;
   var bottom = rect.y+rect.height;
-  var dy;
-  if (y <= top && top < y+v.y) {
-    dy = top - y;
-  } else if (bottom <= y && y+v.y < bottom) {
-    dy = bottom - y;
-  } else {
-    return v;
+  var dx, dy;
+  
+  while (v.x != 0) {
+    var x = (0 < v.x)? this.x+this.width : this.x;
+    if (x <= left && left < x+v.x) {
+      dx = left - x;
+    } else if (right <= x && x+v.x < right) {
+      dx = right - x;
+    } else {
+      break;
+    }
+    dy = v.y*dx / v.x;
+    var y = this.y+dy;
+    if ((v.y <= 0 && y+this.height <= top) ||
+	(0 <= v.y && bottom <= y) ||
+	(y+this.height < top || bottom < y)) {
+      break;
+    }
+    v.x = dx;
+    v.y = dy;
+    break;
   }
-  // assert(v.y != 0);
-  var dx = v.x*dy / v.y;
-  if ((v.x <= 0 && x1+dx <= left) ||
-      (0 <= v.x && right <= x0+dx) ||
-      (x1+dx < left || right < x0+dx)) {
-    return v;
+  
+  while (v.y != 0) {
+    var y = (0 < v.y)? this.y+this.height : this.y;
+    if (y <= top && top < y+v.y) {
+      dy = top - y;
+    } else if (bottom <= y && y+v.y < bottom) {
+      dy = bottom - y;
+    } else {
+      break;
+    }
+    dx = v.x*dy / v.y;
+    var x = this.x+dx;
+    if ((v.x <= 0 && x+this.width <= left) ||
+	(0 <= v.x && right <= x) ||
+	(x+this.width < left || right < x)) {
+      break;
+    }
+    v.x = dx;
+    v.y = dy;
+    break;
   }
-  return new Vec2(dx, dy);
-}
 
-function collideVLine(y0, y1, x, rect, v)
-{
-  var left = rect.x;
-  var right = rect.x+rect.width;
-  var top = rect.y;
-  var bottom = rect.y+rect.height;
-  var dx;
-  if (x <= left && left < x+v.x) {
-    dx = left - x;
-  } else if (right <= x && x+v.x < right) {
-    dx = right - x;
-  } else {
-    return v;
-  }
-  // assert(v.x != 0);
-  var dy = v.y*dx / v.x;
-  if ((v.y <= 0 && y1+dy <= top) ||
-      (0 <= v.y && bottom <= y0+dy) ||
-      (y1+dy < top || bottom < y0+dy)) {
-    return v;
-  }
-  return new Vec2(dx, dy);
-}
-
-function collideRect(r0, r1, v)
-{
-  if (0 < v.x) {
-    v = collideVLine(r1.y, r1.y+r1.height, r1.x+r1.width, r0, v);
-  } else if (v.x < 0) {
-    v = collideVLine(r1.y, r1.y+r1.height, r1.x, r0, v);
-  }
-  if (0 < v.y) {
-    v = collideHLine(r1.x, r1.x+r1.width, r1.y+r1.height, r0, v);
-  } else if (v.y < 0) {
-    v = collideHLine(r1.x, r1.x+r1.width, r1.y, r0, v);
-  }
   return v;
-}
+};
 
 // Box
 function Box(origin, size)
@@ -269,4 +258,3 @@ Box.prototype.intersection = function (box)
   return new Box(new Vec3(x0, y0, z0),
 		 new Vec3(x1-x0, y1-y0, z1-z0));
 };
-
