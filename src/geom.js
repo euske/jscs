@@ -132,53 +132,64 @@ Rectangle.prototype.intersection = function (rect)
 // collide: 2D collision detection
 Rectangle.prototype.collide = function (rect, v)
 {
-  var left = rect.x;
-  var right = rect.x+rect.width;
-  var top = rect.y;
-  var bottom = rect.y+rect.height;
+  var x0 = rect.x;
+  var x1 = rect.x+rect.width;
+  var y0 = rect.y;
+  var y1 = rect.y+rect.height;
   var dx, dy;
+  var x, y;
   
-  while (v.x != 0) {
-    var x = (0 < v.x)? this.x+this.width : this.x;
-    if (x <= left && left < x+v.x) {
-      dx = left - x;
-    } else if (right <= x && x+v.x < right) {
-      dx = right - x;
+  do {
+    if (0 < v.x) {
+      x = this.x+this.width;
+    } else if (v.x < 0) {
+      x = this.x;
+    } else {
+      break;
+    }
+    if (x <= x0 && x0 < x+v.x) {
+      dx = x0 - x;
+    } else if (x1 <= x && x+v.x < x1) {
+      dx = x1 - x;
     } else {
       break;
     }
     dy = v.y*dx / v.x;
-    var y = this.y+dy;
-    if ((v.y <= 0 && y+this.height <= top) ||
-	(0 <= v.y && bottom <= y) ||
-	(y+this.height < top || bottom < y)) {
+    y = this.y+dy;
+    if ((v.y <= 0 && y+this.height <= y0) ||
+	(0 <= v.y && y1 <= y) ||
+	(y+this.height < y0 || y1 < y)) {
       break;
     }
     v.x = dx;
     v.y = dy;
-    break;
-  }
+  } while (false);
   
-  while (v.y != 0) {
-    var y = (0 < v.y)? this.y+this.height : this.y;
-    if (y <= top && top < y+v.y) {
-      dy = top - y;
-    } else if (bottom <= y && y+v.y < bottom) {
-      dy = bottom - y;
+  do {
+    if (0 < v.y) {
+      y = this.y+this.height;
+    } else if (v.y < 0) {
+      y = this.y;
+    } else {
+      break;
+    }
+    if (y <= y0 && y0 < y+v.y) {
+      dy = y0 - y;
+    } else if (y1 <= y && y+v.y < y1) {
+      dy = y1 - y;
     } else {
       break;
     }
     dx = v.x*dy / v.y;
-    var x = this.x+dx;
-    if ((v.x <= 0 && x+this.width <= left) ||
-	(0 <= v.x && right <= x) ||
-	(x+this.width < left || right < x)) {
+    x = this.x+dx;
+    if ((v.x <= 0 && x+this.width <= x0) ||
+	(0 <= v.x && x1 <= x) ||
+	(x+this.width < x0 || x1 < x)) {
       break;
     }
     v.x = dx;
     v.y = dy;
-    break;
-  }
+  } while (false);
 
   return v;
 };
