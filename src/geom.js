@@ -19,6 +19,14 @@ Vec2.prototype.copy = function ()
 {
   return new Vec2(this.x, this.y);
 };
+Vec2.prototype.add = function (v)
+{
+  return new Vec2(this.x+v.x, this.y+v.y);
+};
+Vec2.prototype.sub = function (v)
+{
+  return new Vec2(this.x-v.x, this.y-v.y);
+};
 Vec2.prototype.move = function (dx, dy)
 {
   return new Vec2(this.x+dx, this.y+dy);
@@ -43,9 +51,17 @@ Vec3.prototype.copy = function ()
 {
   return new Vec3(this.x, this.y, this.z);
 };
+Vec3.prototype.add = function (v)
+{
+  return new Vec3(this.x+v.x, this.y+v.y, this.z+v.z);
+};
+Vec3.prototype.sub = function (v)
+{
+  return new Vec3(this.x-v.x, this.y-v.y, this.z-v.z);
+};
 Vec3.prototype.move = function (dx, dy, dz)
 {
-  return new Point(this.x+dx, this.y+dy, this.z+dz);
+  return new Vec3(this.x+dx, this.y+dy, this.z+dz);
 };
 
 // Rectangle

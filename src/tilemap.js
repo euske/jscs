@@ -131,17 +131,13 @@ TileMap.prototype.collide = function (rect, v, f)
 
 TileMap.prototype.getMove = function (rect, v, f)
 {
-  var vx = v.x;
-  var vy = v.y;
-  var d1 = this.collide(rect, new Vec2(vx, vy), f);
+  var d1 = this.collide(rect, new Vec2(v.x, v.y), f);
   rect = rect.move(d1.x, d1.y);
-  vx -= d1.x;
-  vy -= d1.y;
-  var d2 = this.collide(rect, new Vec2(vx, 0), f);
+  v = v.sub(d1);
+  var d2 = this.collide(rect, new Vec2(v.x, 0), f);
   rect = rect.move(d2.x, d2.y);
-  vx -= d2.x;
-  vy -= d2.y;
-  var d3 = this.collide(rect, new Vec2(0, vy), f);
+  v = v.sub(d2);
+  var d3 = this.collide(rect, new Vec2(0, v.y), f);
   return new Vec2(d1.x+d2.x+d3.x, d1.y+d2.y+d3.y);
 };
 
