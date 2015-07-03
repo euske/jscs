@@ -270,106 +270,115 @@ Box.prototype.intersection = function (box)
 		 new Vec3(x1-x0, y1-y0, z1-z0));
 };
 
+Box.prototype.collideYZPlane = function (x, v, rect)
+{
+  var dx, dy, dz;
+  if (0 < v.x && this.origin.x+this.size.x <= x) {
+    dx = x-this.origin.x+this.size.x;
+  } else if (v.x < 0 && x <= this.origin.x) {
+    dx = x-this.origin.x;
+  } else {
+    return v;
+  }
+  dy = v.y*dx / v.x;
+  dz = v.z*dx / v.x;
+  if (rect != null) {
+    var y = this.origin.y+dy;
+    var z = this.origin.z+dz;
+    if ((v.y <= 0 && y+this.size.y <= rect.x) ||
+	(0 <= v.y && rect.x+rect.width <= y) ||
+	(v.z <= 0 && z+this.size.z <= rect.y) ||
+	(0 <= v.z && rect.y+rect.height <= z) ||
+	!rect.overlap(new Rectangle(y, z, this.size.y, this.size.z))) {
+      return v;
+    }
+  }
+  return new Vec3(dx, dy, dz);  
+}
+
+Box.prototype.collideZXPlane = function (y, v, rect)
+{
+  var dx, dy, dz;
+  if (0 < v.y && this.origin.y+this.size.y <= y) {
+    dy = y-this.origin.y+this.size.y;
+  } else if (v.y < 0 && y <= this.origin.y) {
+    dy = y-this.origin.y;
+  } else {
+    return v;
+  }
+  dz = v.z*dy / v.y;
+  dx = v.x*dy / v.y;
+  if (rect != null) {
+    var z = this.origin.z+dz;
+    var x = this.origin.x+dx;
+    if ((v.z <= 0 && z+this.size.z <= rect.x) ||
+	(0 <= v.z && rect.x+rect.width <= z) ||
+	(v.x <= 0 && x+this.size.x <= rect.y) ||
+	(0 <= v.x && rect.y+rect.height <= x) ||
+	!rect.overlap(new Rectangle(z, x, this.size.z, this.size.x))) {
+      return v;
+    }
+  }
+  return new Vec3(dx, dy, dz);  
+}
+
+Box.prototype.collideXYPlane = function (z, v, rect)
+{
+  var dx, dy, dz;
+  if (0 < v.z && this.origin.z+this.size.z <= z) {
+    dz = z-this.origin.z+this.size.z;
+  } else if (v.z < 0 && z <= this.origin.z) {
+    dz = z-this.origin.z;
+  } else {
+    return v;
+  }
+  dx = v.x*dz / v.z;
+  dy = v.y*dz / v.z;
+  if (rect != null) {
+    var x = this.origin.x+dx;
+    var y = this.origin.y+dy;
+    if ((v.x <= 0 && x+this.size.x <= rect.x) ||
+	(0 <= v.x && rect.x+rect.width <= x) ||
+	(v.y <= 0 && y+this.size.y <= rect.y) ||
+	(0 <= v.y && rect.y+rect.height <= y) ||
+	!rect.overlap(new Rectangle(x, y, this.size.x, this.size.y))) {
+      return v;
+    }
+  }
+  return new Vec3(dx, dy, dz);  
+}
+
 Box.prototype.collide = function (box, v)
 {
-  var x0 = box.origin.x;
-  var x1 = box.origin.x+box.size.x;
-  var y0 = box.origin.y;
-  var y1 = box.origin.y+box.size.y;
-  var z0 = box.origin.z;
-  var z1 = box.origin.z+box.size.z;
-  var dx, dy, dz;
-  var x, y, z;
+  if (0 < v.x) {
+    v = this.collideYZPlane(box.origin.x, v,
+			    new Rectangle(box.origin.y, box.origin.z,
+					  box.size.y, box.size.z));
+  } else if (v.x < 0) {
+    v = this.collideYZPlane(box.origin.x+box.size.x, v,
+			    new Rectangle(box.origin.y, box.origin.z,
+					  box.size.y, box.size.z));
+  }
+
+  if (0 < v.y) {
+    v = this.collideZXPlane(box.origin.y, v,
+			    new Rectangle(box.origin.z, box.origin.x,
+					  box.size.z, box.size.x));
+  } else if (v.y < 0) {
+    v = this.collideZXPlane(box.origin.y+box.size.y, v,
+			    new Rectangle(box.origin.z, box.origin.x,
+					  box.size.z, box.size.x));
+  }
   
-  // YZ plane
-  do {
-    if (0 < v.x) {
-      x = this.origin.x+this.size.x;
-    } else if (v.x < 0) {
-      x = this.origin.x;
-    } else {
-      break;
-    }
-    if (x <= x0 && x0 < x+v.x) {
-      dx = x0 - x;
-    } else if (x1 <= x && x+v.x < x1) {
-      dx = x1 - x;
-    } else {
-      break;
-    }
-    dy = v.y*dx / v.x;
-    dz = v.z*dx / v.x;
-    var y = this.origin.y+dy;
-    var z = this.origin.z+dz;
-    if ((v.y <= 0 && y+this.size.y <= y0) || (0 <= v.y && y1 <= y) ||
-	(v.z <= 0 && z+this.size.z <= z0) || (0 <= v.z && z1 <= z) ||
-	!rect.overlap(new Rectangle(y, z, this.size.y, this.size.z))) {
-      break;
-    }
-    v.x = dx;
-    v.y = dy;
-    v.z = dz;
-  } while (false);
-
-  // ZX plane
-  do {
-    if (0 < v.y) {
-      y = this.origin.y+this.size.y;
-    } else if (v.y < 0) {
-      y = this.origin.y;
-    } else {
-      break;
-    }
-    if (y <= y0 && y0 < y+v.y) {
-      dy = y0 - y;
-    } else if (y1 <= y && y+v.y < y1) {
-      dy = y1 - y;
-    } else {
-      break;
-    }
-    dz = v.z*dy / v.y;
-    dx = v.x*dy / v.y;
-    var z = this.origin.z+dz;
-    var x = this.origin.x+dx;
-    if ((v.z <= 0 && z+this.size.z <= z0) || (0 <= v.z && z1 <= z) ||
-	(v.x <= 0 && x+this.size.x <= x0) || (0 <= v.x && x1 <= x) ||
-	!rect.overlap(new Rectangle(z, x, this.size.z, this.size.x))) {
-      break;
-    }
-    v.x = dx;
-    v.y = dy;
-    v.z = dz;
-  } while (false);
-
-  // XY plane
-  do {
-    if (0 < v.z) {
-      z = this.origin.z+this.size.z;
-    } else if (v.z < 0) {
-      z = this.origin.z;
-    } else {
-      break;
-    }
-    if (z <= z0 && z0 < z+v.z) {
-      dz = z0 - z;
-    } else if (z1 <= z && z+v.z < z1) {
-      dz = z1 - z;
-    } else {
-      break;
-    }
-    dx = v.x*dz / v.z;
-    dy = v.y*dz / v.z;
-    var x = this.origin.x+dx;
-    var y = this.origin.y+dy;
-    if ((v.x <= 0 && x+this.size.x <= x0) || (0 <= v.x && x1 <= x) ||
-	(v.y <= 0 && y+this.size.y <= y0) || (0 <= v.y && y1 <= y) ||
-	!rect.overlap(new Rectangle(x, y, this.size.x, this.size.y))) {
-      break;
-    }
-    v.x = dx;
-    v.y = dy;
-    v.z = dz;
-  } while (false);
-
+  if (0 < v.z) {
+    v = this.collideZXPlane(box.origin.z, v,
+			    new Rectangle(box.origin.x, box.origin.y,
+					  box.size.x, box.size.y));
+  } else if (v.z < 0) {
+    v = this.collideZXPlane(box.origin.z+box.size.z, v,
+			    new Rectangle(box.origin.x, box.origin.y,
+					  box.size.x, box.size.y));
+  }
+  
   return v;
 };
