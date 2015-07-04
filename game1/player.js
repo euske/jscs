@@ -77,8 +77,7 @@ Player.prototype.move = function (vx, vy)
 {
   if (this.scene === null) return null;
   var tilemap = this.scene.tilemap;
-  var f = (function (x,y) { return T.isObstacle(tilemap.get(x,y)); });
-  var v = tilemap.getMove(this.hitbox, new Vec2(vx, vy), f);
+  var v = this.getMove(new Vec2(vx, vy));
   Actor.prototype.move.call(this, v.x, v.y);
   return v;
 };
@@ -91,13 +90,43 @@ Player.prototype.usermove = function (vx, vy)
   }
 }
 
+Player.prototype.collideTile = function (rect, v0)
+{
+  var tilemap = this.scene.tilemap;
+  var ts = tilemap.tilesize;
+  function f(x, y, v) {
+    if (T.isObstacle(tilemap.get(x, y))) {
+      var bounds = new Rectangle(x*ts, y*ts, ts, ts);
+      v = rect.collide(v, bounds);
+    }
+    return v;
+  }
+  var r = rect.move(v0.x, v0.y).union(rect);
+  return tilemap.reduce(tilemap.coord2map(r), f, v0);
+};
+
+Player.prototype.getMove = function (v)
+{
+  var rect = this.hitbox;
+  var d0 = this.collideTile(rect, v);
+  rect = rect.move(d0.x, d0.y);
+  v = v.sub(d0);
+  var d1 = this.collideTile(rect, new Vec2(v.x, 0));
+  rect = rect.move(d1.x, d1.y);
+  v = v.sub(d1);
+  var d2 = this.collideTile(rect, new Vec2(0, v.y));
+  return new Vec2(d0.x+d1.x+d2.x,
+		  d0.y+d1.y+d2.y);
+};
+
 Player.prototype.jump = function (jumping)
 {
   if (this.scene === null) return;
   var tilemap = this.scene.tilemap;
   var f = (function (x,y) { return T.isObstacle(tilemap.get(x,y)); });
   if (jumping) {
-    var d = tilemap.collide(this.hitbox, new Vec2(0, this._gy), f);
+    var v = new Vec2(0, this._gy);
+    var d = this.collideTile(this.hitbox, v);
     if (0 < this._gy && d.y == 0) {
       this._gy = this.jumpacc;
       this._jumpt = 0;

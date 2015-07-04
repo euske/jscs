@@ -147,7 +147,7 @@ Player.prototype.jump = function (jumping)
   if (this.scene === null) return;
   if (jumping) {
     var p = new Vec3(this.hitbox.x, this.hitbox.y, this.z);
-    var v = new Vec3(0, 0, this.gravity);
+    var v = new Vec3(0, 0, this._gz);
     var d = this.collideTile(p, v);
     if (this._gz < 0 && d.z == 0) {
       this._gz = this.jumpacc;

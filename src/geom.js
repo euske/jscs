@@ -146,8 +146,10 @@ Rectangle.prototype.intersection = function (rect)
   return new Rectangle(x0, y0, x1-x0, y1-y0);
 };
 // collide: 2D collision detection
-Rectangle.prototype.collide = function (rect, v)
+Rectangle.prototype.collide = function (v, rect)
 {
+  assert(!this.overlap(rect), "rect overlapped");
+  
   var x0 = rect.x;
   var x1 = rect.x+rect.width;
   var y0 = rect.y;
@@ -177,8 +179,7 @@ Rectangle.prototype.collide = function (rect, v)
 	(y+this.height < y0 || y1 < y)) {
       break;
     }
-    v.x = dx;
-    v.y = dy;
+    v = new Vec2(dx,dy);
   } while (false);
   
   do {
@@ -203,8 +204,7 @@ Rectangle.prototype.collide = function (rect, v)
 	(x+this.width < x0 || x1 < x)) {
       break;
     }
-    v.x = dx;
-    v.y = dy;
+    v = new Vec2(dx,dy);
   } while (false);
 
   return v;
