@@ -286,13 +286,15 @@ Box.prototype.intersection = function (box)
 		 new Vec3(x1-x0, y1-y0, z1-z0));
 };
 
-Box.prototype.collideYZPlane = function (x, v, rect)
+Box.prototype.collideYZPlane = function (v, x, rect)
 {
   var dx, dy, dz;
-  if (0 < v.x && this.origin.x+this.size.x <= x) {
-    dx = x-this.origin.x+this.size.x;
-  } else if (v.x < 0 && x <= this.origin.x) {
-    dx = x-this.origin.x;
+  var x0 = this.origin.x;
+  var x1 = this.origin.x+this.size.x;
+  if (x <= x0 && x0+v.x < x) {
+    dx = x-x0;
+  } else if (x1 <= x && x < x1+v.x) {
+    dx = x-x1;
   } else {
     return v;
   }
@@ -301,24 +303,23 @@ Box.prototype.collideYZPlane = function (x, v, rect)
   if (rect != null) {
     var y = this.origin.y+dy;
     var z = this.origin.z+dz;
-    if ((v.y <= 0 && y+this.size.y <= rect.x) ||
-	(0 <= v.y && rect.x+rect.width <= y) ||
-	(v.z <= 0 && z+this.size.z <= rect.y) ||
-	(0 <= v.z && rect.y+rect.height <= z) ||
-	!rect.overlap(new Rectangle(y, z, this.size.y, this.size.z))) {
+    if (y+this.size.y < rect.x || rect.x+rect.width < y ||
+	z+this.size.z < rect.y || rect.y+rect.height < z) {
       return v;
     }
   }
-  return new Vec3(dx, dy, dz);  
+  return new Vec3(dx, dy, dz);
 }
 
-Box.prototype.collideZXPlane = function (y, v, rect)
+Box.prototype.collideZXPlane = function (v, y, rect)
 {
   var dx, dy, dz;
-  if (0 < v.y && this.origin.y+this.size.y <= y) {
-    dy = y-this.origin.y+this.size.y;
-  } else if (v.y < 0 && y <= this.origin.y) {
-    dy = y-this.origin.y;
+  var y0 = this.origin.y;
+  var y1 = this.origin.y+this.size.y;
+  if (y <= y0 && y0+v.y < y) {
+    dy = y-y0;
+  } else if (y1 <= y && y < y1+v.y) {
+    dy = y-y1;
   } else {
     return v;
   }
@@ -327,24 +328,23 @@ Box.prototype.collideZXPlane = function (y, v, rect)
   if (rect != null) {
     var z = this.origin.z+dz;
     var x = this.origin.x+dx;
-    if ((v.z <= 0 && z+this.size.z <= rect.x) ||
-	(0 <= v.z && rect.x+rect.width <= z) ||
-	(v.x <= 0 && x+this.size.x <= rect.y) ||
-	(0 <= v.x && rect.y+rect.height <= x) ||
-	!rect.overlap(new Rectangle(z, x, this.size.z, this.size.x))) {
+    if (z+this.size.z < rect.x || rect.x+rect.width < z ||
+	x+this.size.x < rect.y || rect.y+rect.height < x) {
       return v;
     }
   }
   return new Vec3(dx, dy, dz);  
 }
 
-Box.prototype.collideXYPlane = function (z, v, rect)
+Box.prototype.collideXYPlane = function (v, z, rect)
 {
   var dx, dy, dz;
-  if (0 < v.z && this.origin.z+this.size.z <= z) {
-    dz = z-this.origin.z+this.size.z;
-  } else if (v.z < 0 && z <= this.origin.z) {
-    dz = z-this.origin.z;
+  var z0 = this.origin.z;
+  var z1 = this.origin.z+this.size.z;
+  if (z <= z0 && z0+v.z < z) {
+    dz = z-z0;
+  } else if (z1 <= z && z < z1+v.z) {
+    dz = z-z1;
   } else {
     return v;
   }
@@ -353,45 +353,42 @@ Box.prototype.collideXYPlane = function (z, v, rect)
   if (rect != null) {
     var x = this.origin.x+dx;
     var y = this.origin.y+dy;
-    if ((v.x <= 0 && x+this.size.x <= rect.x) ||
-	(0 <= v.x && rect.x+rect.width <= x) ||
-	(v.y <= 0 && y+this.size.y <= rect.y) ||
-	(0 <= v.y && rect.y+rect.height <= y) ||
-	!rect.overlap(new Rectangle(x, y, this.size.x, this.size.y))) {
+    if (x+this.size.x < rect.x || rect.x+rect.width < x ||
+	y+this.size.y < rect.y || rect.y+rect.height < y) {
       return v;
     }
   }
   return new Vec3(dx, dy, dz);  
 }
 
-Box.prototype.collide = function (box, v)
+Box.prototype.collide = function (v, box)
 {
   if (0 < v.x) {
-    v = this.collideYZPlane(box.origin.x, v,
+    v = this.collideYZPlane(v, box.origin.x, 
 			    new Rectangle(box.origin.y, box.origin.z,
 					  box.size.y, box.size.z));
   } else if (v.x < 0) {
-    v = this.collideYZPlane(box.origin.x+box.size.x, v,
+    v = this.collideYZPlane(v, box.origin.x+box.size.x, 
 			    new Rectangle(box.origin.y, box.origin.z,
 					  box.size.y, box.size.z));
   }
 
   if (0 < v.y) {
-    v = this.collideZXPlane(box.origin.y, v,
+    v = this.collideZXPlane(v, box.origin.y, 
 			    new Rectangle(box.origin.z, box.origin.x,
 					  box.size.z, box.size.x));
   } else if (v.y < 0) {
-    v = this.collideZXPlane(box.origin.y+box.size.y, v,
+    v = this.collideZXPlane(v, box.origin.y+box.size.y, 
 			    new Rectangle(box.origin.z, box.origin.x,
 					  box.size.z, box.size.x));
   }
   
   if (0 < v.z) {
-    v = this.collideZXPlane(box.origin.z, v,
+    v = this.collideZXPlane(v, box.origin.z, 
 			    new Rectangle(box.origin.x, box.origin.y,
 					  box.size.x, box.size.y));
   } else if (v.z < 0) {
-    v = this.collideZXPlane(box.origin.z+box.size.z, v,
+    v = this.collideZXPlane(v, box.origin.z+box.size.z, 
 			    new Rectangle(box.origin.x, box.origin.y,
 					  box.size.x, box.size.y));
   }
