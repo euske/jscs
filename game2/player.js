@@ -85,7 +85,7 @@ Player.prototype.render = function (ctx, x, y)
 		x, y, w, h);
   ctx.drawImage(sprites,
 		this.tileno*tw, tw-h, w, h,
-		x, y-this.z, w, h);
+		x, y-this.z/2, w, h);
 };
 
 Player.prototype.move = function (vx, vy)
@@ -93,16 +93,15 @@ Player.prototype.move = function (vx, vy)
   if (this.scene === null) return null;
   var v = this.getMove(new Vec3(vx, vy, this._gz));
   Actor.prototype.move.call(this, v.x, v.y);
-  this.z += v.z;
   return v;
 };
 
 Player.prototype.usermove = function (vx, vy)
 {
-  var v = this.move(vx*this.speed, vy*this.speed);
-  if (v !== null) {
-    this._gz = v.z;
-  }
+  var v = this.getMove(new Vec3(vx*this.speed, vy*this.speed, this._gz));
+  Actor.prototype.move.call(this, v.x, v.y);
+  this.z += v.z;
+  this._gz = v.z;
 }
 
 Player.prototype.collideTile = function (p, v0)
@@ -118,7 +117,8 @@ Player.prototype.collideTile = function (p, v0)
     }
     return v;
   }
-  var r = this.hitbox.move(v0.x, v0.y).union(this.hitbox);
+  var r = box.movev(v0).union(box);
+  r = new Rectangle(r.origin.x, r.origin.y, r.size.x, r.size.y);
   v0 = tilemap.reduce(tilemap.coord2map(r), f, v0);
   v0 = box.collideXYPlane(v0, 0, null);
   return v0;

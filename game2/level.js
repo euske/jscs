@@ -38,6 +38,7 @@ Level1.prototype.render = function (ctx, bx, by)
     var obj = this.sprites[i];
     if (obj.scene !== this) continue;
     if (obj.bounds === null) continue;
+    if (obj instanceof Player && tilesize/2 < obj.z) continue;
     var bounds = obj.bounds;
     if (bounds.overlap(window)) {
       var x = Math.floor((bounds.x+bounds.width/2)/tilesize);
@@ -75,6 +76,11 @@ Level1.prototype.render = function (ctx, bx, by)
     if (obj.scene !== this) continue;
     if (obj.bounds === null) {
       obj.render(ctx, bx, by);
+    } else if (obj instanceof Player && tilesize/2 < obj.z) {
+      var bounds = obj.bounds;
+      if (bounds.overlap(window)) {
+	obj.render(ctx, bx+bounds.x-window.x, by+bounds.y-window.y);
+      }
     }
   }
 };
