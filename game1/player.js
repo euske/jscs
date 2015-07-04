@@ -90,35 +90,6 @@ Player.prototype.usermove = function (vx, vy)
   }
 }
 
-Player.prototype.collideTile = function (rect, v0)
-{
-  var tilemap = this.scene.tilemap;
-  var ts = tilemap.tilesize;
-  function f(x, y, v) {
-    if (T.isObstacle(tilemap.get(x, y))) {
-      var bounds = new Rectangle(x*ts, y*ts, ts, ts);
-      v = rect.collide(v, bounds);
-    }
-    return v;
-  }
-  var r = rect.move(v0.x, v0.y).union(rect);
-  return tilemap.reduce(tilemap.coord2map(r), f, v0);
-};
-
-Player.prototype.getMove = function (v)
-{
-  var rect = this.hitbox;
-  var d0 = this.collideTile(rect, v);
-  rect = rect.move(d0.x, d0.y);
-  v = v.sub(d0);
-  var d1 = this.collideTile(rect, new Vec2(v.x, 0));
-  rect = rect.move(d1.x, d1.y);
-  v = v.sub(d1);
-  var d2 = this.collideTile(rect, new Vec2(0, v.y));
-  return new Vec2(d0.x+d1.x+d2.x,
-		  d0.y+d1.y+d2.y);
-};
-
 Player.prototype.jump = function (jumping)
 {
   if (this.scene === null) return;
@@ -144,4 +115,33 @@ Player.prototype.pick = function (a)
   // show a particle.
   var particle = new FixedSprite(a.bounds, this.scene.game.framerate, S.YAY);
   this.scene.addObject(particle);
+};
+
+Player.prototype.getMove = function (v)
+{
+  var rect = this.hitbox;
+  var d0 = this.collideTile(rect, v);
+  rect = rect.move(d0.x, d0.y);
+  v = v.sub(d0);
+  var d1 = this.collideTile(rect, new Vec2(v.x, 0));
+  rect = rect.move(d1.x, d1.y);
+  v = v.sub(d1);
+  var d2 = this.collideTile(rect, new Vec2(0, v.y));
+  return new Vec2(d0.x+d1.x+d2.x,
+		  d0.y+d1.y+d2.y);
+};
+
+Player.prototype.collideTile = function (rect, v0)
+{
+  var tilemap = this.scene.tilemap;
+  var ts = tilemap.tilesize;
+  function f(x, y, v) {
+    if (T.isObstacle(tilemap.get(x, y))) {
+      var bounds = new Rectangle(x*ts, y*ts, ts, ts);
+      v = rect.collide(v, bounds);
+    }
+    return v;
+  }
+  var r = rect.move(v0.x, v0.y).union(rect);
+  return tilemap.reduce(tilemap.coord2map(r), f, v0);
 };
