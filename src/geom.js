@@ -146,67 +146,63 @@ Rectangle.prototype.intersection = function (rect)
   return new Rectangle(x0, y0, x1-x0, y1-y0);
 };
 // collide: 2D collision detection
+
+Rectangle.prototype.collideVLine = function (v, x, y0, y1)
+{
+  var dx, dy;
+  var x0 = this.x;
+  var x1 = this.x+this.width;
+  if (x <= x0 && x0+v.x < x) {
+    dx = x-x0;
+  } else if (x1 <= x && x < x1+v.x) {
+    dx = x-x1;
+  } else {
+    return v;
+  }
+  dy = v.y*dx / v.x;
+  y = this.y+dy;
+  if (y+this.height < y0 || y1 < y) {
+    return v;
+  }
+  return new Vec2(dx, dy);
+};
+
+Rectangle.prototype.collideHLine = function (v, y, x0, x1)
+{
+  var dx, dy;
+  var y0 = this.y;
+  var y1 = this.y+this.height;
+  if (y <= y0 && y0+v.y < y) {
+    dy = y-y0;
+  } else if (y1 <= y && y < y1+v.y) {
+    dy = y-y1;
+  } else {
+    return v;
+  }
+  dx = v.x*dy / v.y;
+  x = this.x+dx;
+  if (x+this.height < x0 || x1 < x) {
+    return v;
+  }
+  return new Vec2(dx, dy);
+};
+
 Rectangle.prototype.collide = function (v, rect)
 {
   assert(!this.overlap(rect), "rect overlapped");
   
-  var x0 = rect.x;
-  var x1 = rect.x+rect.width;
-  var y0 = rect.y;
-  var y1 = rect.y+rect.height;
-  var dx, dy;
-  var x, y;
-  
-  do {
-    if (0 < v.x) {
-      x = this.x+this.width;
-    } else if (v.x < 0) {
-      x = this.x;
-    } else {
-      break;
-    }
-    if (x <= x0 && x0 < x+v.x) {
-      dx = x0 - x;
-    } else if (x1 <= x && x+v.x < x1) {
-      dx = x1 - x;
-    } else {
-      break;
-    }
-    dy = v.y*dx / v.x;
-    y = this.y+dy;
-    if ((v.y <= 0 && y+this.height <= y0) ||
-	(0 <= v.y && y1 <= y) ||
-	(y+this.height < y0 || y1 < y)) {
-      break;
-    }
-    v = new Vec2(dx,dy);
-  } while (false);
-  
-  do {
-    if (0 < v.y) {
-      y = this.y+this.height;
-    } else if (v.y < 0) {
-      y = this.y;
-    } else {
-      break;
-    }
-    if (y <= y0 && y0 < y+v.y) {
-      dy = y0 - y;
-    } else if (y1 <= y && y+v.y < y1) {
-      dy = y1 - y;
-    } else {
-      break;
-    }
-    dx = v.x*dy / v.y;
-    x = this.x+dx;
-    if ((v.x <= 0 && x+this.width <= x0) ||
-	(0 <= v.x && x1 <= x) ||
-	(x+this.width < x0 || x1 < x)) {
-      break;
-    }
-    v = new Vec2(dx,dy);
-  } while (false);
+  if (0 < v.x) {
+    v = this.collideVLine(v, rect.x, rect.y, rect.y+rect.height);
+  } else if (v.x < 0) {
+    v = this.collideVLine(v, rect.x+rect.width, rect.y, rect.y+rect.height);
+  }
 
+  if (0 < v.y) {
+    v = this.collideHLine(v, rect.y, rect.x, rect.x+rect.width);
+  } else if (v.y < 0) {
+    v = this.collideHLine(v, rect.y+rect.height, rect.x, rect.x+rect.width);
+  }
+  
   return v;
 };
 
