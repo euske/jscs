@@ -235,6 +235,10 @@ Box.prototype.move = function (dx, dy, dz)
 {
   return new Box(this.origin.move(dx, dy, dz), this.size);
 };
+Box.prototype.movev = function (v)
+{
+  return new Box(this.origin.add(v), this.size);
+};
 Box.prototype.inflate = function (dx, dy, dz)
 {
   var cx = this.origin.x+this.size.x/2;
@@ -264,11 +268,14 @@ Box.prototype.overlap = function (box)
 };
 Box.prototype.union = function (box)
 {
-  var x0 = Math.min(this.x, rect.x);
-  var y0 = Math.min(this.y, rect.y);
-  var x1 = Math.max(this.x+this.width, rect.x+rect.width);
-  var y1 = Math.max(this.y+this.height, rect.y+rect.height);
-  return new Rectangle(x0, y0, x1-x0, y1-y0);
+  var x0 = Math.min(this.origin.x, box.origin.x);
+  var y0 = Math.min(this.origin.y, box.origin.y);
+  var z0 = Math.min(this.origin.z, box.origin.z);
+  var x1 = Math.max(this.origin.x+this.size.x, box.origin.x+box.size.x);
+  var y1 = Math.max(this.origin.y+this.size.y, box.origin.y+box.size.y);
+  var z1 = Math.max(this.origin.z+this.size.z, box.origin.z+box.size.z);
+  return new Box(new Vec3(x0, y0, z0),
+		 new Vec3(x1-x0, y1-y0, z1-z0));
 };
 Box.prototype.intersection = function (box)
 {
@@ -382,11 +389,11 @@ Box.prototype.collide = function (v, box)
   }
   
   if (0 < v.z) {
-    v = this.collideZXPlane(v, box.origin.z, 
+    v = this.collideXYPlane(v, box.origin.z, 
 			    new Rectangle(box.origin.x, box.origin.y,
 					  box.size.x, box.size.y));
   } else if (v.z < 0) {
-    v = this.collideZXPlane(v, box.origin.z+box.size.z, 
+    v = this.collideXYPlane(v, box.origin.z+box.size.z, 
 			    new Rectangle(box.origin.x, box.origin.y,
 					  box.size.x, box.size.y));
   }
