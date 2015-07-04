@@ -9,6 +9,14 @@ function log(x)
   }
 }
 
+// assert(x, msg): throw an exception if the condition is not met.
+function assert(x, msg)
+{
+  if (!x) {
+    throw new Error(msg);
+  }
+}
+
 // clamp(v0, v, v1): limit the value within v0-v1.
 function clamp(v0, v, v1)
 {

@@ -363,6 +363,8 @@ Box.prototype.collideXYPlane = function (v, z, rect)
 
 Box.prototype.collide = function (v, box)
 {
+  assert(!this.overlap(box), "box overlapped");
+  
   if (0 < v.x) {
     v = this.collideYZPlane(v, box.origin.x, 
 			    new Rectangle(box.origin.y, box.origin.z,
