@@ -164,6 +164,10 @@ Rectangle.prototype.collideVLine = function (v, x, y0, y1)
   if (y+this.height < y0 || y1 < y) {
     return v;
   }
+  y += v.y;
+  if (y+this.height <= y0 || y1 <= y) {
+    return v;
+  }
   return new Vec2(dx, dy);
 };
 
@@ -182,6 +186,10 @@ Rectangle.prototype.collideHLine = function (v, y, x0, x1)
   dx = v.x*dy / v.y;
   x = this.x+dx;
   if (x+this.height < x0 || x1 < x) {
+    return v;
+  }
+  x += v.x;
+  if (x+this.height <= x0 || x1 <= x) {
     return v;
   }
   return new Vec2(dx, dy);
@@ -310,6 +318,12 @@ Box.prototype.collideYZPlane = function (v, x, rect)
 	z+this.size.z < rect.y || rect.y+rect.height < z) {
       return v;
     }
+    y += v.y;
+    z += v.z;
+    if (y+this.size.y <= rect.x || rect.x+rect.width <= y ||
+	z+this.size.z <= rect.y || rect.y+rect.height <= z) {
+      return v;
+    }
   }
   return new Vec3(dx, dy, dz);
 }
@@ -335,6 +349,12 @@ Box.prototype.collideZXPlane = function (v, y, rect)
 	x+this.size.x < rect.y || rect.y+rect.height < x) {
       return v;
     }
+    z += v.z;
+    x += v.x;
+    if (z+this.size.z <= rect.x || rect.x+rect.width <= z ||
+	x+this.size.x <= rect.y || rect.y+rect.height <= x) {
+      return v;
+    }
   }
   return new Vec3(dx, dy, dz);  
 }
@@ -358,6 +378,12 @@ Box.prototype.collideXYPlane = function (v, z, rect)
     var y = this.origin.y+dy;
     if (x+this.size.x < rect.x || rect.x+rect.width < x ||
 	y+this.size.y < rect.y || rect.y+rect.height < y) {
+      return v;
+    }
+    x += v.x;
+    y += v.y;
+    if (x+this.size.x <= rect.x || rect.x+rect.width <= x ||
+	y+this.size.y <= rect.y || rect.y+rect.height <= y) {
       return v;
     }
   }
