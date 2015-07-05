@@ -13,7 +13,7 @@ T = {
   NONE: 0,
   BLOCK: 1,
   COLLECTIBLE: 2,
+  WALL: 3,
   
-  isObstacle: function (c) { return (c < 0 || c == T.BLOCK); },
-  isCollectible: function (c) { return (c == T.COLLECTIBLE); },
+  isObstacle: function (c) { return (c < 0 || c == T.WALL); },
 };

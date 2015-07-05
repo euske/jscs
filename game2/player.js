@@ -98,10 +98,11 @@ Player.prototype.move = function (vx, vy)
 
 Player.prototype.usermove = function (vx, vy)
 {
-  var v = this.getMove(new Vec3(vx*this.speed, vy*this.speed, this._gz));
-  Actor.prototype.move.call(this, v.x, v.y);
-  this.z += v.z;
-  this._gz = v.z;
+  var v = this.move(vx*this.speed, vy*this.speed);
+  if (v !== null) {
+    this.z += v.z;
+    this._gz = v.z;
+  }
 }
 
 Player.prototype.collideTile = function (p, v0)

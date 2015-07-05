@@ -123,8 +123,9 @@ TileMap.prototype.getRange = function (f)
   return map;
 }
 
-TileMap.prototype.render = function (ctx, tiles, ft, 
-				     bx, by, x0, y0, w, h)
+TileMap.prototype.renderFromBottomLeft =
+  function (ctx, tiles, ft, 
+	    bx, by, x0, y0, w, h)
 {
   // Align the pos to the bottom left corner.
   var ts = this.tilesize;
@@ -133,6 +134,27 @@ TileMap.prototype.render = function (ctx, tiles, ft,
   // Draw tiles from the bottom-left first.
   for (var dy = h-1; 0 <= dy; dy--) {
     for (var dx = 0; dx < w; dx++) {
+      var c = ft(x0+dx, y0+dy);
+      if (0 <= c) {
+	ctx.drawImage(tiles,
+		      tw*c, 0, tw, tw,
+		      bx+ts*dx, by+ts*dy, tw, tw);
+      }
+    }
+  }
+};
+
+TileMap.prototype.renderFromTopRight =
+  function (ctx, tiles, ft, 
+	    bx, by, x0, y0, w, h)
+{
+  // Align the pos to the bottom left corner.
+  var ts = this.tilesize;
+  var tw = tiles.height;
+  by = by+ts-tw;
+  // Draw tiles from the top-right first.
+  for (var dy = 0; dy < h; dy++) {
+    for (var dx = w-1; 0 <= dx; dx--) {
       var c = ft(x0+dx, y0+dy);
       if (0 <= c) {
 	ctx.drawImage(tiles,

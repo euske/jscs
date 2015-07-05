@@ -65,10 +65,9 @@ Level1.prototype.render = function (ctx, bx, by)
     var c = tilemap.get(x,y);
     return (c == T.NONE? -1 : c);
   };
-  tilemap.render(ctx,
-		 this.game.tiles, ft, 
-		 bx+fx, by+fy,
-		 x0, y0, x1-x0+1, y1-y0+1);
+  tilemap.renderFromTopRight(
+    ctx, this.game.tiles, ft, 
+    bx+fx, by+fy, x0, y0, x1-x0+1, y1-y0+1);
 
   // Draw floating objects.
   for (var i = 0; i < this.sprites.length; i++) {
@@ -92,11 +91,11 @@ Level1.prototype.scrollTile = function (vx, vy)
     for (var y = 0; y < this.tilemap.height; y++) {
       this.tilemap.set(x, y, T.NONE);
     }
-    this.tilemap.set(x, 0, T.BLOCK);
-    this.tilemap.set(x, this.tilemap.height-1, T.BLOCK);
+    this.tilemap.set(x, 0, T.WALL);
+    this.tilemap.set(x, this.tilemap.height-1, T.WALL);
     if (rnd(3) == 0) {
       var y = rnd(1, this.tilemap.height-1);
-      this.tilemap.set(x, y, T.BLOCK);
+      this.tilemap.set(x, y, T.WALL);
     }
     if (rnd(3) == 0) {
       var y = rnd(1, this.tilemap.height-1);
@@ -159,7 +158,7 @@ Level1.prototype.init = function ()
   for (var y = 0; y < map.length; y++) {
     var row = new Array(11);
     for (var x = 0; x < row.length; x++) {
-      row[x] = (y == 0 || y == map.length-1)? T.BLOCK : T.NONE;
+      row[x] = (y == 0 || y == map.length-1)? T.WALL : T.NONE;
     }
     //row[7] = 1;
     map[y] = row;

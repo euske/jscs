@@ -86,10 +86,9 @@ Level1.prototype.render = function (ctx, bx, by)
     var c = tilemap.get(x,y);
     return (c == T.NONE? -1 : c);
   };
-  tilemap.render(ctx,
-		 this.game.tiles, ft, 
-		 bx+fx, by+fy,
-		 x0, y0, x1-x0+1, y1-y0+1);
+  tilemap.renderFromBottomLeft(
+    ctx, this.game.tiles, ft, 
+    bx+fx, by+fy, x0, y0, x1-x0+1, y1-y0+1);
 
   // Draw floating objects.
   for (var i = 0; i < this.sprites.length; i++) {
