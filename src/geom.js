@@ -161,11 +161,9 @@ Rectangle.prototype.collideVLine = function (v, x, y0, y1)
   }
   dy = v.y*dx / v.x;
   y = this.y+dy;
-  if (y+this.height < y0 || y1 < y) {
-    return v;
-  }
-  y += v.y;
-  if (y+this.height <= y0 || y1 <= y) {
+  if (y+this.height < y0 || y1 < y ||
+      (y+this.height == y0 && v.y <= 0) ||
+      (y1 == y && 0 <= v.y)) {
     return v;
   }
   return new Vec2(dx, dy);
@@ -185,11 +183,9 @@ Rectangle.prototype.collideHLine = function (v, y, x0, x1)
   }
   dx = v.x*dy / v.y;
   x = this.x+dx;
-  if (x+this.height < x0 || x1 < x) {
-    return v;
-  }
-  x += v.x;
-  if (x+this.height <= x0 || x1 <= x) {
+  if (x+this.width < x0 || x1 < x ||
+      (x+this.width == x0 && v.x <= 0) ||
+      (x1 == x && 0 <= v.x)) {
     return v;
   }
   return new Vec2(dx, dy);
@@ -210,7 +206,8 @@ Rectangle.prototype.collide = function (v, rect)
   } else if (v.y < 0) {
     v = this.collideHLine(v, rect.y+rect.height, rect.x, rect.x+rect.width);
   }
-  
+
+  assert(!this.move(v.x,v.y).overlap(rect), "rect overlapped 2");
   return v;
 };
 
@@ -315,13 +312,11 @@ Box.prototype.collideYZPlane = function (v, x, rect)
     var y = this.origin.y+dy;
     var z = this.origin.z+dz;
     if (y+this.size.y < rect.x || rect.x+rect.width < y ||
-	z+this.size.z < rect.y || rect.y+rect.height < z) {
-      return v;
-    }
-    y += v.y;
-    z += v.z;
-    if (y+this.size.y <= rect.x || rect.x+rect.width <= y ||
-	z+this.size.z <= rect.y || rect.y+rect.height <= z) {
+	z+this.size.z < rect.y || rect.y+rect.height < z ||
+	(y+this.size.y == rect.x && v.y <= 0) ||
+	(rect.x+rect.width == y && 0 <= v.y) ||
+	(z+this.size.z == rect.y && v.z <= 0) ||
+	(rect.y+rect.height == z && 0 <= v.z)) {
       return v;
     }
   }
@@ -346,13 +341,11 @@ Box.prototype.collideZXPlane = function (v, y, rect)
     var z = this.origin.z+dz;
     var x = this.origin.x+dx;
     if (z+this.size.z < rect.x || rect.x+rect.width < z ||
-	x+this.size.x < rect.y || rect.y+rect.height < x) {
-      return v;
-    }
-    z += v.z;
-    x += v.x;
-    if (z+this.size.z <= rect.x || rect.x+rect.width <= z ||
-	x+this.size.x <= rect.y || rect.y+rect.height <= x) {
+	x+this.size.x < rect.y || rect.y+rect.height < x ||
+	(z+this.size.z == rect.x && v.z <= 0) ||
+	(rect.x+rect.width == z && 0 <= v.z) ||
+	(x+this.size.x == rect.y && v.x <= 0) ||
+	(rect.y+rect.height == x && 0 <= v.x)) {
       return v;
     }
   }
@@ -377,13 +370,11 @@ Box.prototype.collideXYPlane = function (v, z, rect)
     var x = this.origin.x+dx;
     var y = this.origin.y+dy;
     if (x+this.size.x < rect.x || rect.x+rect.width < x ||
-	y+this.size.y < rect.y || rect.y+rect.height < y) {
-      return v;
-    }
-    x += v.x;
-    y += v.y;
-    if (x+this.size.x <= rect.x || rect.x+rect.width <= x ||
-	y+this.size.y <= rect.y || rect.y+rect.height <= y) {
+	y+this.size.y < rect.y || rect.y+rect.height < y ||
+	(x+this.size.x == rect.x && v.x <= 0) ||
+	(rect.x+rect.width == x && 0 <= v.x) ||
+	(y+this.size.y == rect.y && v.y <= 0) ||
+	(rect.y+rect.height == y && 0 <= v.y)) {
       return v;
     }
   }
@@ -424,5 +415,6 @@ Box.prototype.collide = function (v, box)
 					  box.size.x, box.size.y));
   }
   
+  assert(!this.movev(v).overlap(box), "box overlapped 2");
   return v;
 };
