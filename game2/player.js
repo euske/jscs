@@ -80,9 +80,13 @@ Player.prototype.render = function (ctx, x, y)
   var tw = sprites.height;
   var w = this.bounds.width;
   var h = this.bounds.height;
+  var tilemap = this.scene.tilemap;
+  var r = tilemap.coord2map(this.bounds.center());
+  var c = tilemap.get(r.x, r.y);
+  var sh = (c == T.FLOOR)? h/2 : 0;
   ctx.drawImage(sprites,
 		S.SHADOW*tw, tw-h, w, h,
-		x, y, w, h);
+		x, y-sh, w, h);
   ctx.drawImage(sprites,
 		this.tileno*tw, tw-h, w, h,
 		x, y-this.z/2, w, h);
@@ -110,9 +114,14 @@ Player.prototype.collideTile = function (p, v0)
   var tilemap = this.scene.tilemap;
   var ts = tilemap.tilesize;
   var bs = new Vec3(ts, ts, ts);
+  var ws = new Vec3(ts, ts, 999);
   var box = new Box(p, new Vec3(this.hitbox.width, this.hitbox.height, ts));
   function f(x, y, v) {
-    if (T.isObstacle(tilemap.get(x, y))) {
+    var c = tilemap.get(x, y);
+    if (T.isWall(c)) {
+      var bounds = new Box(new Vec3(x*ts, y*ts, 0), ws);
+      v = box.collide(v, bounds);
+    } else if (T.isObstacle(c)) {
       var bounds = new Box(new Vec3(x*ts, y*ts, 0), bs);
       v = box.collide(v, bounds);
     }

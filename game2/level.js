@@ -88,14 +88,12 @@ Level1.prototype.scrollTile = function (vx, vy)
 {
   // generate tiles for horizontal scrolling.
   for (var x = 0; x < vx; x++) {
-    for (var y = 0; y < this.tilemap.height; y++) {
+    for (var y = 1; y < this.tilemap.height-1; y++) {
       this.tilemap.set(x, y, T.NONE);
     }
-    this.tilemap.set(x, 0, T.WALL);
-    this.tilemap.set(x, this.tilemap.height-1, T.WALL);
     if (rnd(3) == 0) {
       var y = rnd(1, this.tilemap.height-1);
-      this.tilemap.set(x, y, T.WALL);
+      this.tilemap.set(x, y, T.FLOOR);
     }
     if (rnd(3) == 0) {
       var y = rnd(1, this.tilemap.height-1);
