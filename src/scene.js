@@ -169,7 +169,14 @@ Title.prototype.init = function (text)
   e.style.background = 'white';
   e.style.border = 'solid black 2px';
   e.innerHTML = text;
+  var changed = this.changed;
+  e.onmousedown = (function (e) { changed.signal(); });
 };
+
+Title.prototype.mousedown = function (x, y, button)
+{
+  this.changed.signal();
+}
 
 Title.prototype.action = function (action)
 {
