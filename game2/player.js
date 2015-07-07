@@ -96,9 +96,10 @@ Player.prototype.render = function (ctx, x, y, front)
       }
     }
   } else if (!afloat) {
+    var d = this.z/4;
     ctx.drawImage(sprites,
 		  S.SHADOW*tw, tw-h, w, h,
-		  x, y, w, h);
+		  x+d, y+d, w-d*2, h-d*2);
   }
   if ((front && afloat) || (!front && !afloat)) {
     ctx.drawImage(sprites,
