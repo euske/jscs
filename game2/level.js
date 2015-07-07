@@ -17,21 +17,22 @@ Level1.prototype = Object.create(Level.prototype);
 Level1.prototype.render = function (ctx, bx, by)
 {
   // [OVERRIDE]
+  var tilesize = this.tilesize;
+  var window = this.window;
+  var tilemap = this.tilemap;
+  bx -= tilesize;
+  by += (this.game.screen.height-this.window.height)/2;
 
   // Fill with the background color.
   ctx.fillStyle = 'rgb(0,0,128)';
   ctx.fillRect(bx, by, this.window.width, this.window.height);
 
-  var tilesize = this.tilesize;
-  var window = this.window;
-  var tilemap = this.tilemap;
   var x0 = Math.floor(window.x/tilesize);
   var y0 = Math.floor(window.y/tilesize);
   var x1 = Math.ceil((window.x+window.width)/tilesize);
   var y1 = Math.ceil((window.y+window.height)/tilesize);
   var fx = x0*tilesize-window.x;
   var fy = y0*tilesize-window.y;
-  bx -= tilesize;
 
   // Set the drawing order.
   var objs = [];
@@ -159,6 +160,9 @@ Level1.prototype.update = function ()
 {
   Level.prototype.update.call(this);
   this.moveAll(this.speed.x, this.speed.y);
+  if (this.player.hitbox.right() < this.tilesize) {
+    this.changed.signal('LOST', this.score);
+  }
 };
 
 Level1.prototype.init = function ()
@@ -177,7 +181,7 @@ Level1.prototype.init = function ()
   }
   this.tilemap = new TileMap(this.tilesize, map);
 
-  this.speed = new Vec2(4, 0);
+  this.speed = new Vec2(2, 0);
   this.window = new Rectangle(0, 0, this.tilemap.width*this.tilesize, this.tilemap.height*this.tilesize);
   
   var game = this.game;
@@ -193,6 +197,7 @@ Level1.prototype.init = function ()
     playSound(game.audios.pick);
     scene.score++;
     scene.updateScore();
+    scene.speed.x++;
   }
   this.player.picked.subscribe(player_picked);
   this.player.jumped.subscribe(player_jumped);

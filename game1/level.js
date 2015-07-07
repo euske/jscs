@@ -186,7 +186,7 @@ Level1.prototype.init = function ()
       // delay calling.
       scene.addObject(new Task(function (task) {
 	if (task.ticks0+game.framerate < scene.ticks) {
-	  scene.changed.signal('WON');
+	  scene.changed.signal('WON', scene.score);
 	}
       }));
     }

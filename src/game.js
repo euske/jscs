@@ -217,7 +217,7 @@ Game.prototype.blur = function (ev)
   this.active = false;
 };
 
-Game.prototype.init = function (state)
+Game.prototype.init = function (state, score)
 {
   // [OVERRIDE]
   // [GAME SPECIFIC CODE]
@@ -227,35 +227,44 @@ Game.prototype.init = function (state)
   }
 
   var game = this;
-  function title_changed(e, arg) {
+  function title_changed(e) {
     game.post(function () { game.init(1); });
   }
-  function level_finished(e) {
-    game.post(function () { game.init(2); });
+  function level_changed(e, arg, score) {
+    switch (arg) {
+    case 'WON': game.post(function () { game.init(2, score); }); break;
+    case 'LOST': game.post(function () { game.init(3, score); }); break;
+    }
   }
   switch (state) {
   case 0:
     this.scene = new Title(this);
     this.scene.init('<b>Sample Game</b><p>Made with JSCS<p>Press Enter to start.');
     this.scene.changed.subscribe(title_changed);
-    this.music = this.scene.music;
+    this.music = null;
     break;
   case 1:
     this.scene = new Level1(this);
     this.scene.init();
-    this.scene.changed.subscribe(level_finished);
+    this.scene.changed.subscribe(level_changed);
     this.music = this.scene.music;
     break;
   case 2:
     this.scene = new Title(this);
-    this.scene.init('<b>You Won!</b><p>Press Enter to restart.');
+    this.scene.init('<b>You Won!</b><p><b>Score:'+score+'</b><p>Press Enter to restart.');
     this.scene.changed.subscribe(title_changed);
-    this.scene.music = this.audios.ending;
+    this.music = this.audios.ending;
+    break;
+  case 3:
+    this.scene = new Title(this);
+    this.scene.init('<b>You Lost!</b><p><b>Score:'+score+'</b><p>Press Enter to restart.');
+    this.scene.changed.subscribe(title_changed);
+    this.music = this.audios.explosion;
     break;
   }
   
   if (this.music !== null) {
-    this.music.play();
+    playSound(this.music);
   }
 };
 

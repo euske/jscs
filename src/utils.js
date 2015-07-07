@@ -179,9 +179,11 @@ Slot.prototype.unsubscribe = function (recv)
   removeArray(this.receivers, recv);
 };
 
-Slot.prototype.signal = function (arg)
+Slot.prototype.signal = function ()
 {
   for (var i = 0; i < this.receivers.length; i++) {
-    this.receivers[i](this.object, arg);
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift(this.object);
+    this.receivers[i].apply(null, args);
   }
 };
