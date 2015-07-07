@@ -203,7 +203,7 @@ Game.prototype.focus = function (ev)
 {
   // [OVERRIDE]
   this.active = true;
-  if (this.music !== null) {
+  if (this.music !== null && this.music.loop) {
     this.music.play();
   }
 };
