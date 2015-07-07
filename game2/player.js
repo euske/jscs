@@ -74,22 +74,35 @@ Player.prototype.update = function ()
   }
 };
 
-Player.prototype.render = function (ctx, x, y)
+Player.prototype.render = function (ctx, x, y, front)
 {
   var sprites = this.scene.game.sprites;
   var tw = sprites.height;
   var w = this.bounds.width;
   var h = this.bounds.height;
-  var tilemap = this.scene.tilemap;
-  var r = tilemap.coord2map(this.bounds.center());
-  var c = tilemap.get(r.x, r.y);
-  var sh = (c == T.FLOOR)? h/2 : 0;
-  ctx.drawImage(sprites,
-		S.SHADOW*tw, tw-h, w, h,
-		x, y-sh, w, h);
-  ctx.drawImage(sprites,
-		this.tileno*tw, tw-h, w, h,
-		x, y-this.z/2, w, h);
+  var afloat = (this.scene.tilesize <= this.z);
+  var shadow = true;
+  if (front) {
+    if (afloat) {
+      var tilemap = this.scene.tilemap;
+      var r = tilemap.coord2map(this.bounds.center());
+      var c = tilemap.get(r.x, r.y);
+      if (c == T.FLOOR) {
+	ctx.drawImage(sprites,
+		      S.SHADOW*tw, tw-h, w, h,
+		      x, y-h/2, w, h);
+      }
+    }
+  } else if (!afloat) {
+    ctx.drawImage(sprites,
+		  S.SHADOW*tw, tw-h, w, h,
+		  x, y, w, h);
+  }
+  if ((front && afloat) || (!front && !afloat)) {
+    ctx.drawImage(sprites,
+		  this.tileno*tw, tw-h, w, h,
+		  x, y-this.z/2, w, h);
+  }
 };
 
 Player.prototype.move = function (vx, vy)

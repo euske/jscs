@@ -31,6 +31,7 @@ Level1.prototype.render = function (ctx, bx, by)
   var y1 = Math.ceil((window.y+window.height)/tilesize);
   var fx = x0*tilesize-window.x;
   var fy = y0*tilesize-window.y;
+  bx -= tilesize;
 
   // Set the drawing order.
   var objs = [];
@@ -38,7 +39,6 @@ Level1.prototype.render = function (ctx, bx, by)
     var obj = this.sprites[i];
     if (obj.scene !== this) continue;
     if (obj.bounds === null) continue;
-    if (obj instanceof Player && tilesize/2 < obj.z) continue;
     var bounds = obj.bounds;
     if (bounds.overlap(window)) {
       var x = Math.floor((bounds.x+bounds.width/2)/tilesize);
@@ -59,7 +59,13 @@ Level1.prototype.render = function (ctx, bx, by)
       for (var i = 0; i < r.length; i++) {
 	var a = r[i];
 	var b = a.bounds;
-	a.render(ctx, bx+b.x-window.x, by+b.y-window.y);
+	if (a instanceof FixedSprite) {
+	  ;
+	} else if (a instanceof Player) {
+	  a.render(ctx, bx+b.x-window.x, by+b.y-window.y, false);
+	} else {
+	  a.render(ctx, bx+b.x-window.x, by+b.y-window.y);
+	}
       }
     }
     var c = tilemap.get(x,y);
@@ -75,10 +81,15 @@ Level1.prototype.render = function (ctx, bx, by)
     if (obj.scene !== this) continue;
     if (obj.bounds === null) {
       obj.render(ctx, bx, by);
-    } else if (obj instanceof Player && tilesize/2 < obj.z) {
+    } else if (obj instanceof FixedSprite) {
       var bounds = obj.bounds;
       if (bounds.overlap(window)) {
 	obj.render(ctx, bx+bounds.x-window.x, by+bounds.y-window.y);
+      }
+    } else if (obj instanceof Player) {
+      var bounds = obj.bounds;
+      if (bounds.overlap(window)) {
+	obj.render(ctx, bx+bounds.x-window.x, by+bounds.y-window.y, true);
       }
     }
   }
@@ -90,6 +101,10 @@ Level1.prototype.scrollTile = function (vx, vy)
   for (var x = 0; x < vx; x++) {
     for (var y = 1; y < this.tilemap.height-1; y++) {
       this.tilemap.set(x, y, T.NONE);
+    }
+    if (rnd(10) == 0) {
+      var y = rnd(1, this.tilemap.height-1);
+      this.tilemap.set(x, y, T.WALL);
     }
     if (rnd(3) == 0) {
       var y = rnd(1, this.tilemap.height-1);
@@ -154,21 +169,20 @@ Level1.prototype.init = function ()
   // [GAME SPECIFIC CODE]
   var map = new Array(7);
   for (var y = 0; y < map.length; y++) {
-    var row = new Array(11);
+    var row = new Array(12);
     for (var x = 0; x < row.length; x++) {
       row[x] = (y == 0 || y == map.length-1)? T.WALL : T.NONE;
     }
-    //row[7] = 1;
     map[y] = row;
   }
   this.tilemap = new TileMap(this.tilesize, map);
 
   this.speed = new Vec2(4, 0);
-  this.window = new Rectangle(0, 0, this.game.screen.width, this.game.screen.height);
+  this.window = new Rectangle(0, 0, this.tilemap.width*this.tilesize, this.tilemap.height*this.tilesize);
   
   var game = this.game;
   var scene = this;
-  var rect = new Rectangle(1, 4, 1, 1);
+  var rect = new Rectangle(2, 3, 1, 1);
   this.player = new Player(this.tilemap.map2coord(rect));
   this.addObject(this.player);
   
