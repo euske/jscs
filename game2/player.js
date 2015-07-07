@@ -85,9 +85,11 @@ Player.prototype.render = function (ctx, x, y, front)
   if (front) {
     if (afloat) {
       var tilemap = this.scene.tilemap;
-      var r = tilemap.coord2map(this.bounds.center());
-      var c = tilemap.get(r.x, r.y);
-      if (c == T.FLOOR) {
+      var r = tilemap.coord2map(this.hitbox);
+      function f(x, y) {
+	return (tilemap.get(r.x, r.y) == T.FLOOR);
+      }
+      if (tilemap.apply(r, f) != null) {
 	ctx.drawImage(sprites,
 		      S.SHADOW*tw, tw-h, w, h,
 		      x, y-h/2, w, h);
