@@ -38,11 +38,64 @@ RangeMap.prototype.get = function (x0, y0, x1, y1)
 	  ((x0<0 || y0<0)? 0 : this.data[y0][x0]) -
 	  ((y0<0)? 0 : this.data[y0][x1]) -
 	  ((x0<0)? 0 : this.data[y1][x0]));
-}
+};
 
 RangeMap.prototype.exists = function (rect)
 {
   return (this.get(rect.x, rect.y,
 		   rect.x+rect.width,
 		   rect.y+rect.height) != 0);
+};
+
+// findSimplePath(x0, y0, x1, x1, cb): 
+//   returns a list of points that a character can proceed without being blocked.
+//   returns null if no such path exists. This function takes O(w*h).
+//   Note: this returns only a straightforward path without any detour.
+RangeMap.prototype.findSimplePath = function (x0, y0, x1, y1, cb)
+{
+  var a = [];
+  var w = Math.abs(x1-x0);
+  var h = Math.abs(y1-y0);
+  var INF = (w+h+1)*2;
+  var vx = (x0 <= x1)? +1 : -1;
+  var vy = (y0 <= y1)? +1 : -1;
+  for (var dy = 0; dy <= h; dy++) {
+    a.push([]);
+    // y: y0...y1
+    var y = y0+dy*vy;
+    for (var dx = 0; dx <= w; dx++) {
+      // x: x0...x1
+      var x = x0+dx*vx;
+      // for each point, compare the cost of (x-1,y) and (x,y-1).
+      var p = new Vec2(x, y);
+      var d;
+      var e = null;	// the closest neighbor (if exists).
+      if (dx == 0 && dy == 0) {
+	d = 0;
+      } else {
+	d = INF;
+	if (!this.get(x+cb.x, y+cb.y, x+cb.x+cb.width, y+cb.y+cb.height)) {
+	  if (0 < dx && a[dy][dx-1].d < d) {
+	    e = a[dy][dx-1];
+	    d = e.d;
+	  }
+	  if (0 < dy && a[dy-1][dx].d < d) {
+	    e = a[dy-1][dx];
+	    d = e.d;
+	  }
+	}
+	d++;
+      }
+      // populate a[dy][dx].
+      a[dy].push({p:p, d:d, next:e});
+    }
+  }
+  // trace them in a reverse order: from goal to start.
+  var r = []
+  e = a[h][w];
+  while (e != null) {
+    r.push(e.p);
+    e = e.next;
+  }
+  return r;
 }
