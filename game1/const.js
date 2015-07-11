@@ -7,6 +7,7 @@ S = {
   SHADOW: 1,
   THINGY: 2,
   YAY: 3,
+  ENEMY: 4,
 };
 
 T = {
