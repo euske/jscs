@@ -148,6 +148,9 @@ Level1.prototype.init = function ()
   var rect = new Rectangle(1, 10, 1, 1);
   this.player = new Player(this.tilemap.map2coord(rect));
   this.addObject(this.player);
+
+  var rect = new Rectangle(10, 10, 1, 1);
+  this.addObject(new Enemy(this.tilemap.map2coord(rect)));
   
   function player_jumped(e) {
     playSound(game.audios.jump);
