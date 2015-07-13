@@ -113,7 +113,7 @@ TileMap.prototype.scroll = function (rect, vx, vy)
   }
 };
 
-TileMap.prototype.getRange = function (f)
+TileMap.prototype.getRangeMap = function (f)
 {
   var map = this.rangemap[f];
   if (map === undefined) {

@@ -4,6 +4,7 @@ function RangeMap(tilemap, f)
 {
   var data = new Array(tilemap.height+1);
   var row0 = new Int32Array(tilemap.width+1);
+  data[0] = row0;
   for (var y = 0; y < tilemap.height; y++) {
     var row1 = new Int32Array(tilemap.width+1);
     var n = 0;
@@ -23,7 +24,7 @@ function RangeMap(tilemap, f)
 
 RangeMap.prototype.get = function (x0, y0, x1, y1)
 {
-  var t:int;
+  var t;
   if (x1 < x0) {
     t = x0; x0 = x1; x1 = t;
   }

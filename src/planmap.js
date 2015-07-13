@@ -9,18 +9,20 @@ function getLandingPoint(
   tilemap, pos, cb, 
   velocity, gravity, maxdt)
 {
-  var stoppable = tilemap.getRangeMap(Tile.isStoppable);
+  maxdt = (typeof(maxdt) !== 'undefined')? maxdt : 20;
+  var stoppable = tilemap.getRangeMap(T.isStoppable);
   var y0 = Math.floor(pos.y / tilemap.tilesize);
   for (var dt = 0; dt < maxdt; dt++) {
     var x = Math.floor((pos.x+velocity.x*dt) / tilemap.tilesize);
     if (x < 0 || tilemap.width <= x) continue;
+    var x0 = x+cb.x;
+    var x1 = x+cb.x+cb.width;
     var y1 = Math.ceil((pos.y - ascend(0, dt, gravity)) / tilemap.tilesize);
     for (var y = y0; y <= y1; y++) {
       if (y < 0 || tilemap.height <= y) continue;
-      if (stoppable.hasTile(x+cb.left, y+cb.bottom, 
-			    x+cb.right, y+cb.bottom)) return null;
-      if (stoppable.hasTile(x+cb.left, y+cb.bottom+1, 
-			    x+cb.right, y+cb.bottom+1)) {
+      var yb = y+cb.y+cb.height;
+      if (stoppable.get(x0, yb, x1, yb+1) != 0) return null;
+      if (stoppable.get(x0, yb+1, x1, yb+2) != 0) {
 	return new Vec2(x, y);
       }
     }
@@ -98,9 +100,9 @@ PlanMap.prototype.addQueue = function (queue, start, a1)
 
 PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 {
-  var obstacle = tilemap.getRangeMap(Tile.isObstacle);
-  var stoppable = tilemap.getRangeMap(Tile.isStoppable);
-  var grabbable = tilemap.getRangeMap(Tile.isGrabbable);
+  var obstacle = tilemap.getRangeMap(T.isObstacle);
+  var stoppable = tilemap.getRangeMap(T.isStoppable);
+  var grabbable = tilemap.getRangeMap(T.isGrabbable);
 
   if (start != null &&
       !grabbable.hasTile(start.x+cb.left, start.y+cb.top,
@@ -249,9 +251,9 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 	    //    |  |  (this is impossible!)
 	    //    +-X+
 	    //       #
-	    if (tilemap.isTile(p.x+bx1, p.y+cb.top-1, Tile.isObstacle) &&
-		tilemap.isTile(p.x+bx1, p.y+cb.bottom+1, Tile.isObstacle) &&
-		!tilemap.isTile(p.x+bx1-vx, p.y+cb.top-1, Tile.isObstacle)) continue;
+	    if (tilemap.isTile(p.x+bx1, p.y+cb.top-1, T.isObstacle) &&
+		tilemap.isTile(p.x+bx1, p.y+cb.bottom+1, T.isObstacle) &&
+		!tilemap.isTile(p.x+bx1-vx, p.y+cb.top-1, T.isObstacle)) continue;
 	    cost = a0.cost+Math.abs(jdx)+Math.abs(jdy)+1;
 	    addQueue(queue, start, 
 		     new PlanAction(new Vec2(jx, jy), null,

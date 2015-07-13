@@ -39,6 +39,8 @@ function Actor2(bounds, tileno)
   this.gravity = 2;
   this.maxspeed = 16;
   this.jumpacc = -8;
+  this.tilebounds = new Rectangle(0, 0, 1, 1);
+  this.velocity = new Vec2(0, 0);
 
   this._gy = 0;
 }
@@ -72,6 +74,31 @@ Actor2.prototype.getMove = function (v)
   var d2 = this.collideTile(rect, new Vec2(0, v.y));
   return new Vec2(d0.x+d1.x+d2.x,
 		  d0.y+d1.y+d2.y);
+};
+
+Actor2.prototype.getPos = function ()
+{
+  var r = this.scene.tilemap.coord2map(this.bounds.center());
+  return new Vec2(r.x, r.y);
+};
+
+Actor2.prototype.isMovable = function (v0)
+{
+  var v1 = this.getMove(v0);
+  return v1.equals(v0);
+};
+
+Actor2.prototype.isLanded = function ()
+{
+  var d = this.collideTile(this.hitbox, new Vec2(0, this._gy));
+  return (0 < this._gy && d.y == 0);
+};
+
+Actor2.prototype.isHolding = function ()
+{
+  var tilemap = this.scene.tilemap;
+  var f = (function (x,y) { return T.isGrabbable(tilemap.get(x,y)); });
+  return (tilemap.apply(tilemap.coord2map(this.hitbox), f) !== null);
 };
 
 Actor2.prototype.collideTile = function (rect, v0)
@@ -128,6 +155,7 @@ Player.prototype.usermove = function (vx, vy)
 {
   var v = this.move(vx*this.speed, this._gy);
   if (v !== null) {
+    this.velocity = v;
     this._gy = v.y;
   }
 };
@@ -135,12 +163,8 @@ Player.prototype.usermove = function (vx, vy)
 Player.prototype.jump = function (jumping)
 {
   if (this.scene === null) return;
-  var tilemap = this.scene.tilemap;
-  var f = (function (x,y) { return T.isObstacle(tilemap.get(x,y)); });
   if (jumping) {
-    var v = new Vec2(0, this._gy);
-    var d = this.collideTile(this.hitbox, v);
-    if (0 < this._gy && d.y == 0) {
+    if (this.isLanded()) {
       this._gy = this.jumpacc;
       this._jumpt = 0;
       this.jumped.signal();
@@ -163,6 +187,8 @@ Player.prototype.pick = function (a)
 function Enemy(bounds)
 {
   Actor2.call(this, bounds, S.ENEMY);
+  this.target = null;
+  this.runner = null;
 }
 
 Enemy.prototype = Object.create(Actor2.prototype);
@@ -172,12 +198,72 @@ Enemy.prototype.toString = function ()
   return '<Enemy: '+this.bounds+'>';
 };
 
+Enemy.prototype.jump = function ()
+{
+  if (this.isLanded()) {
+    this._gy = this.jumpacc;
+  }
+};
+
 Enemy.prototype.update = function ()
 {
   Actor2.prototype.update.call(this);
-  var vx = 0;
-  var v = this.move(vx*this.speed, this._gy);
-  if (v !== null) {
-    this._gy = v.y;
+
+  if (this.scene === null) return;
+  var d = this.collideTile(this.hitbox, this._gy);
+  this._gy = d.y;
+
+  if (this.target === null) return;
+
+  var scene = this.scene;
+  var tilemap = scene.tilemap;
+  var goal = ((this.target.isLanded())?
+	      tilemap.map2coord(this.target.getPos()).center() :
+	      getLandingPoint(tilemap, this.target.getPos(),
+			      this.target.tilebounds,
+			      this.target.velocity, this.target.gravity));
+  if (goal === null) return;
+
+  var actor = this;
+  function jump(e) {
+    actor.jump();
+  }
+  function moveto(e, p) {
+    actor.moveToward(p);
+  }
+  
+  // adjust the goal position when it cannot fit.
+  var obstacle = tilemap.getRangeMap(T.isObstacle);
+  for (var dx = tilebounds.left; dx <= tilebounds.right; dx++) {
+    if (!obstacle.hasTile(goal.x-dx+tilebounds.left, goal.y+tilebounds.top,
+			  goal.x-dx+tilebounds.right, goal.y+tilebounds.bottom)) {
+      goal.x -= dx;
+      break;
+    }
+  }
+  
+  // make a plan.
+  if (this.runner === null) {
+    var bounds = scene.getCenteredBounds(goal, 10);
+    var plan = new PlanMap(tilemap, goal, bounds,
+			   tilebounds, speed, jumpspeed, gravity);
+    if (plan.fillPlan(tilemap.map2coord(this.getPos()).center())) {
+      // start following a plan.
+      this.runner = new PlanActionRunner(plan, this);
+      this.runner.jump.subscribe(jump);
+      this.runner.moveto.subscribe(moveto);
+      log("begin:"+this.runner);
+    }
+
+    // follow a plan.
+    if (this.runner !== null) {
+      // end following a plan.
+      if (!this.runner.update(goal)) {
+	log("end:  "+this.runner);
+	this.runner.jump.unsubscribe(jump);
+	this.runner.moveto.unsubscribe(moveto);
+	this.runner = null;
+      }
+    }
   }
 };

@@ -48,26 +48,26 @@ PlanActionRunner.prototype.update = function (goal)
     var valid = plan.isValid(goal);
     var cur = tilemap.coord2map(actor.bounds);
     var dst = this.action.next.p;
-    var p, path;
 
     // Get a micro-level (greedy) plan.
     switch (this.action.type) {
     case PlanAction.WALK:
     case PlanAction.CLIMB:
-      p = tilemap.getTilePoint(dst.x, dst.y);
-      this.moveto.signal(p);
+      var r = tilemap.map2coord(dst);
+      this.moveto.signal(r.center());
       if (cur.equals(dst)) {
 	this.action = (valid)? this.action.next : null;
       }
       break;
       
     case PlanAction.FALL:
-      var map = tilemap.getRangeMap(Tile.isObstacle);
-      path = map.findSimplePath(cur.x, cur.y, dst.x, dst.y, actor.tilebounds);
+      var map = tilemap.getRangeMap(T.isObstacle);
+      var path = map.findSimplePath(cur.x, cur.y, dst.x, dst.y, actor.tilebounds);
       for (var i in path) {
-	var p = tilemap.getTilePoint(path[i].x, path[i].y);
-	if (actor.isMovable(p.x-actor.pos.x, p.y-actor.pos.y)) {
-	  this.moveto.signal(p);
+	var r = tilemap.map2coord(path[i]);
+	var v = new Vec2(r.x-actor.bounds.x, r.y-actor.bounds.y);
+	if (actor.isMovable(v)) {
+	  this.moveto.signal(r.center());
 	  break;
 	}
       }
@@ -99,6 +99,6 @@ PlanActionRunner.prototype.hasClearance = function (x, y)
 					 y+actor.tilebounds.top, 
 					 actor.tilebounds.width+1, 
 					 actor.tilebounds.height+1);
-  var stoppable = this.tilemap.getRangeMap(Tile.isStoppable);
+  var stoppable = this.tilemap.getRangeMap(T.isStoppable);
   return (!stoppable.hasTileByRect(actor.bounds.union(r)));
 };

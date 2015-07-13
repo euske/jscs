@@ -248,6 +248,7 @@ Game.prototype.init = function (state, score)
     this.scene.init();
     this.scene.changed.subscribe(level_changed);
     this.music = this.scene.music;
+    this.music = null;
     break;
   case 2:
     this.scene = new Title(this);

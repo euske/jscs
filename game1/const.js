@@ -14,7 +14,10 @@ T = {
   NONE: 0,
   BLOCK: 1,
   COLLECTIBLE: 2,
+  LADDER: 2,
   
   isObstacle: function (c) { return (c < 0 || c == T.BLOCK); },
+  isStoppable: function (c) { return (c < 0 || c == T.BLOCK || c == T.LADDER); },
+  isGrabbable: function (c) { return (c == T.LADDER); },
   isCollectible: function (c) { return (c == T.COLLECTIBLE); },
 };

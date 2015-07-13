@@ -150,7 +150,9 @@ Level1.prototype.init = function ()
   this.addObject(this.player);
 
   var rect = new Rectangle(10, 10, 1, 1);
-  this.addObject(new Enemy(this.tilemap.map2coord(rect)));
+  var enemy = new Enemy(this.tilemap.map2coord(rect));
+  enemy.target = this.player;
+  this.addObject(enemy);
   
   function player_jumped(e) {
     playSound(game.audios.jump);
