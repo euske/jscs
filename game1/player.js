@@ -219,9 +219,9 @@ Enemy.prototype.update = function ()
   var tilemap = scene.tilemap;
   var goal = ((this.target.isLanded())?
 	      tilemap.map2coord(this.target.getPos()).center() :
-	      getLandingPoint(tilemap, this.target.getPos(),
-			      this.target.tilebounds,
-			      this.target.velocity, this.target.gravity));
+	      predictLandingPoint(tilemap, this.target.getPos(),
+				  this.target.tilebounds,
+				  this.target.velocity, this.target.gravity));
   if (goal === null) return;
 
   var actor = this;
@@ -233,10 +233,11 @@ Enemy.prototype.update = function ()
   }
   
   // adjust the goal position when it cannot fit.
+  var tilebounds = this.tilebounds;
   var obstacle = tilemap.getRangeMap(T.isObstacle);
-  for (var dx = tilebounds.left; dx <= tilebounds.right; dx++) {
-    if (!obstacle.hasTile(goal.x-dx+tilebounds.left, goal.y+tilebounds.top,
-			  goal.x-dx+tilebounds.right, goal.y+tilebounds.bottom)) {
+  for (var dx = 0; dx <= tilebounds.width; dx++) {
+    if (obstacle.get(goal.x-dx+tilebounds.x, goal.y+tilebounds.y,
+		     goal.x-dx+tilebounds.right(), goal.y+tilebounds.bottom()) == 0) {
       goal.x -= dx;
       break;
     }
@@ -244,9 +245,10 @@ Enemy.prototype.update = function ()
   
   // make a plan.
   if (this.runner === null) {
-    var bounds = scene.getCenteredBounds(goal, 10);
+    var bounds = tilemap.map2coord(goal).inflate(10, 10);
     var plan = new PlanMap(tilemap, goal, bounds,
-			   tilebounds, speed, jumpspeed, gravity);
+			   tilebounds, this.speed,
+			   this.jumpspeed, this.gravity);
     if (plan.fillPlan(tilemap.map2coord(this.getPos()).center())) {
       // start following a plan.
       this.runner = new PlanActionRunner(plan, this);

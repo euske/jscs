@@ -9,6 +9,11 @@ A = {
   MOVETO: 'MOVETO',
 };
 
+function getKey(x, y, context)
+{
+  return x+","+y+":"+context;
+}
+
 function PlanAction(p, context, type, cost, next)
 {
   this.p = p;
@@ -16,6 +21,7 @@ function PlanAction(p, context, type, cost, next)
   this.type = type;
   this.cost = cost;
   this.next = next;
+  this.key = getKey(p.x, p.y, null);
 }
 
 PlanAction.prototype.toString = function ()
@@ -51,8 +57,8 @@ PlanActionRunner.prototype.update = function (goal)
 
     // Get a micro-level (greedy) plan.
     switch (this.action.type) {
-    case PlanAction.WALK:
-    case PlanAction.CLIMB:
+    case A.WALK:
+    case A.CLIMB:
       var r = tilemap.map2coord(dst);
       this.moveto.signal(r.center());
       if (cur.equals(dst)) {
@@ -60,7 +66,7 @@ PlanActionRunner.prototype.update = function (goal)
       }
       break;
       
-    case PlanAction.FALL:
+    case A.FALL:
       var map = tilemap.getRangeMap(T.isObstacle);
       var path = map.findSimplePath(cur.x, cur.y, dst.x, dst.y, actor.tilebounds);
       for (var i in path) {
@@ -76,7 +82,7 @@ PlanActionRunner.prototype.update = function (goal)
       }
       break;
       
-    case PlanAction.JUMP:
+    case A.JUMP:
       if (actor.isLanded() && !actor.isHolding() &&
 	  this.hasClearance(cur.x, dst.y)) {
 	this.jump.signal();
