@@ -11,7 +11,7 @@ function predictLandingPoint(
   tilemap, pos, cb, 
   velocity, gravity, maxdt)
 {
-  maxdt = (typeof(maxdt) !== 'undefined')? maxdt : 20;
+  maxdt = (maxdt !== undefined)? maxdt : 20;
   var stoppable = tilemap.getRangeMap(T.isStoppable);
   var y0 = Math.floor(pos.y / tilemap.tilesize);
   for (var dt = 0; dt < maxdt; dt++) {
@@ -101,9 +101,9 @@ PlanMap.prototype.addQueue = function (queue, start, a1)
 
 PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 {
-  n = (typeof(n) !== 'undefined')? n : 1000;
-  falldx = (typeof(falldx) !== 'undefined')? falldx : 10;
-  falldy = (typeof(falldy) !== 'undefined')? falldy : 20;
+  n = (n !== undefined)? n : 1000;
+  falldx = (falldx !== undefined)? falldx : 10;
+  falldy = (falldy !== undefined)? falldy : 20;
   
   var tilemap = this.tilemap;
   var obstacle = tilemap.getRangeMap(T.isObstacle);

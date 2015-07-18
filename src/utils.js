@@ -4,7 +4,7 @@
 // log(x): display a thing in the console (Firefox only, maybe)
 function log(x)
 {
-  if (typeof(window.console) !== 'undefined') {
+  if (window.console !== undefined) {
     window.console.log(x);
   }
 }
@@ -32,7 +32,7 @@ function blink(t, d)
 // rnd(n): returns a random number.
 function rnd(a, b)
 {
-  b = (typeof(b) !== 'undefined')? b : 0;
+  b = (b !== undefined)? b : 0;
   if (b < a) {
     var c = a;
     a = b;
@@ -44,8 +44,8 @@ function rnd(a, b)
 // format: pretty print a number.
 function format(v, n, c)
 {
-  n = (typeof(n) !== 'undefined')? n : 3;
-  c = (typeof(c) !== 'undefined')? c : ' ';
+  n = (n !== undefined)? n : 3;
+  c = (c !== undefined)? c : ' ';
   var s = '';
   while (s.length < n) {
     s = (v % 10)+s;
