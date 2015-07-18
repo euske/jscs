@@ -11,11 +11,15 @@ A = {
 
 function getKey(x, y, context)
 {
-  return x+","+y+":"+context;
+  return (context === null)? (x+","+y) : (x+","+y+":"+context);
 }
 
 function PlanAction(p, context, type, cost, next)
 {
+  context = (context !== undefined)? context : null;
+  type = (type !== undefined)? type : A.NONE;
+  cost = (cost !== undefined)? cost : 0;
+  next = (next !== undefined)? next : null;
   this.p = p;
   this.context = context;
   this.type = type;

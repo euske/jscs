@@ -76,9 +76,9 @@ Actor2.prototype.getMove = function (v)
 		  d0.y+d1.y+d2.y);
 };
 
-Actor2.prototype.getPos = function ()
+Actor2.prototype.getTilePos = function (rect)
 {
-  var r = this.scene.tilemap.coord2map(this.bounds.center());
+  var r = this.scene.tilemap.coord2map(rect.center());
   return new Vec2(r.x, r.y);
 };
 
@@ -205,6 +205,7 @@ Enemy.prototype.jump = function ()
   }
 };
 
+RANGE = 10;
 Enemy.prototype.update = function ()
 {
   Actor2.prototype.update.call(this);
@@ -217,13 +218,13 @@ Enemy.prototype.update = function ()
 
   var scene = this.scene;
   var tilemap = scene.tilemap;
-  var goal = ((this.target.isLanded())?
-	      tilemap.map2coord(this.target.getPos()).center() :
-	      predictLandingPoint(tilemap, this.target.getPos(),
-				  this.target.tilebounds,
-				  this.target.velocity, this.target.gravity));
-  if (goal === null) return;
-
+  var hitbox = ((this.target.isLanded())? 
+		this.target.hitbox :
+		predictLandingPoint(tilemap, this.target.hitbox, 
+				    this.target.velocity, this.target.gravity));
+  if (hitbox === null) return;
+  var goal = this.target.getTilePos(hitbox);
+  
   var actor = this;
   function jump(e) {
     actor.jump();
@@ -245,27 +246,27 @@ Enemy.prototype.update = function ()
   
   // make a plan.
   if (this.runner === null) {
-    var bounds = tilemap.map2coord(goal).inflate(10, 10);
-    var plan = new PlanMap(tilemap, goal, bounds,
+    var range = new Rectangle(goal.x-RANGE, goal.y-RANGE, RANGE*2+1, RANGE*2+1);
+    var plan = new PlanMap(tilemap, goal, range,
 			   tilebounds, this.speed,
 			   this.jumpspeed, this.gravity);
-    if (plan.fillPlan(tilemap.map2coord(this.getPos()).center())) {
+    if (plan.fillPlan(this.getTilePos(this.hitbox))) {
       // start following a plan.
       this.runner = new PlanActionRunner(plan, this);
       this.runner.jump.subscribe(jump);
       this.runner.moveto.subscribe(moveto);
       log("begin:"+this.runner);
     }
+  }
 
-    // follow a plan.
-    if (this.runner !== null) {
-      // end following a plan.
-      if (!this.runner.update(goal)) {
-	log("end:  "+this.runner);
-	this.runner.jump.unsubscribe(jump);
-	this.runner.moveto.unsubscribe(moveto);
-	this.runner = null;
-      }
+  // follow a plan.
+  if (this.runner !== null) {
+    // end following a plan.
+    if (!this.runner.update(goal)) {
+      log("end:  "+this.runner);
+      this.runner.jump.unsubscribe(jump);
+      this.runner.moveto.unsubscribe(moveto);
+      this.runner = null;
     }
   }
 };
