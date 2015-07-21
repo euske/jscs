@@ -4,6 +4,9 @@ function RangeMap(tilemap, f)
 {
   var data = new Array(tilemap.height+1);
   var row0 = new Int32Array(tilemap.width+1);
+  for (var x = 0; x < tilemap.width; x++) {
+    row0[x+1] = 0;
+  }
   data[0] = row0;
   for (var y = 0; y < tilemap.height; y++) {
     var row1 = new Int32Array(tilemap.width+1);
@@ -27,18 +30,18 @@ RangeMap.prototype.get = function (x0, y0, x1, y1)
   var t;
   if (x1 < x0) {
     t = x0; x0 = x1; x1 = t;
+    // assert(x0 <= x1);
   }
   if (y1 < y0) {
     t = y0; y0 = y1; y1 = t;
+    // assert(y0 <= y1);
   }
-  x0 = clamp(-1, x0-1, this.width-1);
-  y0 = clamp(-1, y0-1, this.height-1);
+  x0 = clamp(0, x0, this.width);
+  y0 = clamp(0, y0, this.height);
   x1 = clamp(0, x1, this.width);
   y1 = clamp(0, y1, this.height);
-  return (this.data[y1][x1] - 
-	  ((x0<0 || y0<0)? 0 : this.data[y0][x0]) -
-	  ((y0<0)? 0 : this.data[y0][x1]) -
-	  ((x0<0)? 0 : this.data[y1][x0]));
+  return (this.data[y1][x1] - this.data[y1][x0] -
+	  this.data[y0][x1] + this.data[y0][x0]);
 };
 
 RangeMap.prototype.exists = function (rect)
