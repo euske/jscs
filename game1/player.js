@@ -41,8 +41,7 @@ function Actor2(bounds, tileno)
   this.jumpacc = -8;
   this.tilebounds = new Rectangle(0, 0, 1, 1);
   this.velocity = new Vec2(0, 0);
-
-  this._gy = 0;
+  this.landed = false;
 }
 
 Actor2.prototype = Object.create(Actor.prototype);
@@ -50,16 +49,12 @@ Actor2.prototype = Object.create(Actor.prototype);
 Actor2.prototype.update = function ()
 {
   if (this.scene === null) return;
-  this._gy = Math.min(this._gy + this.gravity, this.maxspeed);
-};
-
-Actor2.prototype.move = function (vx, vy)
-{
-  if (this.scene === null) return null;
-  var tilemap = this.scene.tilemap;
-  var v = this.getMove(new Vec2(vx, vy));
-  Actor.prototype.move.call(this, v.x, v.y);
-  return v;
+  this.velocity.y += this.gravity;
+  this.velocity.y = clamp(-this.maxspeed, this.velocity.y, this.maxspeed);
+  var v = this.getMove(this.velocity);
+  this.landed = (0 < this.velocity.y && v.y == 0);
+  this.velocity = v;
+  this.move(this.velocity.x, this.velocity.y);
 };
 
 Actor2.prototype.getMove = function (v)
@@ -90,8 +85,7 @@ Actor2.prototype.isMovable = function (v0)
 
 Actor2.prototype.isLanded = function ()
 {
-  var d = this.collideTile(this.hitbox, new Vec2(0, this._gy));
-  return (0 < this._gy && d.y == 0);
+  return this.landed;
 };
 
 Actor2.prototype.isHolding = function ()
@@ -146,18 +140,15 @@ Player.prototype.update = function ()
   }
   if (0 <= this._jumpt && this._jumpt < this.maxacctime) {
     this._jumpt++;
-  } else {
-    Actor2.prototype.update.call(this);
+    this.velocity.y -= this.gravity;
   }
+  
+  Actor2.prototype.update.call(this);  
 };
 
 Player.prototype.usermove = function (vx, vy)
 {
-  var v = this.move(vx*this.speed, this._gy);
-  if (v !== null) {
-    this.velocity = v;
-    this._gy = v.y;
-  }
+  this.velocity.x = vx*this.speed;
 };
 
 Player.prototype.jump = function (jumping)
@@ -165,8 +156,8 @@ Player.prototype.jump = function (jumping)
   if (this.scene === null) return;
   if (jumping) {
     if (this.isLanded()) {
-      this._gy = this.jumpacc;
       this._jumpt = 0;
+      this.velocity.y = this.jumpacc;
       this.jumped.signal();
     }
   } else {
@@ -201,8 +192,14 @@ Enemy.prototype.toString = function ()
 Enemy.prototype.jump = function ()
 {
   if (this.isLanded()) {
-    this._gy = this.jumpacc;
+    this.velocity.y = this.jumpacc;
   }
+};
+
+Enemy.prototype.moveToward = function (p)
+{
+  var dx = (p.x - this.hitbox.center().x);
+  this.velocity.x = ((0 < dx) ? +1 : -1) * this.speed;
 };
 
 RANGE = 10;
@@ -211,9 +208,6 @@ Enemy.prototype.update = function ()
   Actor2.prototype.update.call(this);
 
   if (this.scene === null) return;
-  var d = this.collideTile(this.hitbox, this._gy);
-  this._gy = d.y;
-
   if (this.target === null) return;
 
   var scene = this.scene;

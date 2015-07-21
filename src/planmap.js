@@ -60,7 +60,7 @@ PlanMap.prototype.toString = function ()
 
 PlanMap.prototype.isValid = function (p)
 {
-  return (p != null && this.goal.equals(p));
+  return (p !== null && this.goal.equals(p));
 };
 
 PlanMap.prototype.getAction = function (x, y, context)
@@ -80,9 +80,9 @@ PlanMap.prototype.getAllActions = function ()
 PlanMap.prototype.addQueue = function (queue, start, a1)
 {
   var a0 = this._map[a1.key];
-  if (a0 == null || a1.cost < a0.cost) {
+  if (a0 === undefined || a1.cost < a0.cost) {
     this._map[a1.key] = a1;
-    var dist = ((start == null)? 0 :
+    var dist = ((start === null)? 0 :
 		Math.abs(start.x-a1.p.x)+Math.abs(start.y-a1.p.y));
     queue.push({ action:a1, prio:dist });
   }
@@ -102,47 +102,46 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
   var cbx0 = this.cb.x, cbx1 = this.cb.right();
   var cby0 = this.cb.y, cby1 = this.cb.bottom();
 
-  if (start != null &&
+  if (start !== null &&
       grabbable.get(start.x+cbx0, start.y+cby0,
 		    start.y+cbx1, start.y+cby1) == 0 &&
-      stoppable.get(start.x+cbx0, start.y+cby1+1, 
+      stoppable.get(start.x+cbx0, start.y+cby1, 
 		    start.x+cbx1, start.y+cby1+1) == 0) return false;
-  
+
   var queue = [];
   this.addQueue(queue, start, new PlanAction(this.goal));
   while (0 < n && 0 < queue.length) {
-    var cost;
-    var q = queue.pop();
-    var a0 = q.action;
+    var a0 = queue.pop().action;
     var p = a0.p;
     var context = a0.context;
-    if (start != null && start.equals(p)) return true;
+    if (start !== null && start.equals(p)) return true;
     if (obstacle.get(p.x+cbx0, p.y+cby0, 
 		     p.x+cbx1, p.y+cby1) != 0) continue;
-    if (context == null &&
+    if (context === null &&
 	grabbable.get(p.x+cbx0, p.y+cby0,
 		      p.x+cbx1, p.y+cby1) == 0 &&
-	stoppable.get(p.x+cbx0, p.y+cby1+1, 
+	stoppable.get(p.x+cbx0, p.y+cby1, 
 		      p.x+cbx1, p.y+cby1+1) == 0) continue;
     // assert(range.left <= p.x && p.x <= range.right);
     // assert(range.top <= p.y && p.y <= range.bottom);
+    var cost = a0.cost;
 
     // try climbing down.
-    if (context == null &&
+    if (context === null &&
 	range.top <= p.y-1 &&
 	grabbable.get(p.x+cbx0, p.y+cby1,
-		      p.x+cbx1, p.y+cby1) != 0) {
-      cost = a0.cost+1;
+		      p.x+cbx1, p.y+cby1+1) != 0) {
+      cost += 1;
       this.addQueue(queue, start, 
 		    new PlanAction(new Vec2(p.x, p.y-1), null,
 				   A.CLIMB, cost, a0));
     }
     // try climbing up.
-    if (context == null &&
+    if (context === null &&
 	p.y+1 <= range.bottom &&
 	grabbable.get(p.x+cbx0, p.y+cby0+1,
 		      p.x+cbx1, p.y+cby1+1) != 0) {
-      cost = a0.cost+1;
+      cost += 1;
       this.addQueue(queue, start, 
 		    new PlanAction(new Vec2(p.x, p.y+1), null,
 				   A.CLIMB, cost, a0));
@@ -155,22 +154,22 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 
       // try walking.
       var wx = p.x-vx;
-      if (context == null &&
+      if (context === null &&
 	  range.left <= wx && wx <= range.right &&
 	  obstacle.get(wx+cbx0, p.y+cby0,
 		       wx+cbx1, p.y+cby1) == 0 &&
 	  (grabbable.get(wx+cbx0, p.y+cby0,
 			 wx+cbx1, p.y+cby1) != 0 ||
-	   stoppable.get(wx+cbx0, p.y+cby1+1,
+	   stoppable.get(wx+cbx0, p.y+cby1,
 			 wx+cbx1, p.y+cby1+1) != 0)) {
-	cost = a0.cost+1;
+	cost += 1;
 	this.addQueue(queue, start, 
 		      new PlanAction(new Vec2(wx, p.y), null,
 				     A.WALK, cost, a0));
       }
 
       // try falling.
-      if (context == null) {
+      if (context === null) {
 	for (var fdx = 0; fdx <= falldx; fdx++) {
 	  var fx = p.x-vx*fdx;
 	  if (fx < range.left || range.right < fx) break;
@@ -191,13 +190,13 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 	    //     ######
 	    if (obstacle.get(fx+cbx0, fy+cby0,
 			     fx+cbx1, fy+cby1) != 0) continue;
-	    cost = a0.cost+Math.abs(fdx)+Math.abs(fdy)+1;
+	    cost += Math.abs(fdx)+Math.abs(fdy)+1;
 	    if (0 < fdx &&
 		stoppable.get(fx+bx0+vx, fy+cby0, 
 			      p.x+bx1, p.y+cby1) == 0 &&
 		(grabbable.get(fx+cbx0, fy+cby0, 
 			       fx+cbx1, fy+cby1) != 0 ||
-		 stoppable.get(fx+cbx0, fy+cby1+1, 
+		 stoppable.get(fx+cbx0, fy+cby1, 
 			       fx+cbx1, fy+cby1+1) != 0)) {
 	      // normal fall.
 	      this.addQueue(queue, start, 
@@ -217,7 +216,7 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
       }
 
       // try jumping.
-      if (context == A.FALL) {
+      if (context === A.FALL) {
 	for (var jdx = 1; jdx <= this._madx; jdx++) {
 	  // adt: time for ascending.
 	  var adt = Math.floor(jdx*tilemap.tilesize/this.speed);
@@ -241,7 +240,7 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 			      p.x+bx1-vx, p.y+cby0) != 0) break;
 	    if (grabbable.get(jx+cbx0, jy+cby0, 
 			      jx+cbx1, jy+cby1) == 0 &&
-		stoppable.get(jx+cbx0, jy+cby1+1, 
+		stoppable.get(jx+cbx0, jy+cby1, 
 			      jx+cbx1, jy+cby1+1) == 0) continue;
 	    // extra care is needed not to allow the following case:
 	    //      .#
@@ -252,7 +251,7 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 	    if (T.isObstacle(tilemap.get(p.x+bx1, p.y+cby0-1)) &&
 		T.isObstacle(tilemap.get(p.x+bx1, p.y+cby1+1)) &&
 		!T.isObstacle(tilemap.get(p.x+bx1-vx, p.y+cby0-1))) continue;
-	    cost = a0.cost+Math.abs(jdx)+Math.abs(jdy)+1;
+	    cost += Math.abs(jdx)+Math.abs(jdy)+1;
 	    this.addQueue(queue, start, 
 			  new PlanAction(new Vec2(jx, jy), null,
 					 A.JUMP, cost, a0));
@@ -260,7 +259,7 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 	}
       }
     }
-    if (start != null) {
+    if (start !== null) {
       // A* search.
       queue.sort(function (a,b) { return b.prio-a.prio; });
     }

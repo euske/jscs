@@ -51,7 +51,7 @@ PlanActionRunner.prototype.toString = function ()
 
 PlanActionRunner.prototype.update = function (goal)
 {
-  if (this.action != null && this.action.next != null) {
+  if (this.action !== null && this.action.next !== null) {
     var plan = this.plan;
     var actor = this.actor;
     var tilemap = plan.tilemap;
@@ -94,13 +94,13 @@ PlanActionRunner.prototype.update = function (goal)
 	this.action = (valid)? this.action.next : null;
       } else {
 	// not landed, holding something, or has no clearance.
-	p = tilemap.getTilePoint(cur.x, cur.y);
-	this.moveto.signal(p);
+	var r = tilemap.map2coord(cur);
+	this.moveto.signal(r.center());
       }
       break;
     }
   }
-  return (this.action != null && this.action.next != null);
+  return (this.action !== null && this.action.next !== null);
 };
 
 PlanActionRunner.prototype.hasClearance = function (x, y)
