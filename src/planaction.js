@@ -11,7 +11,7 @@ A = {
 
 function getKey(x, y, context)
 {
-  return (context === null)? (x+","+y) : (x+","+y+":"+context);
+  return (context === undefined)? (x+","+y) : (x+","+y+":"+context);
 }
 
 function PlanAction(p, context, type, cost, next)
@@ -25,7 +25,7 @@ function PlanAction(p, context, type, cost, next)
   this.type = type;
   this.cost = cost;
   this.next = next;
-  this.key = getKey(p.x, p.y, null);
+  this.key = getKey(p.x, p.y);
 }
 
 PlanAction.prototype.toString = function ()
@@ -105,10 +105,12 @@ PlanActionRunner.prototype.update = function (goal)
 
 PlanActionRunner.prototype.hasClearance = function (x, y)
 {
-  var r = this.tilemap.coord2getTileRect(x+actor.tilebounds.left, 
-					 y+actor.tilebounds.top, 
-					 actor.tilebounds.width+1, 
-					 actor.tilebounds.height+1);
+  var r = this.tilemap.map2coord(
+    new Rectangle(x+actor.tilebounds.x, 
+		  y+actor.tilebounds.y, 
+		  actor.tilebounds.width, 
+		  actor.tilebounds.height));
+  r = r.union(actor.bounds);
   var stoppable = this.tilemap.getRangeMap(T.isStoppable);
-  return (!stoppable.hasTileByRect(actor.bounds.union(r)));
+  return (stoppable.get(r.x, r.y, r.right(), r.bottom()) == 0);
 };

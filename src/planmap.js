@@ -65,7 +65,12 @@ PlanMap.prototype.isValid = function (p)
 
 PlanMap.prototype.getAction = function (x, y, context)
 {
-  return this._map[getKey(x, y, context)];
+  var k = getKey(x, y, context);
+  if (this._map.hasOwnProperty(k)) {
+    return this._map[k];
+  } else {
+    return null;
+  }
 };
 
 PlanMap.prototype.getAllActions = function ()
@@ -122,13 +127,13 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 		      p.x+cbx1, p.y+cby1) == 0 &&
 	stoppable.get(p.x+cbx0, p.y+cby1, 
 		      p.x+cbx1, p.y+cby1+1) == 0) continue;
-    // assert(range.left <= p.x && p.x <= range.right);
-    // assert(range.top <= p.y && p.y <= range.bottom);
+    // assert(range.x <= p.x && p.x <= range.right());
+    // assert(range.y <= p.y && p.y <= range.bottom());
     var cost = a0.cost;
 
     // try climbing down.
     if (context === null &&
-	range.top <= p.y-1 &&
+	range.y <= p.y-1 &&
 	grabbable.get(p.x+cbx0, p.y+cby1,
 		      p.x+cbx1, p.y+cby1+1) != 0) {
       cost += 1;
@@ -155,7 +160,7 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
       // try walking.
       var wx = p.x-vx;
       if (context === null &&
-	  range.left <= wx && wx <= range.right &&
+	  range.x <= wx && wx <= range.right() &&
 	  obstacle.get(wx+cbx0, p.y+cby0,
 		       wx+cbx1, p.y+cby1) == 0 &&
 	  (grabbable.get(wx+cbx0, p.y+cby0,
@@ -172,14 +177,14 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
       if (context === null) {
 	for (var fdx = 0; fdx <= falldx; fdx++) {
 	  var fx = p.x-vx*fdx;
-	  if (fx < range.left || range.right < fx) break;
+	  if (fx < range.x || range.right() < fx) break;
 	  // fdt: time for falling.
 	  var fdt = Math.floor(tilemap.tilesize*fdx/this.speed);
 	  // fdy: amount of falling.
 	  var fdy = Math.ceil(-ascend(0, fdt, this.gravity) / tilemap.tilesize);
 	  for (; fdy <= falldy; fdy++) {
 	    var fy = p.y-fdy;
-	    if (fy < range.top || range.bottom < fy) break;
+	    if (fy < range.y || range.bottom() < fy) break;
 	    //  +--+....  [vx = +1]
 	    //  |  |....
 	    //  +-X+.... (fx,fy) original position.
@@ -225,9 +230,9 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 	  for (var jdy = ady; jdy <= this._mady; jdy++) {
 	    // (jx,jy): original position.
 	    var jx = p.x-vx*jdx;
-	    if (jx < range.left || range.right < jx) break;
+	    if (jx < range.x || range.right() < jx) break;
 	    var jy = p.y+jdy;
-	    if (jy < range.top || range.bottom < jy) break;
+	    if (jy < range.y || range.bottom() < jy) break;
 	    //  ....+--+  [vx = +1]
 	    //  ....|  |
 	    //  ....+-X+ (p.x,p.y) tip point
@@ -269,6 +274,29 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
   return false;
 };
 
-PlanMap.prototype.render = function (ctx, x, y, tilesize)
+PlanMap.prototype.render = function (ctx, bx, by, tilesize)
 {
+  ctx.lineWidth = 1;
+  for (var k in this._map) {
+    var a = this._map[k];
+    var p = a.p;
+    switch (a.type) {
+    case A.WALK:
+      ctx.strokeStyle = 'white';
+      break;
+    case A.FALL:
+      ctx.strokeStyle = 'blue';
+      break;
+    case A.JUMP:
+      ctx.strokeStyle = 'magenta';
+      break;
+    case A.CLIMB:
+      ctx.strokeStyle = 'cyan';
+      break;
+    default:
+      continue;
+    }
+    ctx.strokeRect(bx+tilesize*p.x, by+tilesize*p.y,
+		   tilesize, tilesize);
+  }
 };
