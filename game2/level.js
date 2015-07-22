@@ -63,9 +63,9 @@ Level1.prototype.render = function (ctx, bx, by)
 	if (a instanceof FixedSprite) {
 	  ;
 	} else if (a instanceof Player) {
-	  a.render(ctx, bx+b.x-window.x, by+b.y-window.y, false);
+	  a.render(ctx, bx-window.x, by-window.y, false);
 	} else {
-	  a.render(ctx, bx+b.x-window.x, by+b.y-window.y);
+	  a.render(ctx, bx-window.x, by-window.y);
 	}
       }
     }
@@ -85,12 +85,12 @@ Level1.prototype.render = function (ctx, bx, by)
     } else if (obj instanceof FixedSprite) {
       var bounds = obj.bounds;
       if (bounds.overlap(window)) {
-	obj.render(ctx, bx+bounds.x-window.x, by+bounds.y-window.y);
+	obj.render(ctx, bx-window.x, by-window.y);
       }
     } else if (obj instanceof Player) {
       var bounds = obj.bounds;
       if (bounds.overlap(window)) {
-	obj.render(ctx, bx+bounds.x-window.x, by+bounds.y-window.y, true);
+	obj.render(ctx, bx-window.x, by-window.y, true);
       }
     }
   }

@@ -19,7 +19,7 @@ FixedSprite.prototype.update = function ()
   this.bounds.y -= 1;
 };
 
-FixedSprite.prototype.render = function (ctx, x, y)
+FixedSprite.prototype.render = function (ctx, bx, by)
 {
   var sprites = this.scene.game.sprites;
   var tw = sprites.height;
@@ -27,7 +27,7 @@ FixedSprite.prototype.render = function (ctx, x, y)
   var h = this.bounds.height;
   ctx.drawImage(sprites,
 		this.tileno*tw, tw-h, w, h,
-		x, y, w, h);
+		bx+this.bounds.x, by+this.bounds.y, w, h);
 };
 
 // Actor2
@@ -258,9 +258,16 @@ Enemy.prototype.update = function ()
     // end following a plan.
     if (!this.runner.update(goal)) {
       log("end:  "+this.runner);
-      this.runner.jump.unsubscribe(jump);
-      this.runner.moveto.unsubscribe(moveto);
+      //this.runner.jump.unsubscribe(jump);
+      //this.runner.moveto.unsubscribe(moveto);
       this.runner = null;
     }
+  }
+};
+
+Enemy.prototype.renderPlan = function (ctx, bx, by)
+{
+  if (this.runner !== null && this.runner.plan !== null) {
+    this.runner.plan.render(ctx, bx, by, this.scene.tilesize/2);
   }
 };

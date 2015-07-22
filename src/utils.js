@@ -168,6 +168,10 @@ function Slot(object)
   this.object = object
   this.receivers = [];
 }
+Slot.prototype.toString = function ()
+{
+  return ('<Slot('+this.object+') '+this.receivers+'>');
+};
 
 Slot.prototype.subscribe = function (recv)
 {

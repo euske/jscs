@@ -79,8 +79,7 @@ Level1.prototype.render = function (ctx, bx, by)
       var r = objs[k];
       for (var i = 0; i < r.length; i++) {
 	var a = r[i];
-	var b = a.bounds;
-	a.render(ctx, bx+b.x-window.x, by+b.y-window.y);
+	a.render(ctx, bx-window.x, by-window.y);
       }
     }
     var c = tilemap.get(x,y);
@@ -96,6 +95,9 @@ Level1.prototype.render = function (ctx, bx, by)
     if (obj.scene !== this) continue;
     if (obj.bounds === null) {
       obj.render(ctx, bx, by);
+    }
+    if (obj instanceof Enemy) {
+      obj.renderPlan(ctx, bx, by);
     }
   }
 };

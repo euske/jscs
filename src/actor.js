@@ -103,7 +103,7 @@ Actor.prototype.render = function (ctx, x, y)
   var h = this.bounds.height;
   ctx.drawImage(sprites,
 		this.tileno*tw, tw-h, w, h,
-		x, y, w, h);
+		x+this.bounds.x, y+this.bounds.y, w, h);
 };
 
 Actor.prototype.move = function (dx, dy)

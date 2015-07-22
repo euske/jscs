@@ -81,12 +81,7 @@ Level.prototype.render = function (ctx, bx, by)
   for (var i = 0; i < this.sprites.length; i++) {
     var obj = this.sprites[i];
     if (obj.scene !== this) continue;
-    var b = obj.bounds;
-    if (b !== null) {
-      obj.render(ctx, bx+b.x, by+b.y);
-    } else {
-      obj.render(ctx, bx, by);
-    }
+    obj.render(ctx, bx, by);
   }
 };
 

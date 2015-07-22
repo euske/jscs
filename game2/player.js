@@ -27,7 +27,7 @@ FixedSprite.prototype.render = function (ctx, x, y)
   var h = this.bounds.height;
   ctx.drawImage(sprites,
 		this.tileno*tw, tw-h, w, h,
-		x, y, w, h);
+		x+this.bounds.x, y+this.bounds.y, w, h);
 };
 
 
@@ -82,6 +82,8 @@ Player.prototype.render = function (ctx, x, y, front)
   var h = this.bounds.height;
   var afloat = (this.scene.tilesize <= this.z);
   var shadow = true;
+  x += this.bounds.x;
+  y += this.bounds.y;
   if (front) {
     if (afloat) {
       var tilemap = this.scene.tilemap;
