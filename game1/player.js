@@ -71,9 +71,14 @@ Actor2.prototype.getMove = function (v)
 		  d0.y+d1.y+d2.y);
 };
 
-Actor2.prototype.getTilePos = function (rect)
+Actor2.prototype.getPos = function ()
 {
-  var r = this.scene.tilemap.coord2map(rect.center());
+  return this.hitbox.center();
+};
+
+Actor2.prototype.getTilePos = function ()
+{
+  var r = this.scene.tilemap.coord2map(this.hitbox.center());
   return new Vec2(r.x, r.y);
 };
 
@@ -198,7 +203,7 @@ Enemy.prototype.jump = function ()
 
 Enemy.prototype.moveToward = function (p)
 {
-  var dx = (p.x - this.hitbox.center().x);
+  var dx = (p.x - this.getPos().x);
   this.velocity.x = ((0 < dx) ? +1 : -1) * this.speed;
 };
 
@@ -217,7 +222,7 @@ Enemy.prototype.update = function ()
 		predictLandingPoint(tilemap, this.target.hitbox, 
 				    this.target.velocity, this.target.gravity));
   if (hitbox === null) return;
-  var goal = this.target.getTilePos(hitbox);
+  var goal = this.target.getTilePos();
   
   var actor = this;
   function jump(e) {
@@ -244,7 +249,7 @@ Enemy.prototype.update = function ()
     var plan = new PlanMap(tilemap, goal, range,
 			   tilebounds, this.speed,
 			   this.jumpspeed, this.gravity);
-    if (plan.fillPlan(this.getTilePos(this.hitbox))) {
+    if (plan.fillPlan(this.getTilePos())) {
       // start following a plan.
       this.runner = new PlanActionRunner(plan, this);
       this.runner.jump.subscribe(jump);

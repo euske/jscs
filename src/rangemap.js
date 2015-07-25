@@ -63,6 +63,9 @@ RangeMap.prototype.findSimplePath = function (x0, y0, x1, y1, cb)
   var INF = (w+h+1)*2;
   var vx = (x0 <= x1)? +1 : -1;
   var vy = (y0 <= y1)? +1 : -1;
+  var cbx0 = cb.x, cbx1 = cb.right();
+  var cby0 = cb.y, cby1 = cb.bottom();
+  
   for (var dy = 0; dy <= h; dy++) {
     a.push([]);
     // y: y0...y1
@@ -78,7 +81,7 @@ RangeMap.prototype.findSimplePath = function (x0, y0, x1, y1, cb)
 	d = 0;
       } else {
 	d = INF;
-	if (!this.get(x+cb.x, y+cb.y, x+cb.x+cb.width, y+cb.y+cb.height)) {
+	if (!this.get(x+cbx0, y+cby0, x+cbx1, y+cby1)) {
 	  if (0 < dx && a[dy][dx-1].d < d) {
 	    e = a[dy][dx-1];
 	    d = e.d;

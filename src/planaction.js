@@ -37,7 +37,7 @@ function PlanActionRunner(plan, actor)
 {
   this.plan = plan;
   this.actor = actor;
-  var cur = plan.tilemap.coord2map(actor.bounds);
+  var cur = actor.getTilePos();
   this.action = plan.getAction(cur.x, cur.y);
 
   this.moveto = new Slot(this);
@@ -56,7 +56,7 @@ PlanActionRunner.prototype.update = function (goal)
     var actor = this.actor;
     var tilemap = plan.tilemap;
     var valid = plan.isValid(goal);
-    var cur = tilemap.coord2map(actor.bounds);
+    var cur = actor.getTilePos();
     var dst = this.action.next.p;
 
     // Get a micro-level (greedy) plan.
@@ -75,7 +75,8 @@ PlanActionRunner.prototype.update = function (goal)
       var path = map.findSimplePath(cur.x, cur.y, dst.x, dst.y, actor.tilebounds);
       for (var i in path) {
 	var r = tilemap.map2coord(path[i]);
-	var v = new Vec2(r.x-actor.bounds.x, r.y-actor.bounds.y);
+	var v = actor.getPos();
+	var v = new Vec2(r.x-v.x, r.y-v.y);
 	if (actor.isMovable(v)) {
 	  this.moveto.signal(r.center());
 	  break;
@@ -110,7 +111,7 @@ PlanActionRunner.prototype.hasClearance = function (x, y)
 		  y+actor.tilebounds.y, 
 		  actor.tilebounds.width, 
 		  actor.tilebounds.height));
-  r = r.union(actor.bounds);
+  r = r.union(actor.hitbox);
   var stoppable = this.tilemap.getRangeMap(T.isStoppable);
   return (stoppable.get(r.x, r.y, r.right(), r.bottom()) == 0);
 };
