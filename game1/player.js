@@ -183,6 +183,7 @@ Player.prototype.pick = function (a)
 function Enemy(bounds)
 {
   Actor2.call(this, bounds, S.ENEMY);
+  this.jumpacc = -16;
   this.target = null;
   this.runner = null;
 }
@@ -248,7 +249,7 @@ Enemy.prototype.update = function ()
     var range = new Rectangle(goal.x-RANGE, goal.y-RANGE, RANGE*2+1, RANGE*2+1);
     var plan = new PlanMap(tilemap, goal, range,
 			   tilebounds, this.speed,
-			   this.jumpspeed, this.gravity);
+			   -this.jumpacc, this.gravity);
     if (plan.fillPlan(this.getTilePos())) {
       // start following a plan.
       this.runner = new PlanActionRunner(plan, this);

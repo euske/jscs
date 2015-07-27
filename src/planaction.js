@@ -106,12 +106,16 @@ PlanActionRunner.prototype.update = function (goal)
 
 PlanActionRunner.prototype.hasClearance = function (x, y)
 {
-  var r = this.tilemap.map2coord(
+  var plan = this.plan;
+  var actor = this.actor;
+  var tilemap = plan.tilemap;
+
+  var r = tilemap.map2coord(
     new Rectangle(x+actor.tilebounds.x, 
 		  y+actor.tilebounds.y, 
 		  actor.tilebounds.width, 
 		  actor.tilebounds.height));
   r = r.union(actor.hitbox);
-  var stoppable = this.tilemap.getRangeMap(T.isStoppable);
+  var stoppable = tilemap.getRangeMap(T.isStoppable);
   return (stoppable.get(r.x, r.y, r.right(), r.bottom()) == 0);
 };
