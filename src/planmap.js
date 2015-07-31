@@ -31,26 +31,22 @@ function predictLandingPoint(
   // public var range:Rectangle; // search range
   // public var cb:Rectangle;    // character offset and size
   // public var speed:int;       // moving speed while jumping
-  // public var jumpspeed:int;   // initial jumping speed
-  // public var gravity:int;     // gravity acceleration
+  // public var jumprange:Point;   // jump range
+  // public var ascend:Function;   // ascend at t
+  // public var descend:Function;   // descende at t
 function PlanMap(tilemap, goal, range, cb,
-		 speed, jumpspeed, gravity)
+		 speed, jumprange, ascend, descend)
 {
   this.tilemap = tilemap;
   this.goal = goal;
   this.range = range;
   this.cb = cb;
   this.speed = speed;
-  this.jumpspeed = jumpspeed;
-  this.gravity = gravity;
+  this.jumprange = jumprange;
+  this.ascend = ascend;
+  this.descend = descend;
   
   this._map = {}
-  // madt: maximum amount of time for ascending.
-  var madt = Math.floor(jumpspeed / gravity);
-  // madx: maximum horizontal distance while ascending.
-  this._madx = Math.floor(madt*speed / tilemap.tilesize);
-  // mady: maximum vertical distance while ascending.
-  this._mady = Math.floor(ascend(jumpspeed, madt, gravity) / tilemap.tilesize);
 }
 
 PlanMap.prototype.toString = function ()
@@ -181,7 +177,7 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 	  // fdt: time for falling.
 	  var fdt = Math.floor(tilemap.tilesize*fdx/this.speed);
 	  // fdy: amount of falling.
-	  var fdy = Math.ceil(-ascend(0, fdt, this.gravity) / tilemap.tilesize);
+	  var fdy = Math.ceil(this.descend(fdt) / tilemap.tilesize);
 	  for (; fdy <= falldy; fdy++) {
 	    var fy = p.y-fdy;
 	    if (fy < range.y || range.bottom() < fy) break;
@@ -222,12 +218,12 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 
       // try jumping.
       if (context === A.FALL) {
-	for (var jdx = 1; jdx <= this._madx; jdx++) {
+	for (var jdx = 1; jdx <= this.jumprange.x; jdx++) {
 	  // adt: time for ascending.
 	  var adt = Math.floor(jdx*tilemap.tilesize/this.speed);
 	  // ady: minimal ascend.
-	  var ady = Math.floor(ascend(this.jumpspeed, adt, this.gravity) / tilemap.tilesize);
-	  for (var jdy = ady; jdy <= this._mady; jdy++) {
+	  var ady = Math.floor(this.ascend(adt) / tilemap.tilesize);
+	  for (var jdy = ady; jdy <= this.jumprange.y; jdy++) {
 	    // (jx,jy): original position.
 	    var jx = p.x-vx*jdx;
 	    if (jx < range.x || range.right() < jx) break;

@@ -249,7 +249,10 @@ Enemy.prototype.update = function ()
     var range = new Rectangle(goal.x-RANGE, goal.y-RANGE, RANGE*2+1, RANGE*2+1);
     var plan = new PlanMap(tilemap, goal, range,
 			   tilebounds, this.speed,
-			   -this.jumpacc, this.gravity);
+			   new Vec2(2, 3),
+			   (function (t) { return t; }),
+			   (function (t) { return t*t*actor.gravity; })
+			  );
     if (plan.fillPlan(this.getTilePos())) {
       // start following a plan.
       this.runner = new PlanActionRunner(plan, this);
