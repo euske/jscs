@@ -39,11 +39,19 @@ function run()
     if (game.active) {
       game.keydown(e);
       switch (e.keyCode) {
-      case 32:
-      case 37:
-      case 38:
-      case 39:
-      case 40:
+      case 8:			// Backspace
+      case 9:			// Tab
+      case 13:			// Return
+      case 14:			// Enter
+      case 32:			// Space
+      case 33:			// PageUp
+      case 34:			// PageDown
+      case 35:			// End
+      case 36:			// Home
+      case 37:			// Left
+      case 38:			// Up
+      case 39:			// Right
+      case 40:			// Down
 	e.preventDefault();
 	break;
       }
