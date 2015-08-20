@@ -22,7 +22,7 @@ Task.prototype.start = function (scene)
 Task.prototype.update = function ()
 {
   this.body(this);
-}
+};
 
 
 // Queue: a list of Tasks that runs sequentially.

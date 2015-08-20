@@ -33,7 +33,7 @@ function run()
       game.repaint();
       repaint();
     }
-  };
+  }
   
   function keydown(e) {
     if (game.active) {
@@ -56,38 +56,38 @@ function run()
 	break;
       }
     }
-  };
+  }
   
   function keyup(e) {
     if (game.active) {
       game.keyup(e);
     }
-  };
+  }
   
   function mousedown(e) {
     if (game.active) {
       game.mousedown(e);
     }
-  };
+  }
   
   function mouseup(e) {
     if (game.active) {
       game.mouseup(e);
     }
-  };
+  }
   
   function mousemove(e) {
     if (game.active) {
       game.mousemove(e);
     }
-  };
+  }
   
   function focus(e) {
     if (!game.active) {
       game.focus(e);
       repaint();
     }
-  };
+  }
   
   function blur(e) {
     if (game.active) {
@@ -105,7 +105,7 @@ function run()
     ctx.lineTo(frame.width/2+size, frame.height/2);
     ctx.fill();
     ctx.restore();
-  };
+  }
   
   window.addEventListener('keydown', keydown);
   window.addEventListener('keyup', keyup);

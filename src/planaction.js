@@ -117,5 +117,5 @@ PlanActionRunner.prototype.hasClearance = function (x, y)
 		  actor.tilebounds.height));
   r = r.union(actor.hitbox);
   var stoppable = tilemap.getRangeMap(T.isStoppable);
-  return (stoppable.get(r.x, r.y, r.right(), r.bottom()) == 0);
+  return (stoppable.get(r.x, r.y, r.right(), r.bottom()) === 0);
 };

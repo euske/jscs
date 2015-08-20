@@ -48,7 +48,7 @@ RangeMap.prototype.exists = function (rect)
 {
   return (this.get(rect.x, rect.y,
 		   rect.x+rect.width,
-		   rect.y+rect.height) != 0);
+		   rect.y+rect.height) !== 0);
 };
 
 // findSimplePath(x0, y0, x1, x1, cb): 
@@ -77,7 +77,7 @@ RangeMap.prototype.findSimplePath = function (x0, y0, x1, y1, cb)
       var p = new Vec2(x, y);
       var d;
       var e = null;	// the closest neighbor (if exists).
-      if (dx == 0 && dy == 0) {
+      if (dx === 0 && dy === 0) {
 	d = 0;
       } else {
 	d = INF;
@@ -98,11 +98,11 @@ RangeMap.prototype.findSimplePath = function (x0, y0, x1, y1, cb)
     }
   }
   // trace them in a reverse order: from goal to start.
-  var r = []
-  e = a[h][w];
-  while (e != null) {
+  var r = [];
+  var e = a[h][w];
+  while (e !== null) {
     r.push(e.p);
     e = e.next;
   }
   return r;
-}
+};

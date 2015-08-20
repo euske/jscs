@@ -134,7 +134,7 @@ function image2array(img)
   ctx.drawImage(img, 0, 0);
   var data = ctx.getImageData(0, 0, width, height).data;
   var i = 0;
-  var c2v = new Object();
+  var c2v = {};
   for (var y = 0; y < header; y++) {
     for (var x = 0; x < width; x++, i+=4) {
       var c = ((data[i] << 16) | (data[i+1] << 8) | data[i+2]); // RGBA
@@ -165,7 +165,7 @@ function playSound(sound)
 // Slot: an event system
 function Slot(object)
 {
-  this.object = object
+  this.object = object;
   this.receivers = [];
 }
 Slot.prototype.toString = function ()

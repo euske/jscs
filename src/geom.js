@@ -308,7 +308,7 @@ Box.prototype.collideYZPlane = function (v, x, rect)
   }
   dy = v.y*dx / v.x;
   dz = v.z*dx / v.x;
-  if (rect != null) {
+  if (rect !== null) {
     var y = this.origin.y+dy;
     var z = this.origin.z+dz;
     if (y+this.size.y < rect.x || rect.x+rect.width < y ||
@@ -321,7 +321,7 @@ Box.prototype.collideYZPlane = function (v, x, rect)
     }
   }
   return new Vec3(dx, dy, dz);
-}
+};
 
 Box.prototype.collideZXPlane = function (v, y, rect)
 {
@@ -337,7 +337,7 @@ Box.prototype.collideZXPlane = function (v, y, rect)
   }
   dz = v.z*dy / v.y;
   dx = v.x*dy / v.y;
-  if (rect != null) {
+  if (rect !== null) {
     var z = this.origin.z+dz;
     var x = this.origin.x+dx;
     if (z+this.size.z < rect.x || rect.x+rect.width < z ||
@@ -350,7 +350,7 @@ Box.prototype.collideZXPlane = function (v, y, rect)
     }
   }
   return new Vec3(dx, dy, dz);  
-}
+};
 
 Box.prototype.collideXYPlane = function (v, z, rect)
 {
@@ -366,7 +366,7 @@ Box.prototype.collideXYPlane = function (v, z, rect)
   }
   dx = v.x*dz / v.z;
   dy = v.y*dz / v.z;
-  if (rect != null) {
+  if (rect !== null) {
     var x = this.origin.x+dx;
     var y = this.origin.y+dy;
     if (x+this.size.x < rect.x || rect.x+rect.width < x ||
@@ -379,7 +379,7 @@ Box.prototype.collideXYPlane = function (v, z, rect)
     }
   }
   return new Vec3(dx, dy, dz);  
-}
+};
 
 Box.prototype.collide = function (v, box)
 {

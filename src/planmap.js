@@ -17,7 +17,7 @@ function predictLandingPoint(
   for (var dt = 0; dt < maxdt; dt++) {
     var rect1 = hitbox.move(velocity.x*dt, ascend(velocity.y, dt, gravity));
     var b = tilemap.coord2map(rect1);
-    if (stoppable.get(b.x, b.y, b.x+b.width, b.y+b.height) != 0) {
+    if (stoppable.get(b.x, b.y, b.x+b.width, b.y+b.height) !== 0) {
       return rect0;
     }
     rect0 = rect1;
@@ -46,7 +46,7 @@ function PlanMap(tilemap, goal, range, cb,
   this.ascend = ascend;
   this.descend = descend;
   
-  this._map = {}
+  this._map = {};
 }
 
 PlanMap.prototype.toString = function ()
@@ -105,9 +105,9 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 
   if (start !== null &&
       grabbable.get(start.x+cbx0, start.y+cby0,
-		    start.y+cbx1, start.y+cby1) == 0 &&
+		    start.y+cbx1, start.y+cby1) === 0 &&
       stoppable.get(start.x+cbx0, start.y+cby1, 
-		    start.x+cbx1, start.y+cby1+1) == 0) return false;
+		    start.x+cbx1, start.y+cby1+1) === 0) return false;
 
   var queue = [];
   this.addQueue(queue, start, new PlanAction(this.goal));
@@ -117,12 +117,12 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
     var context = a0.context;
     if (start !== null && start.equals(p)) return true;
     if (obstacle.get(p.x+cbx0, p.y+cby0, 
-		     p.x+cbx1, p.y+cby1) != 0) continue;
+		     p.x+cbx1, p.y+cby1) !== 0) continue;
     if (context === null &&
 	grabbable.get(p.x+cbx0, p.y+cby0,
-		      p.x+cbx1, p.y+cby1) == 0 &&
+		      p.x+cbx1, p.y+cby1) === 0 &&
 	stoppable.get(p.x+cbx0, p.y+cby1, 
-		      p.x+cbx1, p.y+cby1+1) == 0) continue;
+		      p.x+cbx1, p.y+cby1+1) === 0) continue;
     // assert(range.x <= p.x && p.x <= range.right());
     // assert(range.y <= p.y && p.y <= range.bottom());
     var cost = a0.cost;
@@ -131,7 +131,7 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
     if (context === null &&
 	range.y <= p.y-1 &&
 	grabbable.get(p.x+cbx0, p.y+cby1,
-		      p.x+cbx1, p.y+cby1+1) != 0) {
+		      p.x+cbx1, p.y+cby1+1) !== 0) {
       cost += 1;
       this.addQueue(queue, start, 
 		    new PlanAction(new Vec2(p.x, p.y-1), null,
@@ -141,7 +141,7 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
     if (context === null &&
 	p.y+1 <= range.bottom &&
 	grabbable.get(p.x+cbx0, p.y+cby0+1,
-		      p.x+cbx1, p.y+cby1+1) != 0) {
+		      p.x+cbx1, p.y+cby1+1) !== 0) {
       cost += 1;
       this.addQueue(queue, start, 
 		    new PlanAction(new Vec2(p.x, p.y+1), null,
@@ -158,11 +158,11 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
       if (context === null &&
 	  range.x <= wx && wx <= range.right() &&
 	  obstacle.get(wx+cbx0, p.y+cby0,
-		       wx+cbx1, p.y+cby1) == 0 &&
+		       wx+cbx1, p.y+cby1) === 0 &&
 	  (grabbable.get(wx+cbx0, p.y+cby0,
-			 wx+cbx1, p.y+cby1) != 0 ||
+			 wx+cbx1, p.y+cby1) !== 0 ||
 	   stoppable.get(wx+cbx0, p.y+cby1,
-			 wx+cbx1, p.y+cby1+1) != 0)) {
+			 wx+cbx1, p.y+cby1+1) !== 0)) {
 	cost += 1;
 	this.addQueue(queue, start, 
 		      new PlanAction(new Vec2(wx, p.y), null,
@@ -190,23 +190,23 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 	    //   ...+-X+ (p.x,p.y)
 	    //     ######
 	    if (obstacle.get(fx+cbx0, fy+cby0,
-			     fx+cbx1, fy+cby1) != 0) continue;
+			     fx+cbx1, fy+cby1) !== 0) continue;
 	    cost += Math.abs(fdx)+Math.abs(fdy)+1;
 	    if (0 < fdx &&
 		stoppable.get(fx+bx0+vx, fy+cby0, 
-			      p.x+bx1, p.y+cby1) == 0 &&
+			      p.x+bx1, p.y+cby1) === 0 &&
 		(grabbable.get(fx+cbx0, fy+cby0, 
-			       fx+cbx1, fy+cby1) != 0 ||
+			       fx+cbx1, fy+cby1) !== 0 ||
 		 stoppable.get(fx+cbx0, fy+cby1, 
-			       fx+cbx1, fy+cby1+1) != 0)) {
+			       fx+cbx1, fy+cby1+1) !== 0)) {
 	      // normal fall.
 	      this.addQueue(queue, start, 
 			    new PlanAction(new Vec2(fx, fy), null,
 					   A.FALL, cost, a0));
 	    }
-	    if (fdy == 0 ||
+	    if (fdy === 0 ||
 		stoppable.get(fx+bx0, fy+cby1, 
-			      p.x+bx1, p.y+cby1) == 0) {
+			      p.x+bx1, p.y+cby1) === 0) {
 	      // fall after jump.
 	      this.addQueue(queue, start, 
 			    new PlanAction(new Vec2(fx, fy), A.FALL,
@@ -238,11 +238,11 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 	    //  +-X+... (jx,jy) original position.
 	    // ######
 	    if (stoppable.get(jx+bx0, jy+cby1, 
-			      p.x+bx1-vx, p.y+cby0) != 0) break;
+			      p.x+bx1-vx, p.y+cby0) !== 0) break;
 	    if (grabbable.get(jx+cbx0, jy+cby0, 
-			      jx+cbx1, jy+cby1) == 0 &&
+			      jx+cbx1, jy+cby1) === 0 &&
 		stoppable.get(jx+cbx0, jy+cby1, 
-			      jx+cbx1, jy+cby1+1) == 0) continue;
+			      jx+cbx1, jy+cby1+1) === 0) continue;
 	    // extra care is needed not to allow the following case:
 	    //      .#
 	    //    +--+

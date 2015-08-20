@@ -22,7 +22,7 @@ function Game(framerate, frame, images, audios, labels)
   var scale = 2;
   this.screen = createCanvas(this.frame.width/scale,
 			     this.frame.height/scale);
-  this.ctx = getEdgeyContext(this.screen)
+  this.ctx = getEdgeyContext(this.screen);
   
   this._key_left = false;
   this._key_right = false;
@@ -48,7 +48,7 @@ Game.prototype.renderString = function (font, text, scale, x, y, align)
 		       x, y, fs*scale, fs*scale);
     x += fs*scale;
   }
-}
+};
 
 Game.prototype.addElement = function (bounds)
 {
@@ -61,12 +61,12 @@ Game.prototype.addElement = function (bounds)
   e.style.padding = '0px';
   this.frame.parentNode.appendChild(e);
   return e;
-}
+};
 
 Game.prototype.removeElement = function (e)
 {
   e.parentNode.removeChild(e);
-}
+};
 
 Game.prototype.keydown = function (ev)
 {

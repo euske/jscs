@@ -121,7 +121,7 @@ TileMap.prototype.getRangeMap = function (f)
     this.rangemap[f] = map;
   }
   return map;
-}
+};
 
 TileMap.prototype.renderFromBottomLeft =
   function (ctx, tiles, ft, 

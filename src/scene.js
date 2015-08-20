@@ -134,13 +134,13 @@ Level.prototype.updateObjects = function (objs)
   for (var i = 0; i < objs.length; i++) {
     objs[i].update();
   }
-}
+};
 
 Level.prototype.cleanObjects = function (objs)
 {
   function f(obj) { return !obj.alive; }
   removeArray(objs, f);
-}
+};
 
 
 //  Title
@@ -171,7 +171,7 @@ Title.prototype.init = function (text)
 Title.prototype.mousedown = function (x, y, button)
 {
   this.changed.signal();
-}
+};
 
 Title.prototype.action = function (action)
 {
