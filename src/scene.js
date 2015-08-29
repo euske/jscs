@@ -5,19 +5,26 @@ function Scene(game)
 {
   this.game = game;
   this.music = null;
-  this.changed = new Slot(this);
 }
 
 Scene.prototype.init = function ()
 {
+  // [OVERRIDE]
+};
+
+Scene.prototype.change = function ()
+{
+  // [OVERRIDE]
 };
 
 Scene.prototype.update = function ()
 {
+  // [OVERRIDE]
 };
 
 Scene.prototype.render = function (ctx, bx, by)
 {
+  // [OVERRIDE]
   // Fill with the background color.
   ctx.fillStyle = 'rgb(0,0,0)';
   ctx.fillRect(bx, by, this.game.screen.width, this.game.screen.height);
@@ -25,35 +32,85 @@ Scene.prototype.render = function (ctx, bx, by)
 
 Scene.prototype.move = function (vx, vy)
 {
+  // [OVERRIDE]
 };
 
 Scene.prototype.action = function (action)
 {
+  // [OVERRIDE]
 };
 
 Scene.prototype.mousedown = function (x, y, button)
 {
+  // [OVERRIDE]
 };
 
 Scene.prototype.mouseup = function (x, y, button)
 {
+  // [OVERRIDE]
 };
 
 Scene.prototype.mousemove = function (x, y)
 {
+  // [OVERRIDE]
+};
+
+Scene.prototype.changeScene = function (scene)
+{
+  var game = this.game;
+  game.post(function () { game.init(scene); });
 };
 
 
-//  Level
+//  TextScene
+//
+function TextScene(game, text)
+{
+  Scene.call(this, game);
+  this.text = text;
+}
+
+TextScene.prototype = Object.create(Scene.prototype);
+
+TextScene.prototype.init = function ()
+{
+  var scene = this;
+  var frame = this.game.frame;
+  var e = this.game.addElement(
+    new Rectangle(frame.width/8, frame.height/4,
+		  3*frame.width/4, frame.height/2));
+  e.align = 'left';
+  e.style.padding = '10px';
+  e.style.color = 'black';
+  e.style.background = 'white';
+  e.style.border = 'solid black 2px';
+  e.innerHTML = this.text;
+  e.onmousedown = (function (e) { scene.change(); });
+};
+
+TextScene.prototype.mousedown = function (x, y, button)
+{
+  this.change();
+};
+
+TextScene.prototype.action = function (action)
+{
+  if (action) {
+    this.change();
+  }
+};
+
+
+//  GameScene
 // 
-function Level(game)
+function GameScene(game)
 {
   Scene.call(this, game);
 }
 
-Level.prototype = Object.create(Scene.prototype);
+GameScene.prototype = Object.create(Scene.prototype);
   
-Level.prototype.init = function ()
+GameScene.prototype.init = function ()
 {
   // [OVERRIDE]
   this.tasks = [];
@@ -62,7 +119,7 @@ Level.prototype.init = function ()
   this.ticks = 0;
 };
 
-Level.prototype.update = function ()
+GameScene.prototype.update = function ()
 {
   // [OVERRIDE]
   this.updateObjects(this.tasks);
@@ -72,7 +129,7 @@ Level.prototype.update = function ()
   this.ticks++;
 };
 
-Level.prototype.render = function (ctx, bx, by)
+GameScene.prototype.render = function (ctx, bx, by)
 {
   // [OVERRIDE]
   Scene.prototype.render.call(this, ctx, bx, by);
@@ -85,7 +142,7 @@ Level.prototype.render = function (ctx, bx, by)
   }
 };
 
-Level.prototype.collide = function (obj0)
+GameScene.prototype.collide = function (obj0)
 {
   var a = [];
   if (obj0.alive && obj0.scene === this && obj0.hitbox !== null) {
@@ -100,7 +157,7 @@ Level.prototype.collide = function (obj0)
   return a;
 };
   
-Level.prototype.addObject = function (obj)
+GameScene.prototype.addObject = function (obj)
 {
   if (obj.update !== undefined) {
     if (obj.scene === null) {
@@ -116,7 +173,7 @@ Level.prototype.addObject = function (obj)
   }
 };
 
-Level.prototype.removeObject = function (obj)
+GameScene.prototype.removeObject = function (obj)
 {
   if (obj.update !== undefined) {
     removeArray(this.tasks, obj);
@@ -129,53 +186,15 @@ Level.prototype.removeObject = function (obj)
   }
 };
 
-Level.prototype.updateObjects = function (objs)
+GameScene.prototype.updateObjects = function (objs)
 {
   for (var i = 0; i < objs.length; i++) {
     objs[i].update();
   }
 };
 
-Level.prototype.cleanObjects = function (objs)
+GameScene.prototype.cleanObjects = function (objs)
 {
   function f(obj) { return !obj.alive; }
   removeArray(objs, f);
-};
-
-
-//  Title
-//
-function Title(game)
-{
-  Scene.call(this, game);
-}
-
-Title.prototype = Object.create(Scene.prototype);
-
-Title.prototype.init = function (text)
-{
-  var frame = this.game.frame;
-  var e = this.game.addElement(
-    new Rectangle(frame.width/8, frame.height/4,
-		  3*frame.width/4, frame.height/2));
-  e.align = 'left';
-  e.style.padding = '10px';
-  e.style.color = 'black';
-  e.style.background = 'white';
-  e.style.border = 'solid black 2px';
-  e.innerHTML = text;
-  var changed = this.changed;
-  e.onmousedown = (function (e) { changed.signal(); });
-};
-
-Title.prototype.mousedown = function (x, y, button)
-{
-  this.changed.signal();
-};
-
-Title.prototype.action = function (action)
-{
-  if (action) {
-    this.changed.signal();
-  }
 };

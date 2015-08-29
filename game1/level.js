@@ -2,11 +2,44 @@
 
 // [GAME SPECIFIC CODE]
 
+//  Scene0
+//
+function Scene0(game)
+{
+  TextScene.call(this, game);
+  this.text = '<b>Sample Game 1</b><p>Made with JSCS<p>Press Enter to start.';
+}
+
+Scene0.prototype = Object.create(TextScene.prototype);
+
+Scene0.prototype.change = function ()
+{
+  this.changeScene(new Level1(this.game));
+}
+
+
+//  EndGame
+//
+function EndGame(game, score)
+{
+  TextScene.call(this, game);
+  this.text = '<b>You Won!</b><p><b>Score:'+score+'</b><p>Press Enter to restart.';
+  this.music = game.audios.ending;
+}
+
+EndGame.prototype = Object.create(TextScene.prototype);
+
+EndGame.prototype.change = function ()
+{
+  this.changeScene(new Level1(this.game));
+}
+
+
 //  Level1
 // 
 function Level1(game)
 {
-  Scene.call(this, game);
+  GameScene.call(this, game);
   
   this.tilesize = 32;
   this.window = new Rectangle(0, 0, game.screen.width, game.screen.height);
@@ -14,7 +47,7 @@ function Level1(game)
   this.music = game.audios.music;
 }
 
-Level1.prototype = Object.create(Level.prototype);
+Level1.prototype = Object.create(GameScene.prototype);
   
 Level1.prototype.setCenter = function (rect)
 {
@@ -104,7 +137,7 @@ Level1.prototype.render = function (ctx, bx, by)
 
 Level1.prototype.init = function ()
 {
-  Level.prototype.init.call(this);
+  GameScene.prototype.init.call(this);
   
   // [OVERRIDE]
   // [GAME SPECIFIC CODE]
@@ -193,7 +226,7 @@ Level1.prototype.init = function ()
       // delay calling.
       scene.addObject(new Task(function (task) {
 	if (task.ticks0+game.framerate < scene.ticks) {
-	  scene.changed.signal('WON', scene.score);
+	  scene.change('WON', scene.score);
 	}
       }));
     }
@@ -242,3 +275,8 @@ Level1.prototype.updateScore = function ()
   // [GAME SPECIFIC CODE]
   this.score_node.innerHTML = ('Score: '+this.score);
 };
+
+Level1.prototype.change = function (state, score)
+{
+  this.changeScene(new EndGame(this.game, score));
+}

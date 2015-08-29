@@ -217,7 +217,25 @@ Game.prototype.blur = function (ev)
   this.active = false;
 };
 
-Game.prototype.init = function (state, score)
+Game.prototype.init = function (scene)
+{
+  // [OVERRIDE]
+  // [GAME SPECIFIC CODE]
+  removeChildren(this.frame.parentNode, 'div');
+  if (this.music !== null) {
+    this.music.pause();
+  }
+
+  this.scene = scene;
+  this.scene.init();
+  this.music = this.scene.music;
+  
+  if (this.music !== null) {
+    playSound(this.music);
+  }
+}
+
+Game.prototype.init_ = function (state, score)
 {
   // [OVERRIDE]
   // [GAME SPECIFIC CODE]
