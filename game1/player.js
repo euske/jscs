@@ -1,6 +1,6 @@
 // player.js
 
-// [GAME SPECIFIC CODE]
+// [APP SPECIFIC CODE]
 
 // FixedSprite
 function FixedSprite(bounds, duration, tileno)
@@ -21,7 +21,7 @@ FixedSprite.prototype.update = function ()
 
 FixedSprite.prototype.render = function (ctx, bx, by)
 {
-  var sprites = this.scene.game.sprites;
+  var sprites = this.scene.app.sprites;
   var tw = sprites.height;
   var w = this.bounds.width;
   var h = this.bounds.height;
@@ -175,7 +175,7 @@ Player.prototype.pick = function (a)
   a.alive = false;
   this.picked.signal();
   // show a particle.
-  var particle = new FixedSprite(a.bounds, this.scene.game.framerate, S.YAY);
+  var particle = new FixedSprite(a.bounds, this.scene.app.framerate, S.YAY);
   this.scene.addObject(particle);
 };
 

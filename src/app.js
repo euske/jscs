@@ -1,9 +1,9 @@
-// game.js
+// app.js
 
-// Game class handles the event loop and global state management.
+// App class handles the event loop and global state management.
 // It also has shared resources (images, audios, etc.)
 
-function Game(framerate, frame, images, audios, labels)
+function App(framerate, frame, images, audios, labels)
 {
   this.framerate = framerate;
   this.frame = frame;
@@ -14,15 +14,15 @@ function Game(framerate, frame, images, audios, labels)
   this.msgs = [];
   this.music = null;
 
-  // [GAME SPECIFIC CODE]
-  this.sprites = this.images.sprites;
-  this.tiles = this.images.tiles;
-
   // Initialize the off-screen bitmap.
   var scale = 2;
   this.screen = createCanvas(this.frame.width/scale,
 			     this.frame.height/scale);
   this.ctx = getEdgeyContext(this.screen);
+
+  // [GAME SPECIFIC CODE]
+  this.sprites = this.images.sprites;
+  this.tiles = this.images.tiles;
   
   this._key_left = false;
   this._key_right = false;
@@ -33,7 +33,7 @@ function Game(framerate, frame, images, audios, labels)
   this._vy = 0;
 }
 
-Game.prototype.renderString = function (font, text, scale, x, y, align)
+App.prototype.renderString = function (font, text, scale, x, y, align)
 {
   var fs = font.height;
   if (align == 'right') {
@@ -50,7 +50,7 @@ Game.prototype.renderString = function (font, text, scale, x, y, align)
   }
 };
 
-Game.prototype.addElement = function (bounds)
+App.prototype.addElement = function (bounds)
 {
   var e = document.createElement('div');
   e.style.position = 'absolute';
@@ -63,14 +63,15 @@ Game.prototype.addElement = function (bounds)
   return e;
 };
 
-Game.prototype.removeElement = function (e)
+App.prototype.removeElement = function (e)
 {
   e.parentNode.removeChild(e);
 };
 
-Game.prototype.keydown = function (ev)
+App.prototype.keydown = function (ev)
 {
   // [OVERRIDE]
+  // [GAME SPECIFIC CODE]
   switch (ev.keyCode) {
   case 37:			// LEFT
   case 65:			// A
@@ -119,9 +120,10 @@ Game.prototype.keydown = function (ev)
   }
 };
 
-Game.prototype.keyup = function (ev)
+App.prototype.keyup = function (ev)
 {
   // [OVERRIDE]
+  // [GAME SPECIFIC CODE]
   switch (ev.keyCode) {
   case 37:			// LEFT
   case 65:			// A
@@ -161,7 +163,7 @@ Game.prototype.keyup = function (ev)
   }
 };
 
-Game.prototype.mousedown = function (ev)
+App.prototype.mousedown = function (ev)
 {
   // [OVERRIDE]
   if (this.scene.mousedown !== undefined) {
@@ -174,7 +176,7 @@ Game.prototype.mousedown = function (ev)
   }
 };
 
-Game.prototype.mouseup = function (ev)
+App.prototype.mouseup = function (ev)
 {
   // [OVERRIDE]
   if (this.scene.mouseup !== undefined) {
@@ -187,7 +189,7 @@ Game.prototype.mouseup = function (ev)
   }
 };
 
-Game.prototype.mousemove = function (ev)
+App.prototype.mousemove = function (ev)
 {
   // [OVERRIDE]
   if (this.scene.mousemove !== undefined) {
@@ -199,7 +201,7 @@ Game.prototype.mousemove = function (ev)
   }
 };
 
-Game.prototype.focus = function (ev)
+App.prototype.focus = function (ev)
 {
   // [OVERRIDE]
   this.active = true;
@@ -208,7 +210,7 @@ Game.prototype.focus = function (ev)
   }
 };
 
-Game.prototype.blur = function (ev)
+App.prototype.blur = function (ev)
 {
   // [OVERRIDE]
   if (this.music !== null) {
@@ -217,10 +219,9 @@ Game.prototype.blur = function (ev)
   this.active = false;
 };
 
-Game.prototype.init = function (scene)
+App.prototype.init = function (scene)
 {
   // [OVERRIDE]
-  // [GAME SPECIFIC CODE]
   removeChildren(this.frame.parentNode, 'div');
   if (this.music !== null) {
     this.music.pause();
@@ -235,64 +236,12 @@ Game.prototype.init = function (scene)
   }
 }
 
-Game.prototype.init_ = function (state, score)
-{
-  // [OVERRIDE]
-  // [GAME SPECIFIC CODE]
-  removeChildren(this.frame.parentNode, 'div');
-  if (this.music !== null) {
-    this.music.pause();
-  }
-
-  var game = this;
-  function title_changed(e) {
-    game.post(function () { game.init(1); });
-  }
-  function level_changed(e, arg, score) {
-    switch (arg) {
-    case 'WON': game.post(function () { game.init(2, score); }); break;
-    case 'LOST': game.post(function () { game.init(3, score); }); break;
-    }
-  }
-  switch (state) {
-  case 0:
-    this.scene = new Title(this);
-    this.scene.init('<b>Sample Game</b><p>Made with JSCS<p>Press Enter to start.');
-    this.scene.changed.subscribe(title_changed);
-    this.music = null;
-    break;
-  case 1:
-    this.scene = new Level1(this);
-    this.scene.init();
-    this.scene.changed.subscribe(level_changed);
-    this.music = this.scene.music;
-    this.music = null;
-    break;
-  case 2:
-    this.scene = new Title(this);
-    this.scene.init('<b>You Won!</b><p><b>Score:'+score+'</b><p>Press Enter to restart.');
-    this.scene.changed.subscribe(title_changed);
-    this.music = this.audios.ending;
-    break;
-  case 3:
-    this.scene = new Title(this);
-    this.scene.init('<b>You Lost!</b><p><b>Score:'+score+'</b><p>Press Enter to restart.');
-    this.scene.changed.subscribe(title_changed);
-    this.music = this.audios.explosion;
-    break;
-  }
-  
-  if (this.music !== null) {
-    playSound(this.music);
-  }
-};
-
-Game.prototype.post = function (msg)
+App.prototype.post = function (msg)
 {
   this.msgs.push(msg);
 };
 
-Game.prototype.update = function ()
+App.prototype.update = function ()
 {
   // [OVERRIDE]
   // [GAME SPECIFIC CODE]
@@ -305,10 +254,9 @@ Game.prototype.update = function ()
   }
 };
 
-Game.prototype.repaint = function ()
+App.prototype.repaint = function ()
 {
   // [OVERRIDE]
-  // [GAME SPECIFIC CODE]
   this.ctx.clearRect(0, 0, this.screen.width, this.screen.height);
   this.ctx.save();
   this.scene.render(this.ctx, 0, 0);

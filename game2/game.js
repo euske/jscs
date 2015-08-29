@@ -1,18 +1,51 @@
-// level.js
+// game.js
 
 // [GAME SPECIFIC CODE]
 
-//  Level1
-// 
-function Level1(game)
+//  Title
+//
+function Title(app)
 {
-  Scene.call(this, game);
-  
-  this.tilesize = 32;
-  //this.music = game.audios.music;
+  TextScene.call(this, app);
+  this.text = '<b>Sample Game 2</b><p>Made with JSCS<p>Press Enter to start.';
 }
 
-Level1.prototype = Object.create(Level.prototype);
+Title.prototype = Object.create(TextScene.prototype);
+
+Title.prototype.change = function ()
+{
+  this.changeScene(new Level1(this.app));
+}
+
+
+//  GameOver
+//
+function GameOver(app, score)
+{
+  TextScene.call(this, app);
+  this.text = '<b>Game Over!</b><p><b>Score: '+score+'</b><p>Press Enter to restart.';
+  this.music = app.audios.explosion;
+}
+
+GameOver.prototype = Object.create(TextScene.prototype);
+
+GameOver.prototype.change = function ()
+{
+  this.changeScene(new Level1(this.app));
+}
+
+
+//  Level1
+// 
+function Level1(app)
+{
+  Scene.call(this, app);
+  
+  this.tilesize = 32;
+  //this.music = app.audios.music;
+}
+
+Level1.prototype = Object.create(GameScene.prototype);
   
 Level1.prototype.render = function (ctx, bx, by)
 {
@@ -21,7 +54,7 @@ Level1.prototype.render = function (ctx, bx, by)
   var window = this.window;
   var tilemap = this.tilemap;
   bx -= tilesize;
-  by += (this.game.screen.height-this.window.height)/2;
+  by += (this.app.screen.height-this.window.height)/2;
 
   // Fill with the background color.
   ctx.fillStyle = 'rgb(0,0,128)';
@@ -73,7 +106,7 @@ Level1.prototype.render = function (ctx, bx, by)
     return (c == T.NONE? -1 : c);
   };
   tilemap.renderFromTopRight(
-    ctx, this.game.tiles, ft, 
+    ctx, this.app.tiles, ft, 
     bx+fx, by+fy, x0, y0, x1-x0+1, y1-y0+1);
 
   // Draw floating objects.
@@ -158,16 +191,16 @@ Level1.prototype.moveAll = function (vx, vy)
 
 Level1.prototype.update = function ()
 {
-  Level.prototype.update.call(this);
+  GameScene.prototype.update.call(this);
   this.moveAll(this.speed.x, this.speed.y);
   if (this.player.hitbox.right() < this.tilesize) {
-    this.changed.signal('LOST', this.score);
+    this.change('LOST', this.score);
   }
 };
 
 Level1.prototype.init = function ()
 {
-  Level.prototype.init.call(this);
+  GameScene.prototype.init.call(this);
   
   // [OVERRIDE]
   // [GAME SPECIFIC CODE]
@@ -184,17 +217,17 @@ Level1.prototype.init = function ()
   this.speed = new Vec2(2, 0);
   this.window = new Rectangle(0, 0, this.tilemap.width*this.tilesize, this.tilemap.height*this.tilesize);
   
-  var game = this.game;
+  var app = this.app;
   var scene = this;
   var rect = new Rectangle(2, 3, 1, 1);
   this.player = new Player(this.tilemap.map2coord(rect));
   this.addObject(this.player);
   
   function player_jumped(e) {
-    playSound(game.audios.jump);
+    playSound(app.audios.jump);
   }
   function player_picked(e) {
-    playSound(game.audios.pick);
+    playSound(app.audios.pick);
     scene.score++;
     scene.updateScore();
     scene.speed.x++;
@@ -202,7 +235,7 @@ Level1.prototype.init = function ()
   this.player.picked.subscribe(player_picked);
   this.player.jumped.subscribe(player_jumped);
 
-  this.score_node = game.addElement(new Rectangle(10, 10, 160, 32));
+  this.score_node = app.addElement(new Rectangle(10, 10, 160, 32));
   this.score_node.align = 'left';
   this.score_node.style.color = 'white';
   this.score_node.style['font-size'] = '150%';
@@ -213,12 +246,12 @@ Level1.prototype.init = function ()
   // show a banner.
   var banner = new Sprite(null);
   banner.update = function () {
-    banner.alive = (scene.ticks < banner.ticks0+game.framerate*2);
+    banner.alive = (scene.ticks < banner.ticks0+app.framerate*2);
   };
   banner.render = function (ctx, x, y) {
-    if (blink(scene.ticks, game.framerate/2)) {
-      game.renderString(game.images.font_w, 'GET ALL TEH DAMN THINGIES!', 1,
-			x+scene.window.width/2, y+50, 'center');
+    if (blink(scene.ticks, app.framerate/2)) {
+      app.renderString(app.images.font_w, 'GET ALL TEH DAMN THINGIES!', 1,
+		       x+scene.window.width/2, y+50, 'center');
     }
   };
   this.addObject(banner);
@@ -241,3 +274,9 @@ Level1.prototype.updateScore = function ()
   // [GAME SPECIFIC CODE]
   this.score_node.innerHTML = ('Score: '+this.score);
 };
+
+Level1.prototype.change = function (state, score)
+{
+  // [GAME SPECIFIC CODE]
+  this.changeScene(new GameOver(this.app, score));
+}

@@ -1,9 +1,9 @@
 // scene.js
 // Scene object takes care of every in-game object and the scrollable map.
 
-function Scene(game)
+function Scene(app)
 {
-  this.game = game;
+  this.app = app;
   this.music = null;
 }
 
@@ -27,7 +27,7 @@ Scene.prototype.render = function (ctx, bx, by)
   // [OVERRIDE]
   // Fill with the background color.
   ctx.fillStyle = 'rgb(0,0,0)';
-  ctx.fillRect(bx, by, this.game.screen.width, this.game.screen.height);
+  ctx.fillRect(bx, by, this.app.screen.width, this.app.screen.height);
 };
 
 Scene.prototype.move = function (vx, vy)
@@ -57,16 +57,16 @@ Scene.prototype.mousemove = function (x, y)
 
 Scene.prototype.changeScene = function (scene)
 {
-  var game = this.game;
-  game.post(function () { game.init(scene); });
+  var app = this.app;
+  app.post(function () { app.init(scene); });
 };
 
 
 //  TextScene
 //
-function TextScene(game, text)
+function TextScene(app, text)
 {
-  Scene.call(this, game);
+  Scene.call(this, app);
   this.text = text;
 }
 
@@ -75,8 +75,8 @@ TextScene.prototype = Object.create(Scene.prototype);
 TextScene.prototype.init = function ()
 {
   var scene = this;
-  var frame = this.game.frame;
-  var e = this.game.addElement(
+  var frame = this.app.frame;
+  var e = this.app.addElement(
     new Rectangle(frame.width/8, frame.height/4,
 		  3*frame.width/4, frame.height/2));
   e.align = 'left';
@@ -103,9 +103,9 @@ TextScene.prototype.action = function (action)
 
 //  GameScene
 // 
-function GameScene(game)
+function GameScene(app)
 {
-  Scene.call(this, game);
+  Scene.call(this, app);
 }
 
 GameScene.prototype = Object.create(Scene.prototype);

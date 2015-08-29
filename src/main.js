@@ -2,7 +2,7 @@
 
 // Browser interaction.
 
-function run()
+function run(scene0)
 {
   // [NO NEED TO CHANGE]
   
@@ -17,27 +17,27 @@ function run()
   var audios = getprops(document.getElementsByTagName('audio'));
   var labels = getprops(document.getElementsByClassName('label'));
   var frame = document.getElementById('main');
-  var game = new Game(framerate, frame, images, audios, labels);
+  var app = new App(framerate, frame, images, audios, labels);
   var ctx = getEdgeyContext(frame);
   var timer;
   
   function repaint() {
-    ctx.drawImage(game.screen,
-		  0, 0, game.screen.width, game.screen.height,
+    ctx.drawImage(app.screen,
+		  0, 0, app.screen.width, app.screen.height,
 		  0, 0, frame.width, frame.height);
   }    
   
   function update() {
-    if (game.active) {
-      game.update();
-      game.repaint();
+    if (app.active) {
+      app.update();
+      app.repaint();
       repaint();
     }
   }
   
   function keydown(e) {
-    if (game.active) {
-      game.keydown(e);
+    if (app.active) {
+      app.keydown(e);
       switch (e.keyCode) {
       case 8:			// Backspace
       case 9:			// Tab
@@ -59,39 +59,39 @@ function run()
   }
   
   function keyup(e) {
-    if (game.active) {
-      game.keyup(e);
+    if (app.active) {
+      app.keyup(e);
     }
   }
   
   function mousedown(e) {
-    if (game.active) {
-      game.mousedown(e);
+    if (app.active) {
+      app.mousedown(e);
     }
   }
   
   function mouseup(e) {
-    if (game.active) {
-      game.mouseup(e);
+    if (app.active) {
+      app.mouseup(e);
     }
   }
   
   function mousemove(e) {
-    if (game.active) {
-      game.mousemove(e);
+    if (app.active) {
+      app.mousemove(e);
     }
   }
   
   function focus(e) {
-    if (!game.active) {
-      game.focus(e);
+    if (!app.active) {
+      app.focus(e);
       repaint();
     }
   }
   
   function blur(e) {
-    if (game.active) {
-      game.blur(e);
+    if (app.active) {
+      app.blur(e);
       repaint();
     }
     var size = 50;
@@ -115,7 +115,7 @@ function run()
   window.addEventListener('focus', focus);
   window.addEventListener('blur', blur);
   
-  game.init(new Scene0(game));
-  game.focus(null);
+  app.init(new scene0(app));
+  app.focus(null);
   timer = window.setInterval(update, 1000/framerate);
 }

@@ -97,7 +97,7 @@ Actor.prototype = Object.create(Sprite.prototype);
 Actor.prototype.render = function (ctx, x, y)
 {
   // [OVERRIDE]
-  var sprites = this.scene.game.sprites;
+  var sprites = this.scene.app.sprites;
   var tw = sprites.height;
   var w = this.bounds.width;
   var h = this.bounds.height;

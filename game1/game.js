@@ -1,50 +1,50 @@
-// level.js
+// game.js
 
 // [GAME SPECIFIC CODE]
 
-//  Scene0
+//  Title
 //
-function Scene0(game)
+function Title(app)
 {
-  TextScene.call(this, game);
+  TextScene.call(this, app);
   this.text = '<b>Sample Game 1</b><p>Made with JSCS<p>Press Enter to start.';
 }
 
-Scene0.prototype = Object.create(TextScene.prototype);
+Title.prototype = Object.create(TextScene.prototype);
 
-Scene0.prototype.change = function ()
+Title.prototype.change = function ()
 {
-  this.changeScene(new Level1(this.game));
+  this.changeScene(new Level1(this.app));
 }
 
 
 //  EndGame
 //
-function EndGame(game, score)
+function EndGame(app, score)
 {
-  TextScene.call(this, game);
-  this.text = '<b>You Won!</b><p><b>Score:'+score+'</b><p>Press Enter to restart.';
-  this.music = game.audios.ending;
+  TextScene.call(this, app);
+  this.text = '<b>You Won!</b><p><b>Score: '+score+'</b><p>Press Enter to restart.';
+  this.music = app.audios.ending;
 }
 
 EndGame.prototype = Object.create(TextScene.prototype);
 
 EndGame.prototype.change = function ()
 {
-  this.changeScene(new Level1(this.game));
+  this.changeScene(new Level1(this.app));
 }
 
 
 //  Level1
 // 
-function Level1(game)
+function Level1(app)
 {
-  GameScene.call(this, game);
+  GameScene.call(this, app);
   
   this.tilesize = 32;
-  this.window = new Rectangle(0, 0, game.screen.width, game.screen.height);
-  this.world = new Rectangle(0, 0, game.screen.width, game.screen.height);
-  this.music = game.audios.music;
+  this.window = new Rectangle(0, 0, app.screen.width, app.screen.height);
+  this.world = new Rectangle(0, 0, app.screen.width, app.screen.height);
+  this.music = app.audios.music;
 }
 
 Level1.prototype = Object.create(GameScene.prototype);
@@ -119,7 +119,7 @@ Level1.prototype.render = function (ctx, bx, by)
     return (c == T.NONE? -1 : c);
   };
   tilemap.renderFromBottomLeft(
-    ctx, this.game.tiles, ft, 
+    ctx, this.app.tiles, ft, 
     bx+fx, by+fy, x0, y0, x1-x0+1, y1-y0+1);
 
   // Draw floating objects.
@@ -167,7 +167,7 @@ Level1.prototype.init = function ()
   this.window.height = Math.min(this.world.height, this.window.height);
 
   this.collectibles = 0;
-  var game = this.game;
+  var app = this.app;
   var scene = this;
   var tilemap = this.tilemap;
   var f = function (x,y) {
@@ -190,17 +190,17 @@ Level1.prototype.init = function ()
   this.addObject(enemy);
   
   function player_jumped(e) {
-    playSound(game.audios.jump);
+    playSound(app.audios.jump);
   }
   function player_picked(e) {
-    playSound(game.audios.pick);
+    playSound(app.audios.pick);
     scene.score++;
     scene.updateScore();
     
     // show a balloon.
-    var frame = game.frame;
+    var frame = app.frame;
     var text = 'Got a thingy!';
-    var e = game.addElement(new Rectangle(20, 20, frame.width-60, 60))
+    var e = app.addElement(new Rectangle(20, 20, frame.width-60, 60))
     e.align = 'left';
     e.style.padding = '10px';
     e.style.color = 'black';
@@ -213,7 +213,7 @@ Level1.prototype.init = function ()
 	  i++;
 	  e.innerHTML = text.substring(0, i);
 	} else {
-	  game.removeElement(e);
+	  app.removeElement(e);
 	  task.alive = false;
 	}
       }
@@ -225,7 +225,7 @@ Level1.prototype.init = function ()
     if (scene.collectibles == 0) {
       // delay calling.
       scene.addObject(new Task(function (task) {
-	if (task.ticks0+game.framerate < scene.ticks) {
+	if (task.ticks0+app.framerate < scene.ticks) {
 	  scene.change('WON', scene.score);
 	}
       }));
@@ -234,7 +234,7 @@ Level1.prototype.init = function ()
   this.player.picked.subscribe(player_picked);
   this.player.jumped.subscribe(player_jumped);
 
-  this.score_node = game.addElement(new Rectangle(10, 10, 160, 32));
+  this.score_node = app.addElement(new Rectangle(10, 10, 160, 32));
   this.score_node.align = 'left';
   this.score_node.style.color = 'white';
   this.score_node.style['font-size'] = '150%';
@@ -245,12 +245,12 @@ Level1.prototype.init = function ()
   // show a banner.
   var banner = new Sprite(null);
   banner.update = function () {
-    banner.alive = (scene.ticks < banner.ticks0+game.framerate*2);
+    banner.alive = (scene.ticks < banner.ticks0+app.framerate*2);
   };
   banner.render = function (ctx, x, y) {
-    if (blink(scene.ticks, game.framerate/2)) {
-      game.renderString(game.images.font_w, 'GET ALL TEH DAMN THINGIES!', 1,
-			x+scene.window.width/2, y+50, 'center');
+    if (blink(scene.ticks, app.framerate/2)) {
+      app.renderString(app.images.font_w, 'GET ALL TEH DAMN THINGIES!', 1,
+		       x+scene.window.width/2, y+50, 'center');
     }
   };
   this.addObject(banner);
@@ -278,5 +278,6 @@ Level1.prototype.updateScore = function ()
 
 Level1.prototype.change = function (state, score)
 {
-  this.changeScene(new EndGame(this.game, score));
+  // [GAME SPECIFIC CODE]
+  this.changeScene(new EndGame(this.app, score));
 }
