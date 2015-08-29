@@ -52,7 +52,7 @@ Actor2.prototype.update = function ()
   this.velocity.y += this.gravity;
   this.velocity.y = clamp(-this.maxspeed, this.velocity.y, this.maxspeed);
   var v = this.getMove(this.velocity);
-  this.landed = (0 < this.velocity.y && v.y == 0);
+  this.landed = (0 < this.velocity.y && v.y === 0);
   this.velocity = v;
   this.move(this.velocity.x, this.velocity.y);
 };
@@ -238,7 +238,7 @@ Enemy.prototype.update = function ()
   var obstacle = tilemap.getRangeMap(T.isObstacle);
   for (var dx = 0; dx <= tilebounds.width; dx++) {
     if (obstacle.get(goal.x-dx+tilebounds.x, goal.y+tilebounds.y,
-		     goal.x-dx+tilebounds.right(), goal.y+tilebounds.bottom()) == 0) {
+		     goal.x-dx+tilebounds.right(), goal.y+tilebounds.bottom()) === 0) {
       goal.x -= dx;
       break;
     }

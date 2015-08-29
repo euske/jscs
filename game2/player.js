@@ -55,7 +55,7 @@ Player.prototype = Object.create(Actor.prototype);
 Player.prototype.toString = function ()
 {
   return '<Player: '+this.bounds+'>';
-}
+};
 
 Player.prototype.update = function ()
 {
@@ -82,16 +82,16 @@ Player.prototype.render = function (ctx, x, y, front)
   var h = this.bounds.height;
   var afloat = (this.scene.tilesize <= this.z);
   var shadow = true;
+  var tilemap = this.scene.tilemap;
+  var r = tilemap.coord2map(this.hitbox);
+  function isfloor(x, y) {
+    return (tilemap.get(r.x, r.y) == T.FLOOR);
+  }
   x += this.bounds.x;
   y += this.bounds.y;
   if (front) {
     if (afloat) {
-      var tilemap = this.scene.tilemap;
-      var r = tilemap.coord2map(this.hitbox);
-      function f(x, y) {
-	return (tilemap.get(r.x, r.y) == T.FLOOR);
-      }
-      if (tilemap.apply(r, f) != null) {
+      if (tilemap.apply(r, isfloor) !== null) {
 	ctx.drawImage(sprites,
 		      S.SHADOW*tw, tw-h, w, h,
 		      x, y-h/2, w, h);
@@ -125,7 +125,7 @@ Player.prototype.usermove = function (vx, vy)
     this.z += v.z;
     this._gz = v.z;
   }
-}
+};
 
 Player.prototype.collideTile = function (p, v0)
 {
@@ -177,7 +177,7 @@ Player.prototype.jump = function (jumping)
     var p = new Vec3(this.hitbox.x, this.hitbox.y, this.z);
     var v = new Vec3(0, 0, this._gz);
     var d = this.collideTile(p, v);
-    if (this._gz < 0 && d.z == 0) {
+    if (this._gz < 0 && d.z === 0) {
       this._gz = this.jumpacc;
       this._jumpt = 0;
       this.jumped.signal();

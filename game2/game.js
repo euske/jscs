@@ -15,7 +15,7 @@ Title.prototype = Object.create(TextScene.prototype);
 Title.prototype.change = function ()
 {
   this.changeScene(new Level1(this.app));
-}
+};
 
 
 //  GameOver
@@ -32,7 +32,7 @@ GameOver.prototype = Object.create(TextScene.prototype);
 GameOver.prototype.change = function ()
 {
   this.changeScene(new Level1(this.app));
-}
+};
 
 
 //  Level1
@@ -136,15 +136,15 @@ Level1.prototype.scrollTile = function (vx, vy)
     for (var y = 1; y < this.tilemap.height-1; y++) {
       this.tilemap.set(x, y, T.NONE);
     }
-    if (rnd(10) == 0) {
+    if (rnd(10) === 0) {
       var y = rnd(1, this.tilemap.height-1);
       this.tilemap.set(x, y, T.WALL);
     }
-    if (rnd(3) == 0) {
+    if (rnd(3) === 0) {
       var y = rnd(1, this.tilemap.height-1);
       this.tilemap.set(x, y, T.FLOOR);
     }
-    if (rnd(3) == 0) {
+    if (rnd(3) === 0) {
       var y = rnd(1, this.tilemap.height-1);
       var rect = new Rectangle(x+this.tilemap.width, y, 1, 1);
       rect = this.tilemap.map2coord(rect);
@@ -165,7 +165,7 @@ Level1.prototype.moveAll = function (vx, vy)
   
   var x0 = Math.floor(window.x/tilesize);
   var y0 = Math.floor(window.y/tilesize);
-  if (x0 != 0 || y0 != 0) {
+  if (x0 !== 0 || y0 !== 0) {
     // warp all the tiles and characters.
     this.scrollTile(x0, y0);
     var wx = -x0*tilesize;
@@ -208,7 +208,7 @@ Level1.prototype.init = function ()
   for (var y = 0; y < map.length; y++) {
     var row = new Array(12);
     for (var x = 0; x < row.length; x++) {
-      row[x] = (y == 0 || y == map.length-1)? T.WALL : T.NONE;
+      row[x] = (y === 0 || y == map.length-1)? T.WALL : T.NONE;
     }
     map[y] = row;
   }
@@ -279,4 +279,4 @@ Level1.prototype.change = function (state, score)
 {
   // [GAME SPECIFIC CODE]
   this.changeScene(new GameOver(this.app, score));
-}
+};

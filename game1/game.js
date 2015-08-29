@@ -15,7 +15,7 @@ Title.prototype = Object.create(TextScene.prototype);
 Title.prototype.change = function ()
 {
   this.changeScene(new Level1(this.app));
-}
+};
 
 
 //  EndGame
@@ -32,7 +32,7 @@ EndGame.prototype = Object.create(TextScene.prototype);
 EndGame.prototype.change = function ()
 {
   this.changeScene(new Level1(this.app));
-}
+};
 
 
 //  Level1
@@ -200,7 +200,7 @@ Level1.prototype.init = function ()
     // show a balloon.
     var frame = app.frame;
     var text = 'Got a thingy!';
-    var e = app.addElement(new Rectangle(20, 20, frame.width-60, 60))
+    var e = app.addElement(new Rectangle(20, 20, frame.width-60, 60));
     e.align = 'left';
     e.style.padding = '10px';
     e.style.color = 'black';
@@ -208,7 +208,7 @@ Level1.prototype.init = function ()
     e.style.border = 'solid black 2px';
     var i = 0;
     function balloon(task) {
-      if ((scene.ticks % 2) == 0) {
+      if ((scene.ticks % 2) === 0) {
 	if (i < text.length) {
 	  i++;
 	  e.innerHTML = text.substring(0, i);
@@ -222,7 +222,7 @@ Level1.prototype.init = function ()
 
     // count the score.
     scene.collectibles--;
-    if (scene.collectibles == 0) {
+    if (scene.collectibles === 0) {
       // delay calling.
       scene.addObject(new Task(function (task) {
 	if (task.ticks0+app.framerate < scene.ticks) {
@@ -280,4 +280,4 @@ Level1.prototype.change = function (state, score)
 {
   // [GAME SPECIFIC CODE]
   this.changeScene(new EndGame(this.app, score));
-}
+};

@@ -234,7 +234,7 @@ App.prototype.init = function (scene)
   if (this.music !== null) {
     playSound(this.music);
   }
-}
+};
 
 App.prototype.post = function (msg)
 {
