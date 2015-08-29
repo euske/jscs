@@ -4,8 +4,8 @@
 // Vec2
 function Vec2(x, y)
 {
-  this.x = x;
-  this.y = y;
+  this.x = (x !== undefined)? x : 0;
+  this.y = (y !== undefined)? y : 0;
 }
 Vec2.prototype.toString = function ()
 {
@@ -49,9 +49,9 @@ Vec2.prototype.move = function (dx, dy)
 // Vec3
 function Vec3(x, y, z)
 {
-  this.x = x;
-  this.y = y;
-  this.z = z;
+  this.x = (x !== undefined)? x : 0;
+  this.y = (y !== undefined)? y : 0;
+  this.z = (z !== undefined)? z : 0;
 }
 Vec3.prototype.toString = function ()
 {
@@ -87,8 +87,8 @@ function Rectangle(x, y, width, height)
 {
   this.x = x;
   this.y = y;
-  this.width = width;
-  this.height = height;
+  this.width = (width !== undefined)? width : 0;
+  this.height = (height !== undefined)? height : 0;
 }
 Rectangle.prototype.toString = function () 
 {
@@ -233,7 +233,7 @@ Rectangle.prototype.collide = function (v, rect)
 function Box(origin, size)
 {
   this.origin = origin;
-  this.size = size;
+  this.size = (size !== undefined)? size : new Vec3();
 }
 Box.prototype.toString = function () 
 {

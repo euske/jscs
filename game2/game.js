@@ -57,7 +57,7 @@ Level1.prototype.render = function (ctx, bx, by)
   by += (this.app.screen.height-this.window.height)/2;
 
   // Fill with the background color.
-  ctx.fillStyle = 'rgb(0,0,128)';
+  ctx.fillStyle = 'rgb(0,128,224)';
   ctx.fillRect(bx, by, this.window.width, this.window.height);
 
   var x0 = Math.floor(window.x/tilesize);

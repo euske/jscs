@@ -1,6 +1,9 @@
 // utils.js
 // Misc. routines.
 
+// int(x) = Math.floor(x)
+int = Math.floor;
+
 // log(x): display a thing in the console (Firefox only, maybe)
 function log(x)
 {
@@ -29,8 +32,8 @@ function blink(t, d)
   return ((t % d) < d/2);
 }
 
-// rnd(n): returns a random number.
-function rnd(a, b)
+// rnd(a, b): returns a random number.
+function frnd(a, b)
 {
   b = (b !== undefined)? b : 0;
   if (b < a) {
@@ -38,7 +41,12 @@ function rnd(a, b)
     a = b;
     b = c;
   }
-  return Math.floor(Math.random()*(b-a))+a;
+  return a+(Math.random()*(b-a));
+}
+
+function rnd(a, b)
+{
+  return int(frnd(a, b));
 }
 
 // format: pretty print a number.
