@@ -27,6 +27,20 @@ Vec2.prototype.sub = function (v)
 {
   return new Vec2(this.x-v.x, this.y-v.y);
 };
+Vec2.prototype.modify = function (v)
+{
+  return new Vec2(this.x*v, this.y*v);
+};
+Vec2.prototype.rotate90 = function (v)
+{
+  if (v < 0) {
+    return new Vec2(this.y, -this.x);
+  } else if (0 < v) {
+    return new Vec2(-this.y, this.x);
+  } else {
+    return this.copy();
+  }
+};
 Vec2.prototype.move = function (dx, dy)
 {
   return new Vec2(this.x+dx, this.y+dy);
@@ -58,6 +72,10 @@ Vec3.prototype.add = function (v)
 Vec3.prototype.sub = function (v)
 {
   return new Vec3(this.x-v.x, this.y-v.y, this.z-v.z);
+};
+Vec3.prototype.modify = function (v)
+{
+  return new Vec3(this.x*v, this.y*v, this.z*v);
 };
 Vec3.prototype.move = function (dx, dy, dz)
 {
