@@ -127,6 +127,10 @@ Rectangle.prototype.move = function (dx, dy)
 {
   return new Rectangle(this.x+dx, this.y+dy, this.width, this.height);  
 };
+Rectangle.prototype.moveTo = function (x, y)
+{
+  return new Rectangle(x-this.width/2, y-this.height/2, this.width, this.height);  
+};
 Rectangle.prototype.inflate = function (dw, dh)
 {
   var cx = this.x+this.width/2;
@@ -163,7 +167,19 @@ Rectangle.prototype.intersection = function (rect)
   var y1 = Math.min(this.y+this.height, rect.y+rect.height);
   return new Rectangle(x0, y0, x1-x0, y1-y0);
 };
-// collide: 2D collision detection
+Rectangle.prototype.clamp = function (rect)
+{
+  var x = ((rect.width < this.width)? rect.centerx() :
+	   clamp(rect.x, this.x, rect.x+rect.width-this.width));
+  var y = ((rect.height < this.height)? rect.centery() :
+	   clamp(rect.y, this.y, rect.y+rect.height-this.height));
+  return new Rectangle(x, y, this.width, this.height);
+};
+Rectangle.prototype.rndpt = function ()
+{
+  return new Vec2(this.x+rnd(this.width),
+		  this.y+rnd(this.height));
+};
 
 Rectangle.prototype.collideVLine = function (v, x, y0, y1)
 {
@@ -262,6 +278,13 @@ Box.prototype.movev = function (v)
 {
   return new Box(this.origin.add(v), this.size);
 };
+Box.prototype.moveTo = function (p)
+{
+  return new Box(new Vec3(p.x-this.size.x/2,
+			  p.y-this.size.y/2,
+			  p.z-this.size.z/2),
+		 this.size);
+};
 Box.prototype.inflate = function (dx, dy, dz)
 {
   var cx = this.origin.x+this.size.x/2;
@@ -310,6 +333,22 @@ Box.prototype.intersection = function (box)
   var z1 = Math.min(this.origin.z+this.size.z, box.origin.z+box.size.z);
   return new Box(new Vec3(x0, y0, z0),
 		 new Vec3(x1-x0, y1-y0, z1-z0));
+};
+Box.prototype.clamp = function (box)
+{
+  var x = ((box.size.x < this.size.x)? (box.origin.x+box.size.x/2) :
+	   clamp(box.origin.x, this.origin.x, box.origin.x+box.size.x-this.size.x));
+  var y = ((box.size.y < this.size.y)? (box.origin.y+box.size.y/2) :
+	   clamp(box.origin.y, this.origin.y, box.origin.y+box.size.y-this.size.y));
+  var z = ((box.size.z < this.size.z)? (box.origin.z+box.size.z/2) :
+	   clamp(box.origin.z, this.origin.z, box.origin.z+box.size.z-this.size.z));
+  return new Box(new Vec3(x, y, z), this.size);
+};
+Box.prototype.rndpt = function ()
+{
+  return new Vec3(this.origin.x+rnd(this.size.x),
+		  this.origin.y+rnd(this.size.y),
+		  this.origin.z+rnd(this.size.z));
 };
 
 Box.prototype.collideYZPlane = function (v, x, rect)

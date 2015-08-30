@@ -1,8 +1,10 @@
 // utils.js
 // Misc. routines.
 
-// int(x) = Math.floor(x)
+// aliases
 int = Math.floor;
+upperbound = Math.min;
+lowerbound = Math.max;
 
 // log(x): display a thing in the console (Firefox only, maybe)
 function log(x)
