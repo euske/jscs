@@ -139,10 +139,10 @@ Rectangle.prototype.inflate = function (dw, dh)
   dh += this.height;
   return new Rectangle(cx-dw/2, cy-dh/2, dw, dh);
 };
-Rectangle.prototype.contains = function (x, y)
+Rectangle.prototype.contains = function (p)
 {
-  return (this.x <= x && this.y <= y &&
-	  x <= this.x+this.width && y <= this.y+this.height);
+  return (this.x <= p.x && this.y <= p.y &&
+	  p.x <= this.x+this.width && p.y <= this.y+this.height);
 };
 Rectangle.prototype.overlap = function (rect)
 {
@@ -227,7 +227,7 @@ Rectangle.prototype.collideHLine = function (v, y, x0, x1)
 
 Rectangle.prototype.collide = function (v, rect)
 {
-  assert(!this.overlap(rect), "rect overlapped");
+  assert(!this.overlap(rect), 'rect overlapped');
   
   if (0 < v.x) {
     v = this.collideVLine(v, rect.x, rect.y, rect.y+rect.height);
@@ -241,7 +241,7 @@ Rectangle.prototype.collide = function (v, rect)
     v = this.collideHLine(v, rect.y+rect.height, rect.x, rect.x+rect.width);
   }
 
-  assert(!this.move(v.x,v.y).overlap(rect), "rect overlapped 2");
+  assert(!this.move(v.x,v.y).overlap(rect), 'rect overlapped 2');
   return v;
 };
 
@@ -440,7 +440,7 @@ Box.prototype.collideXYPlane = function (v, z, rect)
 
 Box.prototype.collide = function (v, box)
 {
-  assert(!this.overlap(box), "box overlapped");
+  assert(!this.overlap(box), 'box overlapped');
   
   if (0 < v.x) {
     v = this.collideYZPlane(v, box.origin.x, 
@@ -472,6 +472,6 @@ Box.prototype.collide = function (v, box)
 					  box.size.x, box.size.y));
   }
   
-  assert(!this.movev(v).overlap(box), "box overlapped 2");
+  assert(!this.movev(v).overlap(box), 'box overlapped 2');
   return v;
 };

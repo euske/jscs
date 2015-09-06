@@ -11,7 +11,7 @@ A = {
 
 function getKey(x, y, context)
 {
-  return (context === undefined)? (x+","+y) : (x+","+y+":"+context);
+  return (context === undefined)? (x+','+y) : (x+','+y+':'+context);
 }
 
 function PlanAction(p, context, type, cost, next)
