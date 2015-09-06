@@ -148,7 +148,7 @@ Level1.prototype.scrollTile = function (vx, vy)
       var y = rnd(1, this.tilemap.height-1);
       var rect = new Rectangle(x+this.tilemap.width, y, 1, 1);
       rect = this.tilemap.map2coord(rect);
-      this.addObject(new Actor(rect, rect, S.THINGY));
+      this.addObject(new Thingy(rect));
       this.tilemap.set(x, y, T.NONE);
     }
   }

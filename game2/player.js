@@ -31,6 +31,28 @@ FixedSprite.prototype.render = function (ctx, x, y)
 };
 
 
+// Thingy
+function Thingy(bounds)
+{
+  var hitbox = bounds.inflate(-4, -4);
+  Actor.call(this, bounds, hitbox, S.THINGY);
+}
+
+Thingy.prototype = Object.create(Actor.prototype);
+
+Thingy.prototype.render = function (ctx, x, y)
+{
+  var sprites = this.scene.app.sprites;
+  var tw = sprites.height;
+  var w = this.bounds.width;
+  var h = this.bounds.height;
+  ctx.drawImage(sprites,
+		S.SHADOW*tw, tw-h, w, h,
+		x+this.bounds.x, y+this.bounds.y, w, h);
+  Actor.prototype.render.call(this, ctx, x, y);
+};
+
+
 // Player
 function Player(bounds)
 {
@@ -85,7 +107,7 @@ Player.prototype.render = function (ctx, x, y, front)
   var tilemap = this.scene.tilemap;
   var r = tilemap.coord2map(this.hitbox);
   function isfloor(x, y) {
-    return (tilemap.get(r.x, r.y) == T.FLOOR);
+    return (tilemap.get(x, y) == T.FLOOR);
   }
   x += this.bounds.x;
   y += this.bounds.y;
