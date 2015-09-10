@@ -255,7 +255,7 @@ Enemy.prototype.update = function ()
 			  );
     if (plan.fillPlan(this.getTilePos())) {
       // start following a plan.
-      this.runner = new PlanActionRunner(plan, this);
+      this.runner = new PlanActionRunner(plan, this, scene.app.framerate*2);
       this.runner.jump.subscribe(jump);
       this.runner.moveto.subscribe(moveto);
       log("begin:"+this.runner);
