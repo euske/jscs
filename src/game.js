@@ -58,8 +58,3 @@ Game.prototype.updateScore = function ()
 {
   // [GAME SPECIFIC CODE]
 };
-
-Game.prototype.change = function (state, score)
-{
-  // [GAME SPECIFIC CODE]
-};

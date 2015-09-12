@@ -216,22 +216,32 @@ Enemy.prototype.update = function ()
   if (this.scene === null) return;
   if (this.target === null) return;
 
-  var scene = this.scene;
-  var tilemap = scene.tilemap;
-  var hitbox = ((this.target.isLanded())? 
-		this.target.hitbox :
-		predictLandingPoint(tilemap, this.target.hitbox, 
-				    this.target.velocity, this.target.gravity));
-  if (hitbox === null) return;
-  var goal = this.target.getTilePos();
-  
   var actor = this;
+  var target = this.target;
   function jump(e) {
     actor.jump();
   }
   function moveto(e, p) {
     actor.moveToward(p);
   }
+  function ascend(t) {
+    return t;
+  }
+  function descend(t) {
+    return t*t*actor.gravity;
+  }
+  function t_descend(t) {
+    return t*t*target.gravity;
+  }
+  
+  var scene = this.scene;
+  var tilemap = scene.tilemap;
+  var hitbox = ((target.isLanded())? 
+		target.hitbox :
+		predictLandingPoint(tilemap, target.hitbox, 
+				    target.velocity, t_descend));
+  if (hitbox === null) return;
+  var goal = target.getTilePos();
   
   // adjust the goal position when it cannot fit.
   var tilebounds = this.tilebounds;
@@ -249,10 +259,7 @@ Enemy.prototype.update = function ()
     var range = new Rectangle(goal.x-RANGE, goal.y-RANGE, RANGE*2+1, RANGE*2+1);
     var plan = new PlanMap(tilemap, goal, range,
 			   tilebounds, this.speed,
-			   new Vec2(2, 3),
-			   (function (t) { return t; }),
-			   (function (t) { return t*t*actor.gravity; })
-			  );
+			   new Vec2(2, 3), ascend, descend);
     if (plan.fillPlan(this.getTilePos())) {
       // start following a plan.
       this.runner = new PlanActionRunner(plan, this, scene.app.framerate*2);

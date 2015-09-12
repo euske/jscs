@@ -12,11 +12,6 @@ Scene.prototype.init = function ()
   // [OVERRIDE]
 };
 
-Scene.prototype.change = function ()
-{
-  // [OVERRIDE]
-};
-
 Scene.prototype.update = function ()
 {
   // [OVERRIDE]
@@ -86,6 +81,11 @@ TextScene.prototype.init = function ()
   e.style.border = 'solid black 2px';
   e.innerHTML = this.text;
   e.onmousedown = (function (e) { scene.change(); });
+};
+
+TextScene.prototype.change = function ()
+{
+  // [OVERRIDE]
 };
 
 TextScene.prototype.mousedown = function (x, y, button)

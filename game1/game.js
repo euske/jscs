@@ -226,7 +226,7 @@ Level1.prototype.init = function ()
       // delay calling.
       scene.addObject(new Task(function (task) {
 	if (task.ticks0+app.framerate < scene.ticks) {
-	  scene.change('WON', scene.score);
+	  scene.changeScene(new EndGame(app, scene.score));
 	}
       }));
     }
@@ -274,10 +274,4 @@ Level1.prototype.updateScore = function ()
 {
   // [GAME SPECIFIC CODE]
   this.score_node.innerHTML = ('Score: '+this.score);
-};
-
-Level1.prototype.change = function (state, score)
-{
-  // [GAME SPECIFIC CODE]
-  this.changeScene(new EndGame(this.app, score));
 };

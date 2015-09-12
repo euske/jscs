@@ -13,9 +13,9 @@ main.js
    <br> Basic plumbing such as event dispatch and main loop.
    In most cases, you don't need to change this.
 
-game.js
+app.js
 -------
- * `new Game(framerate, frame, images, audios, labels)`
+ * `new App(framerate, frame, images, audios, labels)`
    <br> Asset management and overall state handling (game over, etc.)
 
    - `keyup(e)`
@@ -45,20 +45,20 @@ game.js
      <br> Post an event.
 
    - `init()`
-     <br> Game initialization.
-     [A game specific code goes here.]
+     <br> App initialization.
+     [App specific code goes here.]
    
    - `update()`
      <br> Called for every frame.
-     [A game specific code goes here.]
+     [App specific code goes here.]
    
    - `repaint()`
-     <br> Repaint the entire game screen.
-     [A game specific code goes here.]
+     <br> Repaint the entire screen.
+     [App specific code goes here.]
 
 scene.js
 --------
- * `new Scene(game)`
+ * `new Scene(app)`
    <br> Responsible for event handling for a particular scene of game.
         (Title, Game Over, Main Game, etc.)
  
@@ -80,7 +80,7 @@ scene.js
    - `action(action)`
      <br> Receives the action button input.
 
- * `new Level(game)` [extends Scene]
+ * `new GameScene(app)` [extends Scene]
    <br> Holds all entities that are shown in the game world.
 
    - `addObject(obj)`
@@ -163,15 +163,22 @@ geom.js
  * `new Vec2(x, y)`
    <br> A 2D vector object.
  
-   - `equals(p)`
+   - `equals(v)`
    - `copy()`
+   - `add(v)`
+   - `sub(v)`
+   - `modify(v)`
+   - `rotate90(v)`
    - `move(dx, dy)`
    
  * `new Vec3(x, y, z)`
    <br> A 3D vector object.
  
-   - `equals(p)`
+   - `equals(v)`
    - `copy()`
+   - `add(v)`
+   - `sub(v)`
+   - `modify(v)`
    - `move(dx, dy, dz)`
    
  * `new Rectangle(x, y, width, height)`
@@ -185,15 +192,16 @@ geom.js
    - `center()`
    - `copy()`
    - `move(dx, dy)`
-   - `inflate(dx, dy)`
-   - `contains(x, y)`
+   - `inflate(dw, dh)`
+   - `contains(v)`
    - `overlap(rect)`
    - `union(rect)`
    - `intersection(rect)`
-   
- * `collideRect(r0, r1, v)`
-   <br> Clips the motion vector v so that the rect r0 doesn't
-   intersect with the rect r1.
+   - `clamp(rect)`
+   - `rndpt()`
+   - `collide(v, rect)`
+   <br> Clips the motion vector v so that this rect doesn't
+   intersect with the given rect.
    
  * `new Box(origin, size)`
    <br> A box object.
@@ -202,8 +210,13 @@ geom.js
    - `center()`
    - `copy()`
    - `move(dx, dy, dz)`
+   - `movev(v)`
+   - `moveTo(v)`
    - `inflate(dx, dy, dz)`
-   - `contains(p)`
+   - `contains(v)`
    - `overlap(box)`
    - `union(box)`
    - `intersection(box)`
+   - `clamp(box)`
+   - `rndpt()`
+   - `collide(v, box)`

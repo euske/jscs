@@ -1,21 +1,15 @@
 // planmap.js
 
-// ascend: calculate the displacement of a falling object.
-function ascend(v0, dt, g)
-{
-  return (v0*dt - (dt-1)*dt*g/2);
-}
-
 // predictLandingPoint: returns the estimated landing position.
 function predictLandingPoint(
   tilemap, hitbox,
-  velocity, gravity, maxdt)
+  velocity, descend, maxdt)
 {
   maxdt = (maxdt !== undefined)? maxdt : 20;
   var stoppable = tilemap.getRangeMap(T.isStoppable);
   var rect0 = hitbox;
   for (var dt = 0; dt < maxdt; dt++) {
-    var rect1 = hitbox.move(velocity.x*dt, ascend(velocity.y, dt, gravity));
+    var rect1 = hitbox.move(velocity.x*dt, velocity.y*dt-descend(dt));
     var b = tilemap.coord2map(rect1);
     if (stoppable.get(b.x, b.y, b.x+b.width, b.y+b.height) !== 0) {
       return rect0;

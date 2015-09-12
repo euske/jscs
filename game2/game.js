@@ -194,7 +194,7 @@ Level1.prototype.update = function ()
   GameScene.prototype.update.call(this);
   this.moveAll(this.speed.x, this.speed.y);
   if (this.player.hitbox.right() < this.tilesize) {
-    this.change('LOST', this.score);
+    this.changeScene(new GameOver(this.app, this.score));
   }
 };
 
@@ -273,10 +273,4 @@ Level1.prototype.updateScore = function ()
 {
   // [GAME SPECIFIC CODE]
   this.score_node.innerHTML = ('Score: '+this.score);
-};
-
-Level1.prototype.change = function (state, score)
-{
-  // [GAME SPECIFIC CODE]
-  this.changeScene(new GameOver(this.app, score));
 };
