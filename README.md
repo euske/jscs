@@ -86,9 +86,6 @@ scene.js
    - `addObject(obj)`
    - `removeObject(task)`
      <br> Adds/Removes a Game object to the scene.
-     
-   - `collide(actor)`
-     <br> Returns a list of Actor objects that collide with the Actor object.
 
 actor.js
 --------
@@ -112,6 +109,9 @@ actor.js
    
  * new Actor(bounds, hitbox, tileno) [extends Particle]
    <br> An moving object that interacts with other Actors.
+     
+   - `collide(actor)`
+     <br> Called when the Actor object collides with another Actor.
    
    - `move(dx, dy)`
  

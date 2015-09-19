@@ -94,6 +94,11 @@ function Actor(bounds, hitbox, tileno)
 
 Actor.prototype = Object.create(Sprite.prototype);
 
+Actor.prototype.collide = function (actor)
+{
+  // [OVERRIDE]
+};
+
 Actor.prototype.render = function (ctx, x, y)
 {
   // [OVERRIDE]

@@ -133,16 +133,16 @@ Player.prototype.toString = function ()
   return '<Player: '+this.bounds+'>';
 };
 
+Player.prototype.collide = function (actor)
+{
+  if (actor instanceof Actor && actor.tileno == S.THINGY) {
+    this.pick(actor);
+  }
+};
+
 Player.prototype.update = function ()
 {
   if (this.scene === null) return;
-  var r = this.scene.collide(this);
-  for (var i = 0; i < r.length; i++) {
-    var a = r[i];
-    if (a instanceof Actor && a.tileno == S.THINGY) {
-      this.pick(a);
-    }
-  }
   if (0 <= this._jumpt && this._jumpt < this.maxacctime) {
     this._jumpt++;
     this.velocity.y -= this.gravity;
