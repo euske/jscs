@@ -149,7 +149,7 @@ Player.prototype.usermove = function (vx, vy)
   }
 };
 
-Player.prototype.collideTile = function (p, v0)
+Player.prototype.contactTile = function (p, v0)
 {
   var tilemap = this.scene.tilemap;
   var ts = tilemap.tilesize;
@@ -160,33 +160,33 @@ Player.prototype.collideTile = function (p, v0)
     var c = tilemap.get(x, y);
     if (T.isWall(c)) {
       var bounds = new Box(new Vec3(x*ts, y*ts, 0), ws);
-      v = box.collide(v, bounds);
+      v = box.contact(v, bounds);
     } else if (T.isObstacle(c)) {
       var bounds = new Box(new Vec3(x*ts, y*ts, 0), bs);
-      v = box.collide(v, bounds);
+      v = box.contact(v, bounds);
     }
     return v;
   }
   var r = box.movev(v0).union(box);
   r = new Rectangle(r.origin.x, r.origin.y, r.size.x, r.size.y);
   v0 = tilemap.reduce(tilemap.coord2map(r), f, v0);
-  v0 = box.collideXYPlane(v0, 0, null);
+  v0 = box.contactXYPlane(v0, 0, null);
   return v0;
 };
 
 Player.prototype.getMove = function (v)
 {
   var p = new Vec3(this.hitbox.x, this.hitbox.y, this.z);
-  var d0 = this.collideTile(p, v);
+  var d0 = this.contactTile(p, v);
   p = p.add(d0);
   v = v.sub(d0);
-  var d1 = this.collideTile(p, new Vec3(v.x,0,0));
+  var d1 = this.contactTile(p, new Vec3(v.x,0,0));
   p = p.add(d1);
   v = v.sub(d1);
-  var d2 = this.collideTile(p, new Vec3(0,v.y,0));
+  var d2 = this.contactTile(p, new Vec3(0,v.y,0));
   p = p.add(d2);
   v = v.sub(d2);
-  var d3 = this.collideTile(p, new Vec3(0,0,v.z));
+  var d3 = this.contactTile(p, new Vec3(0,0,v.z));
   return new Vec3(d0.x+d1.x+d2.x+d3.x,
 		  d0.y+d1.y+d2.y+d3.y, 
 		  d0.z+d1.z+d2.z+d3.z);
@@ -198,7 +198,7 @@ Player.prototype.jump = function (jumping)
   if (jumping) {
     var p = new Vec3(this.hitbox.x, this.hitbox.y, this.z);
     var v = new Vec3(0, 0, this._gz);
-    var d = this.collideTile(p, v);
+    var d = this.contactTile(p, v);
     if (this._gz < 0 && d.z === 0) {
       this._gz = this.jumpacc;
       this._jumpt = 0;

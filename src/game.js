@@ -35,7 +35,7 @@ Player.prototype.update = function ()
   }
   this.velocity.y += this.gravity;
   this.velocity.y = clamp(-this.maxspeed, this.velocity.y, this.maxspeed);
-  var v = this.hitbox.collide(this.velocity, this.scene.ground);
+  var v = this.hitbox.contact(this.velocity, this.scene.ground);
   this._landed = (0 < this.velocity.y && v.y === 0);
   this.velocity.y = v.y;
   this.move(this.velocity.x, this.velocity.y);

@@ -181,7 +181,7 @@ Rectangle.prototype.rndpt = function ()
 		  this.y+rnd(this.height));
 };
 
-Rectangle.prototype.collideVLine = function (v, x, y0, y1)
+Rectangle.prototype.contactVLine = function (v, x, y0, y1)
 {
   var dx, dy;
   var x0 = this.x;
@@ -203,7 +203,7 @@ Rectangle.prototype.collideVLine = function (v, x, y0, y1)
   return new Vec2(dx, dy);
 };
 
-Rectangle.prototype.collideHLine = function (v, y, x0, x1)
+Rectangle.prototype.contactHLine = function (v, y, x0, x1)
 {
   var dx, dy;
   var y0 = this.y;
@@ -225,20 +225,20 @@ Rectangle.prototype.collideHLine = function (v, y, x0, x1)
   return new Vec2(dx, dy);
 };
 
-Rectangle.prototype.collide = function (v, rect)
+Rectangle.prototype.contact = function (v, rect)
 {
   assert(!this.overlap(rect), 'rect overlapped');
   
   if (0 < v.x) {
-    v = this.collideVLine(v, rect.x, rect.y, rect.y+rect.height);
+    v = this.contactVLine(v, rect.x, rect.y, rect.y+rect.height);
   } else if (v.x < 0) {
-    v = this.collideVLine(v, rect.x+rect.width, rect.y, rect.y+rect.height);
+    v = this.contactVLine(v, rect.x+rect.width, rect.y, rect.y+rect.height);
   }
 
   if (0 < v.y) {
-    v = this.collideHLine(v, rect.y, rect.x, rect.x+rect.width);
+    v = this.contactHLine(v, rect.y, rect.x, rect.x+rect.width);
   } else if (v.y < 0) {
-    v = this.collideHLine(v, rect.y+rect.height, rect.x, rect.x+rect.width);
+    v = this.contactHLine(v, rect.y+rect.height, rect.x, rect.x+rect.width);
   }
 
   assert(!this.move(v.x,v.y).overlap(rect), 'rect overlapped 2');
@@ -351,7 +351,7 @@ Box.prototype.rndpt = function ()
 		  this.origin.z+rnd(this.size.z));
 };
 
-Box.prototype.collideYZPlane = function (v, x, rect)
+Box.prototype.contactYZPlane = function (v, x, rect)
 {
   var dx, dy, dz;
   var x0 = this.origin.x;
@@ -380,7 +380,7 @@ Box.prototype.collideYZPlane = function (v, x, rect)
   return new Vec3(dx, dy, dz);
 };
 
-Box.prototype.collideZXPlane = function (v, y, rect)
+Box.prototype.contactZXPlane = function (v, y, rect)
 {
   var dx, dy, dz;
   var y0 = this.origin.y;
@@ -409,7 +409,7 @@ Box.prototype.collideZXPlane = function (v, y, rect)
   return new Vec3(dx, dy, dz);  
 };
 
-Box.prototype.collideXYPlane = function (v, z, rect)
+Box.prototype.contactXYPlane = function (v, z, rect)
 {
   var dx, dy, dz;
   var z0 = this.origin.z;
@@ -438,36 +438,36 @@ Box.prototype.collideXYPlane = function (v, z, rect)
   return new Vec3(dx, dy, dz);  
 };
 
-Box.prototype.collide = function (v, box)
+Box.prototype.contact = function (v, box)
 {
   assert(!this.overlap(box), 'box overlapped');
   
   if (0 < v.x) {
-    v = this.collideYZPlane(v, box.origin.x, 
+    v = this.contactYZPlane(v, box.origin.x, 
 			    new Rectangle(box.origin.y, box.origin.z,
 					  box.size.y, box.size.z));
   } else if (v.x < 0) {
-    v = this.collideYZPlane(v, box.origin.x+box.size.x, 
+    v = this.contactYZPlane(v, box.origin.x+box.size.x, 
 			    new Rectangle(box.origin.y, box.origin.z,
 					  box.size.y, box.size.z));
   }
 
   if (0 < v.y) {
-    v = this.collideZXPlane(v, box.origin.y, 
+    v = this.contactZXPlane(v, box.origin.y, 
 			    new Rectangle(box.origin.z, box.origin.x,
 					  box.size.z, box.size.x));
   } else if (v.y < 0) {
-    v = this.collideZXPlane(v, box.origin.y+box.size.y, 
+    v = this.contactZXPlane(v, box.origin.y+box.size.y, 
 			    new Rectangle(box.origin.z, box.origin.x,
 					  box.size.z, box.size.x));
   }
   
   if (0 < v.z) {
-    v = this.collideXYPlane(v, box.origin.z, 
+    v = this.contactXYPlane(v, box.origin.z, 
 			    new Rectangle(box.origin.x, box.origin.y,
 					  box.size.x, box.size.y));
   } else if (v.z < 0) {
-    v = this.collideXYPlane(v, box.origin.z+box.size.z, 
+    v = this.contactXYPlane(v, box.origin.z+box.size.z, 
 			    new Rectangle(box.origin.x, box.origin.y,
 					  box.size.x, box.size.y));
   }
