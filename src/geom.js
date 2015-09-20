@@ -7,6 +7,7 @@ function Vec2(x, y)
   this.x = (x !== undefined)? x : 0;
   this.y = (y !== undefined)? y : 0;
 }
+Point = Vec2;
 Vec2.prototype.toString = function ()
 {
   return '('+this.x+', '+this.y+')';
@@ -90,6 +91,7 @@ function Rectangle(x, y, width, height)
   this.width = (width !== undefined)? width : 0;
   this.height = (height !== undefined)? height : 0;
 }
+Rect = Rectangle;
 Rectangle.prototype.toString = function () 
 {
   return '('+this.x+', '+this.y+', '+this.width+', '+this.height+')';

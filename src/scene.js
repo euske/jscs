@@ -20,9 +20,6 @@ Scene.prototype.update = function ()
 Scene.prototype.render = function (ctx, bx, by)
 {
   // [OVERRIDE]
-  // Fill with the background color.
-  ctx.fillStyle = 'rgb(0,0,0)';
-  ctx.fillRect(bx, by, this.app.screen.width, this.app.screen.height);
 };
 
 Scene.prototype.move = function (vx, vy)
@@ -106,6 +103,8 @@ TextScene.prototype.action = function (action)
 function GameScene(app)
 {
   Scene.call(this, app);
+
+  this.world = new Rectangle(0, 0, app.screen.width, app.screen.height);
 }
 
 GameScene.prototype = Object.create(Scene.prototype);

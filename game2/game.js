@@ -2,6 +2,7 @@
 
 // [GAME SPECIFIC CODE]
 
+
 //  Title
 //
 function Title(app)
@@ -15,6 +16,12 @@ Title.prototype = Object.create(TextScene.prototype);
 Title.prototype.change = function ()
 {
   this.changeScene(new Level1(this.app));
+};
+
+Title.prototype.render = function (ctx, bx, by)
+{
+  ctx.fillStyle = 'rgb(0,0,0)';
+  ctx.fillRect(bx, by, this.app.screen.width, this.app.screen.height);
 };
 
 
@@ -32,6 +39,12 @@ GameOver.prototype = Object.create(TextScene.prototype);
 GameOver.prototype.change = function ()
 {
   this.changeScene(new Level1(this.app));
+};
+
+GameOver.prototype.render = function (ctx, bx, by)
+{
+  ctx.fillStyle = 'rgb(0,0,0)';
+  ctx.fillRect(bx, by, this.app.screen.width, this.app.screen.height);
 };
 
 

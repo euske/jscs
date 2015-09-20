@@ -17,6 +17,12 @@ Title.prototype.change = function ()
   this.changeScene(new Level1(this.app));
 };
 
+Title.prototype.render = function (ctx, bx, by)
+{
+  ctx.fillStyle = 'rgb(0,0,0)';
+  ctx.fillRect(bx, by, this.app.screen.width, this.app.screen.height);
+};
+
 
 //  EndGame
 //

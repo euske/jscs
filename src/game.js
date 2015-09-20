@@ -47,8 +47,6 @@ Player.prototype.update = function ()
 function Game(app)
 {
   GameScene.call(this, app);
-
-  this.world = new Rectangle(0, 0, app.screen.width, app.screen.height);
 }
 
 Game.prototype = Object.create(GameScene.prototype);
@@ -79,6 +77,9 @@ Game.prototype.init = function ()
 
 Game.prototype.render = function (ctx, bx, by)
 {
+  // Fill with the background color.
+  ctx.fillStyle = 'rgb(0,0,0)';
+  ctx.fillRect(bx, by, this.app.screen.width, this.app.screen.height);
   GameScene.prototype.render.call(this, ctx, bx, by);
 };
 
