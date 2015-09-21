@@ -174,7 +174,9 @@ GameScene.prototype.removeObject = function (obj)
 GameScene.prototype.updateObjects = function (objs)
 {
   for (var i = 0; i < objs.length; i++) {
-    objs[i].update();
+    var obj = objs[i];
+    if (obj.scene !== this) continue;
+    obj.update();
   }
 };
 

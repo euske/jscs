@@ -88,7 +88,6 @@ Player.prototype.collide = function (actor)
 
 Player.prototype.update = function ()
 {
-  if (this.scene === null) return;
   if (0 <= this._jumpt && this._jumpt < this.maxacctime) {
     this._jumpt++;
   } else {
@@ -134,7 +133,6 @@ Player.prototype.render = function (ctx, x, y, front)
 
 Player.prototype.move = function (vx, vy)
 {
-  if (this.scene === null) return null;
   var v = this.getMove(new Vec3(vx, vy, this._gz));
   Actor.prototype.move.call(this, v.x, v.y);
   return v;
@@ -194,7 +192,6 @@ Player.prototype.getMove = function (v)
 
 Player.prototype.jump = function (jumping)
 {
-  if (this.scene === null) return;
   if (jumping) {
     var p = new Vec3(this.hitbox.x, this.hitbox.y, this.z);
     var v = new Vec3(0, 0, this._gz);

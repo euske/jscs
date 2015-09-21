@@ -48,7 +48,6 @@ Actor2.prototype = Object.create(Actor.prototype);
 
 Actor2.prototype.update = function ()
 {
-  if (this.scene === null) return;
   this.velocity.y += this.gravity;
   this.velocity.y = clamp(-this.maxspeed, this.velocity.y, this.maxspeed);
   var v = this.getMove(this.velocity);
@@ -142,7 +141,6 @@ Player.prototype.collide = function (actor)
 
 Player.prototype.update = function ()
 {
-  if (this.scene === null) return;
   if (0 <= this._jumpt && this._jumpt < this.maxacctime) {
     this._jumpt++;
     this.velocity.y -= this.gravity;
@@ -158,7 +156,6 @@ Player.prototype.usermove = function (vx, vy)
 
 Player.prototype.jump = function (jumping)
 {
-  if (this.scene === null) return;
   if (jumping) {
     if (this.isLanded()) {
       this._jumpt = 0;
@@ -213,7 +210,6 @@ Enemy.prototype.update = function ()
 {
   Actor2.prototype.update.call(this);
 
-  if (this.scene === null) return;
   if (this.target === null) return;
 
   var actor = this;
@@ -283,7 +279,7 @@ Enemy.prototype.update = function ()
 
 Enemy.prototype.renderPlan = function (ctx, bx, by)
 {
-  if (this.runner !== null && this.runner.plan !== null) {
+  if (this.runner !== null) {
     this.runner.plan.render(ctx, bx, by, this.scene.tilesize/2);
   }
 };
