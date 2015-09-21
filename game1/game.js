@@ -136,7 +136,7 @@ Level1.prototype.render = function (ctx, bx, by)
       obj.render(ctx, bx, by);
     }
     if (obj instanceof Enemy) {
-      obj.renderPlan(ctx, bx, by);
+      obj.renderPlan(ctx, bx-window.x, by-window.y);
     }
   }
 };

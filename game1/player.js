@@ -280,6 +280,6 @@ Enemy.prototype.update = function ()
 Enemy.prototype.renderPlan = function (ctx, bx, by)
 {
   if (this.runner !== null) {
-    this.runner.plan.render(ctx, bx, by, this.scene.tilesize/2);
+    this.runner.plan.render(ctx, bx, by, this.scene.tilesize);
   }
 };

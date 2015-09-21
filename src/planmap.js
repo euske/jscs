@@ -269,7 +269,7 @@ PlanMap.prototype.render = function (ctx, bx, by, tilesize)
   ctx.lineWidth = 1;
   for (var k in this._map) {
     var a = this._map[k];
-    var p = a.p;
+    var p0 = a.p;
     switch (a.type) {
     case A.WALK:
       ctx.strokeStyle = 'white';
@@ -286,7 +286,14 @@ PlanMap.prototype.render = function (ctx, bx, by, tilesize)
     default:
       continue;
     }
-    ctx.strokeRect(bx+tilesize*p.x, by+tilesize*p.y,
+    ctx.strokeRect(bx+tilesize*p0.x+.5, by+tilesize*p0.y+.5,
 		   tilesize, tilesize);
+    if (a.next !== null) {
+      var p1 = a.next.p;
+      ctx.beginPath();
+      ctx.moveTo(bx+tilesize*(p0.x+.5), by+tilesize*(p0.y+.5));
+      ctx.lineTo(bx+tilesize*(p1.x+.5), by+tilesize*(p1.y+.5));
+      ctx.stroke();
+    }
   }
 };
