@@ -63,24 +63,22 @@ PlanMap.prototype.getAction = function (x, y, context)
   }
 };
 
-PlanMap.prototype.getAllActions = function ()
+PlanMap.prototype.addAction = function (queue, start, p, context, type, cost, next)
 {
-  var a = [];
-  for (var k in this._map) {
-    a.push(this._map[k]);
-  }
-  return a;
-};
-
-PlanMap.prototype.addQueue = function (queue, start, a1)
-{
+  context = (context !== undefined)? context : null;
+  type = (type !== undefined)? type : A.NONE;
+  cost = (cost !== undefined)? cost : 0;
+  next = (next !== undefined)? next : null;
+  var a1 = new PlanAction(p, context, type, cost, next);
   var a0 = this._map[a1.key];
   if (a0 === undefined || a1.cost < a0.cost) {
     this._map[a1.key] = a1;
     var dist = ((start === null)? 0 :
-		Math.abs(start.x-a1.p.x)+Math.abs(start.y-a1.p.y));
+		(Math.abs(start.x-a1.p.x)+
+		 Math.abs(start.y-a1.p.y)));
     queue.push({ action:a1, prio:dist });
   }
+  return a1;
 };
 
 PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
@@ -104,7 +102,7 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 		    start.x+cbx1, start.y+cby1+1) === 0) return false;
 
   var queue = [];
-  this.addQueue(queue, start, new PlanAction(this.goal));
+  this.addAction(queue, start, this.goal);
   while (0 < n && 0 < queue.length) {
     var a0 = queue.pop().action;
     var p = a0.p;
@@ -127,9 +125,8 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 	grabbable.get(p.x+cbx0, p.y+cby1,
 		      p.x+cbx1, p.y+cby1+1) !== 0) {
       cost += 1;
-      this.addQueue(queue, start, 
-		    new PlanAction(new Vec2(p.x, p.y-1), null,
-				   A.CLIMB, cost, a0));
+      this.addAction(queue, start,
+		     new Vec2(p.x, p.y-1), null, A.CLIMB, cost, a0);
     }
     // try climbing up.
     if (context === null &&
@@ -137,9 +134,8 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 	grabbable.get(p.x+cbx0, p.y+cby0+1,
 		      p.x+cbx1, p.y+cby1+1) !== 0) {
       cost += 1;
-      this.addQueue(queue, start, 
-		    new PlanAction(new Vec2(p.x, p.y+1), null,
-				   A.CLIMB, cost, a0));
+      this.addAction(queue, start, 
+		     new Vec2(p.x, p.y+1), null, A.CLIMB, cost, a0);
     }
 
     // for left and right.
@@ -158,9 +154,8 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 	   stoppable.get(wx+cbx0, p.y+cby1,
 			 wx+cbx1, p.y+cby1+1) !== 0)) {
 	cost += 1;
-	this.addQueue(queue, start, 
-		      new PlanAction(new Vec2(wx, p.y), null,
-				     A.WALK, cost, a0));
+	this.addAction(queue, start, 
+		       new Vec2(wx, p.y), null, A.WALK, cost, a0);
       }
 
       // try falling.
@@ -194,17 +189,15 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 		 stoppable.get(fx+cbx0, fy+cby1, 
 			       fx+cbx1, fy+cby1+1) !== 0)) {
 	      // normal fall.
-	      this.addQueue(queue, start, 
-			    new PlanAction(new Vec2(fx, fy), null,
-					   A.FALL, cost, a0));
+	      this.addAction(queue, start, 
+			     new Vec2(fx, fy), null, A.FALL, cost, a0);
 	    }
 	    if (fdy === 0 ||
 		stoppable.get(fx+bx0, fy+cby1, 
 			      p.x+bx1, p.y+cby1) === 0) {
 	      // fall after jump.
-	      this.addQueue(queue, start, 
-			    new PlanAction(new Vec2(fx, fy), A.FALL,
-					   A.FALL, cost, a0));
+	      this.addAction(queue, start, 
+			     new Vec2(fx, fy), A.FALL, A.FALL, cost, a0);
 	    }
 	  }
 	}
@@ -247,9 +240,8 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 		T.isObstacle(tilemap.get(p.x+bx1, p.y+cby1+1)) &&
 		!T.isObstacle(tilemap.get(p.x+bx1-vx, p.y+cby0-1))) continue;
 	    cost += Math.abs(jdx)+Math.abs(jdy)+1;
-	    this.addQueue(queue, start, 
-			  new PlanAction(new Vec2(jx, jy), null,
-					 A.JUMP, cost, a0));
+	    this.addAction(queue, start, 
+			   new Vec2(jx, jy), null, A.JUMP, cost, a0);
 	  }
 	}
       }
@@ -266,6 +258,7 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 
 PlanMap.prototype.render = function (ctx, bx, by, tilesize)
 {
+  var rs = tilesize/2;
   ctx.lineWidth = 1;
   for (var k in this._map) {
     var a = this._map[k];
@@ -286,8 +279,9 @@ PlanMap.prototype.render = function (ctx, bx, by, tilesize)
     default:
       continue;
     }
-    ctx.strokeRect(bx+tilesize*p0.x+.5, by+tilesize*p0.y+.5,
-		   tilesize, tilesize);
+    ctx.strokeRect(bx+tilesize*p0.x+(tilesize-rs)/2+.5,
+		   by+tilesize*p0.y+(tilesize-rs)/2+.5,
+		   rs, rs);
     if (a.next !== null) {
       var p1 = a.next.p;
       ctx.beginPath();
