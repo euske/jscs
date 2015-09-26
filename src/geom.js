@@ -146,6 +146,13 @@ Rectangle.prototype.contains = function (p)
   return (this.x <= p.x && this.y <= p.y &&
 	  p.x <= this.x+this.width && p.y <= this.y+this.height);
 };
+Rectangle.prototype.containsRect = function (rect)
+{
+  return (this.x <= rect.x &&
+	  this.y <= rect.y &&
+	  rect.x+rect.width <= this.x+this.width &&
+	  rect.y+rect.height <= this.y+this.height);
+};
 Rectangle.prototype.overlap = function (rect)
 {
   return !(this.x+this.width <= rect.x ||
@@ -246,6 +253,11 @@ Rectangle.prototype.contact = function (v, rect)
   assert(!this.move(v.x,v.y).overlap(rect), 'rect overlapped 2');
   return v;
 };
+
+function MakeRect(p, w, h)
+{
+  return new Rectangle(p.x-w/2, p.y-h/2, w, h);
+}
 
 // Box
 function Box(origin, size)

@@ -102,13 +102,18 @@ Actor.prototype.collide = function (actor)
 Actor.prototype.render = function (ctx, x, y)
 {
   // [OVERRIDE]
-  var sprites = this.scene.app.sprites;
-  var tw = sprites.height;
   var w = this.bounds.width;
   var h = this.bounds.height;
-  ctx.drawImage(sprites,
-		this.tileno*tw, tw-h, w, h,
-		x+this.bounds.x, y+this.bounds.y, w, h);
+  if (typeof(this.tileno) === 'string') {
+    ctx.fillStyle = this.tileno;
+    ctx.fillRect(x+this.bounds.x, y+this.bounds.y, w, h);
+  } else {
+    var sprites = this.scene.app.sprites;
+    var tw = sprites.height;
+    ctx.drawImage(sprites,
+		  this.tileno*tw, tw-h, w, h,
+		  x+this.bounds.x, y+this.bounds.y, w, h);
+  }
 };
 
 Actor.prototype.move = function (dx, dy)
