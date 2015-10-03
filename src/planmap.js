@@ -81,9 +81,9 @@ PlanMap.prototype.addAction = function (queue, start, p, context, type, cost, ne
   return a1;
 };
 
-PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
+PlanMap.prototype.fillPlan = function (start, maxcost, falldx, falldy)
 {
-  n = (n !== undefined)? n : 1000;
+  maxcost = (maxcost !== undefined)? maxcost : 100;
   falldx = (falldx !== undefined)? falldx : 10;
   falldy = (falldy !== undefined)? falldy : 20;
 
@@ -103,7 +103,7 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
 
   var queue = [];
   this.addAction(queue, start, this.goal);
-  while (0 < n && 0 < queue.length) {
+  while (0 < queue.length) {
     var a0 = queue.pop().action;
     var p = a0.p;
     var context = a0.context;
@@ -250,7 +250,6 @@ PlanMap.prototype.fillPlan = function (start, n, falldx, falldy)
       // A* search.
       queue.sort(function (a,b) { return b.prio-a.prio; });
     }
-    n--;
   }
   
   return false;
