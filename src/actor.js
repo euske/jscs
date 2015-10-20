@@ -63,6 +63,7 @@ Queue.prototype.remove = function (task)
 function Sprite(bounds)
 {
   Task.call(this);
+  this.visible = true;
   this.bounds = (bounds === null)? bounds : bounds.copy();
 }
 

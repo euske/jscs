@@ -85,6 +85,7 @@ Level1.prototype.render = function (ctx, bx, by)
   for (var i = 0; i < this.sprites.length; i++) {
     var obj = this.sprites[i];
     if (obj.scene !== this) continue;
+    if (!obj.visible) continue;
     if (obj.bounds === null) continue;
     var bounds = obj.bounds;
     if (bounds.overlap(window)) {
@@ -126,6 +127,7 @@ Level1.prototype.render = function (ctx, bx, by)
   for (var i = 0; i < this.sprites.length; i++) {
     var obj = this.sprites[i];
     if (obj.scene !== this) continue;
+    if (!obj.visible) continue;
     if (obj.bounds === null) {
       obj.render(ctx, bx, by);
     } else if (obj instanceof FixedSprite) {

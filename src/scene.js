@@ -146,7 +146,9 @@ GameScene.prototype.render = function (ctx, bx, by)
   for (var i = 0; i < this.sprites.length; i++) {
     var obj = this.sprites[i];
     if (obj.scene !== this) continue;
-    obj.render(ctx, bx, by);
+    if (obj.visible) {
+      obj.render(ctx, bx, by);
+    }
   }
 };
 
