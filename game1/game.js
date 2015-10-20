@@ -250,13 +250,14 @@ Level1.prototype.init = function ()
 
   // show a banner.
   var banner = new Sprite(null);
+  var bounds = new Rectangle(0, 0, app.screen.width, app.screen.height);
   banner.update = function () {
     banner.alive = (scene.ticks < banner.ticks0+app.framerate*2);
   };
   banner.render = function (ctx, x, y) {
     if (blink(scene.ticks, app.framerate/2)) {
-      app.renderString(app.images.font_w, 'GET ALL TEH DAMN THINGIES!', 1,
-		       x+scene.window.width/2, y+50, 'center');
+      app.font.renderText(ctx, 'GET ALL TEH \n\nDAMN THINGIES!',
+			  bounds, 'center', 'center');
     }
   };
   this.addObject(banner);
