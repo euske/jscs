@@ -262,18 +262,15 @@ Level1.prototype.init = function ()
   this.addObject(banner);
 };
 
-Level1.prototype.move = function (vx, vy)
+Level1.prototype.update = function ()
 {
+  GameScene.prototype.update.call(this);
+  
   // [GAME SPECIFIC CODE]
-  this.player.usermove(vx, vy);
+  this.player.usermove(this.app.key_dir.x, this.app.key_dir.y);
+  this.player.jump(this.app.key_action);
   var rect = this.player.bounds.inflate(this.window.width/2, this.window.height/2);
   this.setCenter(rect);
-};
-
-Level1.prototype.action = function (action)
-{
-  // [GAME SPECIFIC CODE]
-  this.player.jump(action);
 };
 
 Level1.prototype.updateScore = function ()

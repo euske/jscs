@@ -22,12 +22,22 @@ Scene.prototype.render = function (ctx, bx, by)
   // [OVERRIDE]
 };
 
-Scene.prototype.move = function (vx, vy)
+Scene.prototype.set_dir = function (vx, vy)
 {
   // [OVERRIDE]
 };
 
-Scene.prototype.action = function (action)
+Scene.prototype.set_action = function (action)
+{
+  // [OVERRIDE]
+};
+
+Scene.prototype.keydown = function (key)
+{
+  // [OVERRIDE]
+};
+
+Scene.prototype.keyup = function (key)
 {
   // [OVERRIDE]
 };
@@ -90,11 +100,9 @@ TextScene.prototype.mousedown = function (x, y, button)
   this.change();
 };
 
-TextScene.prototype.action = function (action)
+TextScene.prototype.keydown = function (key)
 {
-  if (action) {
-    this.change();
-  }
+  this.change();
 };
 
 

@@ -107,6 +107,8 @@ function run(scene0)
     ctx.restore();
   }
   
+  app.init(new scene0(app));
+  app.focus(null);
   window.addEventListener('keydown', keydown);
   window.addEventListener('keyup', keyup);
   window.addEventListener('mousedown', mousedown);
@@ -114,8 +116,5 @@ function run(scene0)
   window.addEventListener('mousemove', mousemove);
   window.addEventListener('focus', focus);
   window.addEventListener('blur', blur);
-  
-  app.init(new scene0(app));
-  app.focus(null);
   timer = window.setInterval(update, 1000/framerate);
 }

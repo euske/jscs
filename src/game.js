@@ -86,14 +86,6 @@ Game.prototype.render = function (ctx, bx, by)
 Game.prototype.update = function ()
 {
   GameScene.prototype.update.call(this);
-};
-
-Game.prototype.move = function (vx, vy)
-{
-  this.player.velocity.x = vx;
-};
-
-Game.prototype.action = function (action)
-{
-  this.player.jump(action);
+  this.player.velocity.x = this.app.key_dir.x;
+  this.player.jump(this.app.key_action);
 };

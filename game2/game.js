@@ -205,6 +205,8 @@ Level1.prototype.moveAll = function (vx, vy)
 Level1.prototype.update = function ()
 {
   GameScene.prototype.update.call(this);
+  this.player.jump(this.app.key_action);
+  this.player.usermove(this.app.key_dir.x, this.app.key_dir.y);
   this.moveAll(this.speed.x, this.speed.y);
   if (this.player.hitbox.right() < this.tilesize) {
     this.changeScene(new GameOver(this.app, this.score));
@@ -268,18 +270,6 @@ Level1.prototype.init = function ()
     }
   };
   this.addObject(banner);
-};
-
-Level1.prototype.move = function (vx, vy)
-{
-  // [GAME SPECIFIC CODE]
-  this.player.usermove(vx, vy);
-};
-
-Level1.prototype.action = function (action)
-{
-  // [GAME SPECIFIC CODE]
-  this.player.jump(action);
 };
 
 Level1.prototype.updateScore = function ()

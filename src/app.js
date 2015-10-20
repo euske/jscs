@@ -28,9 +28,8 @@ function App(framerate, frame, images, audios, labels)
   this._key_right = false;
   this._key_up = false;
   this._key_down = false;
-  this._key_action = false;
-  this._vx = 0;
-  this._vy = 0;
+  this.key_action = false;
+  this.key_dir = new Vec2();
 }
 
 App.prototype.renderString = function (font, text, scale, x, y, align)
@@ -77,35 +76,37 @@ App.prototype.keydown = function (ev)
   case 65:			// A
   case 72:			// H
     this._key_left = true;
-    this._vx = -1;
+    this.key_dir.x = -1;
+    this.scene.set_dir(this.key_dir.x, 0);
     break;
   case 39:			// RIGHT
   case 68:			// D
   case 76:			// L
     this._key_right = true;
-    this._vx = +1;
+    this.key_dir.x = +1;
+    this.scene.set_dir(this.key_dir.x, 0);
     break;
   case 38:			// UP
   case 87:			// W
   case 75:			// K
     this._key_up = true;
-    this._vy = -1;
+    this.key_dir.y = -1;
+    this.scene.set_dir(0, this.key_dir.y);
     break;
   case 40:			// DOWN
   case 83:			// S
   case 74:			// J
     this._key_down = true;
-    this._vy = +1;
+    this.key_dir.y = +1;
+    this.scene.set_dir(0, this.key_dir.y);
     break;
   case 13:			// ENTER
   case 32:			// SPACE
   case 90:			// Z
   case 88:			// X
-    if (!this._key_action) {
-      this._key_action = true;
-      if (this.scene.action !== undefined) {
-	this.scene.action(true);
-      }
+    if (!this.key_action) {
+      this.key_action = true;
+      this.scene.set_action(this.key_action);
     }
     break;
   case 112:			// F1
@@ -118,6 +119,7 @@ App.prototype.keydown = function (ev)
     }
     break;
   }
+  this.scene.keydown(ev.keyCode);
 };
 
 App.prototype.keyup = function (ev)
@@ -129,38 +131,41 @@ App.prototype.keyup = function (ev)
   case 65:			// A
   case 72:			// H
     this._key_left = false;
-    this._vx = (this._key_right) ? +1 : 0;
+    this.key_dir.x = (this._key_right) ? +1 : 0;
+    this.scene.set_dir(this.key_dir.x, 0);
     break;
   case 39:			// RIGHT
   case 68:			// D
   case 76:			// L
     this._key_right = false;
-    this._vx = (this._key_left) ? -1 : 0;
+    this.key_dir.x = (this._key_left) ? -1 : 0;
+    this.scene.set_dir(this.key_dir.x, 0);
     break;
   case 38:			// UP
   case 87:			// W
   case 75:			// K
     this._key_up = false;
-    this._vy = (this._key_down) ? +1 : 0;
+    this.key_dir.y = (this._key_down) ? +1 : 0;
+    this.scene.set_dir(0, this.key_dir.y);
     break;
   case 40:			// DOWN
   case 83:			// S
   case 74:			// J
     this._key_down = false;
-    this._vy = (this._key_up) ? -1 : 0;
+    this.key_dir.y = (this._key_up) ? -1 : 0;
+    this.scene.set_dir(0, this.key_dir.y);
     break;
   case 13:			// ENTER
   case 32:			// SPACE
   case 90:			// Z
   case 88:			// X
-    if (this._key_action) {
-      this._key_action = false;
-      if (this.scene.action !== undefined) {
-	this.scene.action(false);
-      }
+    if (this.key_action) {
+      this.key_action = false;
+      this.scene.set_action(this.key_action);
     }
     break;
   }
+  this.scene.keyup(ev.keyCode);
 };
 
 App.prototype.mousedown = function (ev)
@@ -245,7 +250,6 @@ App.prototype.update = function ()
 {
   // [OVERRIDE]
   // [GAME SPECIFIC CODE]
-  this.scene.move(this._vx, this._vy);
   this.scene.update();
 
   while (0 < this.msgs.length) {
