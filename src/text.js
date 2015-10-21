@@ -4,9 +4,6 @@ function Font(glyphs, color)
 {
   this.width = glyphs.height;
   this.height = glyphs.height;
-  this.scale = 1;
-  this.lineSpace = 0;
-
   this.glyphs = createCanvas(glyphs.width, glyphs.height);
   var ctx = getEdgeyContext(this.glyphs);
   ctx.clearRect(0, 0, glyphs.width, glyphs.height);
@@ -16,10 +13,11 @@ function Font(glyphs, color)
   ctx.fillRect(0, 0, glyphs.width, glyphs.height);
 }
 
-Font.prototype.renderString = function (ctx, text, x, y)
+Font.prototype.renderString = function (ctx, text, x, y, scale)
 {
-  var w = this.scale*this.width;
-  var h = this.scale*this.height;
+  scale = (scale !== undefined)? scale : 1;
+  var w = scale*this.width;
+  var h = scale*this.height;
   for (var i = 0; i < text.length; i++) {
     var c = text.charCodeAt(i);
     ctx.drawImage(this.glyphs,
@@ -28,47 +26,78 @@ Font.prototype.renderString = function (ctx, text, x, y)
   }
 };
 
-Font.prototype.getBBox = function (text)
+function TextBox(font, frame, scale, linespace)
 {
-  var lines = text.split('\n');
+  Sprite.call(this, null);
+  this.font = font;
+  this.frame = frame;
+  this.scale = (scale !== undefined)? scale : 1;
+  this.linespace = (linespace !== undefined)? linespace : 0;
+  this.segments = [];
+}
+
+TextBox.prototype = Object.create(Sprite.prototype);
+
+TextBox.prototype.toString = function ()
+{
+  return '<TextBox: '+this.segments+'>';
+};
+
+TextBox.prototype.getSize = function (lines)
+{
   var n = 0;
   for (var i = 0; i < lines.length; i++) {
     n = Math.max(n, lines[i].length);
   }
-  var lineHeight = (this.height+this.lineSpace)
-  return new Rectangle(0, 0,
-		       this.scale*n*this.width,
-		       this.scale*(lines.length*lineHeight-this.lineSpace));
+
+  var font = this.font;
+  var height = lines.length*(font.height+this.linespace)
+  return new Vec2(this.scale*font.width*n,
+		  this.scale*height-this.linespace);
 }
 
-Font.prototype.renderText = function (ctx, text, rect, halign, valign)
+TextBox.prototype.clearText = function ()
+{
+  this.segments = [];
+};
+
+TextBox.prototype.putText = function (lines, halign, valign)
 {
   halign = (halign !== undefined)? halign : 'left';
   valign = (valign !== undefined)? valign : 'top';
-  var bbox = this.getBBox(text);
-  var y = rect.y;
+  var size = this.getSize(lines);
+  var y = this.frame.y;
   switch (valign) {
   case 'center':
-    y = rect.y+(rect.height-bbox.height)/2;
+    y += (this.frame.height-size.y)/2;
     break;
   case 'bottom':
-    y = rect.y+rect.height-bbox.height;
+    y += this.frame.height-size.y;
     break;
   }
-  var lines = text.split('\n');
-  var w = this.scale*this.width;
+  var font = this.font;
+  var w = this.scale*font.width;
   for (var i = 0; i < lines.length; i++) {
-    var line = lines[i];
-    var x = rect.x;
+    var text = lines[i];
+    var x = this.frame.x;
     switch (halign) {
     case 'center':
-      x = rect.x+(rect.width-w*line.length)/2;
+      x += (this.frame.width-w*text.length)/2;
       break;
     case 'right':
-      x = rect.x+rect.width-w*line.length;
+      x += this.frame.width-w*text.length;
       break;
     }
-    this.renderString(ctx, line, x, y);
-    y += this.scale*(this.height+this.lineSpace);
+    this.segments.push({x:x, y:y, text:text});
+    y += this.scale*(font.height+this.linespace);
+  }  
+};
+
+TextBox.prototype.render = function (ctx, bx, by)
+{
+  var font = this.font;
+  for (var i = 0; i < this.segments.length; i++) {
+    var seg = this.segments[i];
+    font.renderString(ctx, seg.text, bx+seg.x, by+seg.y, this.scale);
   }  
 };

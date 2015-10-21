@@ -62,17 +62,14 @@ Game.prototype.init = function ()
   
   // show a banner.
   var scene = this;
-  var banner = new Sprite(null);
-  banner.update = function () {
-    banner.alive = (scene.ticks < banner.ticks0+app.framerate*2);
+  var frame = new Rectangle(0, 0, app.screen.width, app.screen.height);
+  var textbox = new TextBox(app.font, frame);
+  textbox.putText(['GAME!!1'], 'center', 'center');
+  textbox.update = function () {
+    textbox.alive = (scene.ticks < textbox.ticks0+app.framerate*2);
+    textbox.visible = blink(scene.ticks, app.framerate/2);
   };
-  banner.render = function (ctx, x, y) {
-    if (blink(scene.ticks, app.framerate/2)) {
-      app.renderString(app.images.font_w, 'GAME!!!', 1,
-		       x+app.screen.width/2, y+50, 'center');
-    }
-  };
-  this.addObject(banner);
+  this.addObject(textbox);
 };
 
 Game.prototype.render = function (ctx, bx, by)
