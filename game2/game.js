@@ -66,19 +66,21 @@ Level1.prototype.render = function (ctx, bx, by)
   var tilesize = this.tilesize;
   var window = this.window;
   var tilemap = this.tilemap;
-  bx -= tilesize;
-  by += (this.app.screen.height-this.window.height)/2;
+  var dx = -tilesize;
+  var dy = (this.app.screen.height-this.window.height)/2;
+  var tx = bx+dx-window.x;
+  var ty = by+dy-window.y;
 
   // Fill with the background color.
   ctx.fillStyle = 'rgb(0,128,224)';
-  ctx.fillRect(bx, by, this.window.width, this.window.height);
+  ctx.fillRect(bx+dx, bx+dy, this.window.width, this.window.height);
 
   var x0 = Math.floor(window.x/tilesize);
   var y0 = Math.floor(window.y/tilesize);
   var x1 = Math.ceil((window.x+window.width)/tilesize);
   var y1 = Math.ceil((window.y+window.height)/tilesize);
-  var fx = x0*tilesize-window.x;
-  var fy = y0*tilesize-window.y;
+  var fx = dx+x0*tilesize-window.x;
+  var fy = dy+y0*tilesize-window.y;
 
   // Set the drawing order.
   var objs = [];
@@ -110,9 +112,9 @@ Level1.prototype.render = function (ctx, bx, by)
 	if (a instanceof FixedSprite) {
 	  ;
 	} else if (a instanceof Player) {
-	  a.render(ctx, bx-window.x, by-window.y, false);
+	  a.render(ctx, tx, ty, false);
 	} else {
-	  a.render(ctx, bx-window.x, by-window.y);
+	  a.render(ctx, tx, ty);
 	}
       }
     }
@@ -133,12 +135,12 @@ Level1.prototype.render = function (ctx, bx, by)
     } else if (obj instanceof FixedSprite) {
       var bounds = obj.bounds;
       if (bounds.overlap(window)) {
-	obj.render(ctx, bx-window.x, by-window.y);
+	obj.render(ctx, tx, ty);
       }
     } else if (obj instanceof Player) {
       var bounds = obj.bounds;
       if (bounds.overlap(window)) {
-	obj.render(ctx, bx-window.x, by-window.y, true);
+	obj.render(ctx, tx, ty, true);
       }
     }
   }
