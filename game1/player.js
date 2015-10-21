@@ -15,8 +15,10 @@ FixedSprite.prototype = Object.create(Sprite.prototype);
 FixedSprite.prototype.update = function ()
 {
   Sprite.prototype.update.call(this);
-  this.alive = (this.scene.ticks < this.ticks0+this.duration);
   this.bounds.y -= 1;
+  if (this.ticks0+this.duration < this.scene.ticks) {
+    this.die();
+  }
 };
 
 FixedSprite.prototype.render = function (ctx, bx, by)
@@ -169,7 +171,7 @@ Player.prototype.jump = function (jumping)
 
 Player.prototype.pick = function (a)
 {
-  a.alive = false;
+  a.die();
   this.picked.signal();
   // show a particle.
   var particle = new FixedSprite(a.bounds, this.scene.app.framerate, S.YAY);

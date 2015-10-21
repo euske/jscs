@@ -1,17 +1,10 @@
 // actor.js
 
 // Task: a single procedure that runs at each frame.
-function Task(body)
-{
-  this.init();
-  this.body = body;
-}
-
-Task.prototype.init = function ()
+function Task()
 {
   this.scene = null;
-  this.alive = true;
-};
+}
 
 Task.prototype.start = function (scene)
 {
@@ -19,9 +12,14 @@ Task.prototype.start = function (scene)
   this.ticks0 = scene.ticks;
 };
 
+Task.prototype.die = function ()
+{
+  this.scene = null;
+};
+
 Task.prototype.update = function ()
 {
-  this.body(this);
+  // [OVERRIDE]
 };
 
 
@@ -42,10 +40,10 @@ Queue.prototype.update = function ()
       task.start(this.scene);
     }
     task.update();
-    if (task.alive) return;
+    if (task.scene !== null) return;
     this.tasks.shift();
   }
-  this.alive = false;
+  this.die();
 };
 
 Queue.prototype.add = function (task)

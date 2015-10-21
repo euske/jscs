@@ -222,7 +222,7 @@ Level1.prototype.init = function ()
 	  e.innerHTML = text.substring(0, i);
 	} else {
 	  app.removeElement(e);
-	  task.alive = false;
+	  task.die();
 	}
       }
     }
@@ -255,8 +255,10 @@ Level1.prototype.init = function ()
   var textbox = new TextBox(app.font, frame);
   textbox.putText(['GET ALL TEH','','DAMN THINGIES!'], 'center', 'center');
   textbox.update = function () {
-    textbox.alive = (scene.ticks < textbox.ticks0+app.framerate*2);
     textbox.visible = blink(scene.ticks, app.framerate/2);
+    if (textbox.ticks0+app.framerate*2 < scene.ticks) {
+      textbox.die();
+    }
   };
   this.addObject(textbox);
 };

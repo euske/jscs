@@ -194,10 +194,10 @@ GameScene.prototype.collideObjects = function (objs)
 {
   for (var i = 0; i < objs.length; i++) {
     var obj0 = objs[i];
-    if (obj0.alive && obj0.scene === this && obj0.hitbox !== null) {
+    if (obj0.scene === this && obj0.hitbox !== null) {
       for (var j = i+1; j < objs.length; j++) {
 	var obj1 = objs[j];
-	if (obj1.alive && obj1.scene === this && obj1.hitbox !== null &&
+	if (obj1.scene === this && obj1.hitbox !== null &&
 	    obj1 !== obj0 && obj1.hitbox.overlap(obj0.hitbox)) {
 	  obj0.collide(obj1);
 	  obj1.collide(obj0);
@@ -209,7 +209,7 @@ GameScene.prototype.collideObjects = function (objs)
   
 GameScene.prototype.cleanObjects = function (objs)
 {
-  function f(obj) { return !obj.alive; }
+  function f(obj) { return obj.scene === null; }
   removeArray(objs, f);
 };
 
@@ -218,7 +218,7 @@ GameScene.prototype.findObjects = function (rect, f)
   var a = [];
   for (var i = 0; i < this.colliders.length; i++) {
     var obj1 = this.colliders[i];
-    if (obj1.alive && obj1.scene === this && obj1.hitbox !== null &&
+    if (obj1.scene === this && obj1.hitbox !== null &&
 	f(obj1) && obj1.hitbox.overlap(rect)) {
       a.push(obj1);
     }
