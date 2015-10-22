@@ -263,9 +263,10 @@ Level1.prototype.init = function ()
   this.updateScore();
 
   // show a banner.
-  var frame = new Rectangle(0, 0, app.screen.width, app.screen.height);
-  var textbox = new TextBox(app.font, frame);
-  textbox.putText(['GET ALL TEH DAMN THINGIES!'], 'center', 'center');
+  var textbox = new TextBox();
+  textbox.putText(new Rectangle(0, 0, app.screen.width, app.screen.height),
+		  app.font, ['GET ALL TEH DAMN THINGIES!'],
+		  'center', 'center');
   textbox.update = function () {
     textbox.visible = blink(scene.ticks, app.framerate/2);
     if (textbox.ticks0+app.framerate*2 < scene.ticks) {

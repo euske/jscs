@@ -1,11 +1,14 @@
 // text.js
 
-function Font(glyphs, color)
+function Font(glyphs, color, scale)
 {
-  this.width = glyphs.height;
-  this.height = glyphs.height;
-  this.glyphs = createCanvas(glyphs.width, glyphs.height);
-  var ctx = getEdgeyContext(this.glyphs);
+  scale = (scale !== undefined)? scale : 1;
+  this._width0 = glyphs.height;
+  this._height0 = glyphs.height;
+  this._glyphs = createCanvas(glyphs.width, glyphs.height);
+  this.width = scale*this._width0;
+  this.height = scale*this._height0;
+  var ctx = getEdgeyContext(this._glyphs);
   ctx.clearRect(0, 0, glyphs.width, glyphs.height);
   ctx.drawImage(glyphs, 0, 0);
   ctx.globalCompositeOperation = 'source-in';
@@ -13,25 +16,24 @@ function Font(glyphs, color)
   ctx.fillRect(0, 0, glyphs.width, glyphs.height);
 }
 
-Font.prototype.renderString = function (ctx, text, x, y, scale)
+Font.prototype.getSize = function (text)
 {
-  scale = (scale !== undefined)? scale : 1;
-  var w = scale*this.width;
-  var h = scale*this.height;
+  return new Vec2(this.width * text.length, this.height);
+};
+
+Font.prototype.renderString = function (ctx, text, x, y)
+{
   for (var i = 0; i < text.length; i++) {
     var c = text.charCodeAt(i);
-    ctx.drawImage(this.glyphs,
-		  (c-32)*this.width, 0, this.width, this.height,
-		  x+w*i, y, w, h);
+    ctx.drawImage(this._glyphs,
+		  (c-32)*this._width0, 0, this._width0, this._height0,
+		  x+this.width*i, y, this.width, this.height);
   }
 };
 
-function TextBox(font, frame, scale, linespace)
+function TextBox(linespace)
 {
   Sprite.call(this, null);
-  this.font = font;
-  this.frame = frame;
-  this.scale = (scale !== undefined)? scale : 1;
   this.linespace = (linespace !== undefined)? linespace : 0;
   this.segments = [];
 }
@@ -43,61 +45,63 @@ TextBox.prototype.toString = function ()
   return '<TextBox: '+this.segments+'>';
 };
 
-TextBox.prototype.getSize = function (lines)
-{
-  var n = 0;
-  for (var i = 0; i < lines.length; i++) {
-    n = Math.max(n, lines[i].length);
-  }
-
-  var font = this.font;
-  var height = lines.length*(font.height+this.linespace)
-  return new Vec2(this.scale*font.width*n,
-		  this.scale*height-this.linespace);
-}
-
-TextBox.prototype.clearText = function ()
+TextBox.prototype.clear = function ()
 {
   this.segments = [];
 };
 
-TextBox.prototype.putText = function (lines, halign, valign)
+TextBox.prototype.add = function (font, text, x, y)
+{
+  var seg = {font:font, text:text, x:x, y:y};
+  this.segments.push(seg);
+  return seg;
+}
+
+TextBox.prototype.getSize = function (font, lines)
+{
+  var w = 0, h = 0;
+  for (var i = 0; i < lines.length; i++) {
+    var s = font.getSize(lines[i]);
+    w = Math.max(w, s.x);
+    h = h+s.y+this.linespace;
+  }
+  return new Vec2(w, h-this.linespace);
+}
+
+TextBox.prototype.putText = function (frame, font, lines, halign, valign)
 {
   halign = (halign !== undefined)? halign : 'left';
   valign = (valign !== undefined)? valign : 'top';
-  var size = this.getSize(lines);
-  var y = this.frame.y;
+  var y = frame.y;
   switch (valign) {
   case 'center':
-    y += (this.frame.height-size.y)/2;
+    y += (frame.height-this.getSize(font, lines).y)/2;
     break;
   case 'bottom':
-    y += this.frame.height-size.y;
+    y += frame.height-this.getSize(font, lines).y;
     break;
   }
-  var font = this.font;
-  var w = this.scale*font.width;
   for (var i = 0; i < lines.length; i++) {
     var text = lines[i];
-    var x = this.frame.x;
+    var s = font.getSize(text);
+    var x = frame.x;
     switch (halign) {
     case 'center':
-      x += (this.frame.width-w*text.length)/2;
+      x += (frame.width-s.x)/2;
       break;
     case 'right':
-      x += this.frame.width-w*text.length;
+      x += frame.width-s.x;
       break;
     }
-    this.segments.push({x:x, y:y, text:text});
-    y += this.scale*(font.height+this.linespace);
+    this.segments.push({font:font, x:x, y:y, text:text});
+    y += s.y+this.linespace;
   }  
 };
 
 TextBox.prototype.render = function (ctx, bx, by)
 {
-  var font = this.font;
   for (var i = 0; i < this.segments.length; i++) {
     var seg = this.segments[i];
-    font.renderString(ctx, seg.text, bx+seg.x, by+seg.y, this.scale);
+    seg.font.renderString(ctx, seg.text, bx+seg.x, by+seg.y);
   }  
 };

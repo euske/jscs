@@ -62,9 +62,9 @@ Game.prototype.init = function ()
   
   // show a banner.
   var scene = this;
-  var frame = new Rectangle(0, 0, app.screen.width, app.screen.height);
-  var textbox = new TextBox(app.font, frame);
-  textbox.putText(['GAME!!1'], 'center', 'center');
+  var textbox = new TextBox();
+  textbox.putText(new Rectangle(0, 0, app.screen.width, app.screen.height),
+		  app.font, ['GAME!!1'], 'center', 'center');
   textbox.update = function () {
     textbox.visible = blink(scene.ticks, app.framerate/2);
     if (textbox.ticks0+app.framerate*2 < scene.ticks) {
