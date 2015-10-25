@@ -94,13 +94,14 @@ TextBox.prototype.addNewline = function (font)
 TextBox.prototype.addText = function (font, text)
 {
   for (var i = 0; i < text.length; ) {
-    var j = text.indexOf('\n', i);
-    if (j < 0) {
-      j = text.length; 
-    } else if (j == i) {
+    if (text[i] == '\n') {
       this.addNewline(font);
       i++;
       continue;
+    }
+    var j = text.indexOf('\n', i);
+    if (j < 0) {
+      j = text.length; 
     }
     var s = text.substring(i, j);
     var size = font.getSize(s);
