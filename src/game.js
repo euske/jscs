@@ -64,11 +64,11 @@ Game.prototype.init = function ()
   var scene = this;
   var textbox = new TextBox(new Rectangle(0, 0, app.screen.width, app.screen.height));
   textbox.putText(app.font, ['GAME!!1'], 'center', 'center');
+  textbox.bounds = null;
+  textbox.duration = app.framerate*2;
   textbox.update = function () {
+    TextBox.prototype.update.call(textbox);
     textbox.visible = blink(scene.ticks, app.framerate/2);
-    if (textbox.ticks0+app.framerate*2 < scene.ticks) {
-      textbox.die();
-    }
   };
   this.addObject(textbox);
 };

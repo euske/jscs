@@ -4,6 +4,7 @@
 function Task()
 {
   this.scene = null;
+  this.duration = 0;
 }
 
 Task.prototype.start = function (scene)
@@ -20,6 +21,10 @@ Task.prototype.die = function ()
 Task.prototype.update = function ()
 {
   // [OVERRIDE]
+  if (0 < this.duration &&
+      this.ticks0+this.duration < this.scene.ticks) {
+    this.die();
+  }
 };
 
 
@@ -75,6 +80,7 @@ Sprite.prototype.toString = function ()
 Sprite.prototype.update = function ()
 {
   // [OVERRIDE]
+  Task.prototype.update.call(this);
 };
 
 Sprite.prototype.render = function (ctx, x, y)

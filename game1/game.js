@@ -255,11 +255,10 @@ Level1.prototype.init = function ()
   textbox.putText(app.font, ['GET ALL TEH','DAMN THINGIES!'],
 		  'center', 'center');
   textbox.bounds = null;
+  textbox.duration = app.framerate*2;
   textbox.update = function () {
+    TextBox.prototype.update.call(textbox);
     textbox.visible = blink(scene.ticks, app.framerate/2);
-    if (textbox.ticks0+app.framerate*2 < scene.ticks) {
-      textbox.die();
-    }
   };
   this.addObject(textbox);
 };

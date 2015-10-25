@@ -16,9 +16,6 @@ FixedSprite.prototype.update = function ()
 {
   Sprite.prototype.update.call(this);
   this.bounds.y -= 1;
-  if (this.ticks0+this.duration < this.scene.ticks) {
-    this.die();
-  }
 };
 
 FixedSprite.prototype.render = function (ctx, x, y)

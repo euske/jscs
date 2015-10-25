@@ -183,22 +183,6 @@ TextTask.prototype.update = function ()
   }
 };
 
-// PauseTask
-function PauseTask(textbox, duration)
-{
-  Task.call(this);
-  this.duration = duration;
-}
-
-PauseTask.prototype = Object.create(Task.prototype);
-
-PauseTask.prototype.update = function ()
-{
-  if (this.ticks0+this.duration <= this.scene.ticks) {
-    this.die();
-  }
-};
-
 // TextBoxTT
 function TextBoxTT(bounds, linespace)
 {
@@ -228,7 +212,8 @@ TextBoxTT.prototype.getCurrentTask = function ()
 
 TextBoxTT.prototype.addPause = function (ticks)
 {
-  var task = new PauseTask(this, ticks);
+  var task = new Task();
+  task.duration = ticks;
   this.queue.push(task);
   return task;
 };
