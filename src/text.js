@@ -34,9 +34,10 @@ Font.prototype.renderString = function (ctx, text, x, y)
 
 
 // TextBox
-function TextBox(bounds, linespace)
+function TextBox(frame, linespace)
 {
-  Sprite.call(this, bounds);
+  Sprite.call(this, null);
+  this.frame = frame;
   this.linespace = (linespace !== undefined)? linespace : 0;
   this.segments = [];
 }
@@ -74,16 +75,19 @@ TextBox.prototype.render = function (ctx, bx, by)
 
 TextBox.prototype.addNewline = function (font)
 {
-  var y = ((this.segments.length === 0)? 0 :
-	   this.segments[this.segments.length-1].bounds.bottom()+this.linespace);
-  var newseg = {font:font, bounds:new Rectangle(0, y, 0, font.height), text:''};
+  var x = this.frame.x;
+  var y = this.frame.y;
+  if (this.segments.length !== 0) {
+    y = this.segments[this.segments.length-1].bounds.bottom()+this.linespace;
+  }
+  var newseg = {font:font, bounds:new Rectangle(x, y, 0, font.height), text:''};
   this.segments.push(newseg);
-  var dy = newseg.bounds.bottom() - this.bounds.height;
+  var dy = newseg.bounds.bottom() - this.frame.height;
   if (0 < dy) {
     for (var i = this.segments.length-1; 0 <= i; i--) {
       var seg = this.segments[i];
       seg.bounds.y -= dy;
-      if (seg.bounds.y < 0) {
+      if (seg.bounds.y < this.frame.y) {
 	this.segments.splice(i, 1);
       }
     }
@@ -108,7 +112,7 @@ TextBox.prototype.addText = function (font, text)
     var last = ((this.segments.length === 0)? null :
 		this.segments[this.segments.length-1]);	
     if (last === null ||
-	this.bounds.width < last.bounds.right()+size.x) {
+	this.frame.width < last.bounds.right()+size.x) {
       last = this.addNewline(font);
     }
     last.text += s;
@@ -133,25 +137,25 @@ TextBox.prototype.putText = function (font, lines, halign, valign)
 {
   halign = (halign !== undefined)? halign : 'left';
   valign = (valign !== undefined)? valign : 'top';
-  var y = this.bounds.y;
+  var y = this.frame.y;
   switch (valign) {
   case 'center':
-    y += (this.bounds.height-this.getSize(font, lines).y)/2;
+    y += (this.frame.height-this.getSize(font, lines).y)/2;
     break;
   case 'bottom':
-    y += this.bounds.height-this.getSize(font, lines).y;
+    y += this.frame.height-this.getSize(font, lines).y;
     break;
   }
   for (var i = 0; i < lines.length; i++) {
     var text = lines[i];
     var size = font.getSize(text);
-    var x = this.bounds.x;
+    var x = this.frame.x;
     switch (halign) {
     case 'center':
-      x += (this.bounds.width-size.x)/2;
+      x += (this.frame.width-size.x)/2;
       break;
     case 'right':
-      x += this.bounds.width-size.x;
+      x += this.frame.width-size.x;
       break;
     }
     var bounds = new Rectangle(x, y, size.x, size.y);
@@ -193,9 +197,9 @@ TextTask.prototype.update = function ()
 };
 
 // TextBoxTT
-function TextBoxTT(bounds, linespace)
+function TextBoxTT(frame, linespace)
 {
-  TextBox.call(this, bounds, linespace);
+  TextBox.call(this, frame, linespace);
   this.queue = [];
 }
 
@@ -203,6 +207,7 @@ TextBoxTT.prototype = Object.create(TextBox.prototype);
 
 TextBoxTT.prototype.update = function ()
 {
+  TextBox.prototype.update.call(this);
   while (true) {
     var task = this.getCurrentTask();
     if (task === null) break;

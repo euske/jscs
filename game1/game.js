@@ -206,27 +206,10 @@ Level1.prototype.init = function ()
     scene.updateScore();
     
     // show a balloon.
-    var frame = app.frame;
-    var text = 'Got a thingy!';
-    var e = app.addElement(new Rectangle(20, 20, frame.width-60, 60));
-    e.align = 'left';
-    e.style.padding = '10px';
-    e.style.color = 'black';
-    e.style.background = 'white';
-    e.style.border = 'solid black 2px';
-    var i = 0;
-    function balloon(task) {
-      if ((scene.ticks % 2) === 0) {
-	if (i < text.length) {
-	  i++;
-	  e.innerHTML = text.substring(0, i);
-	} else {
-	  app.removeElement(e);
-	  task.die();
-	}
-      }
-    }
-    scene.addObject(new Task(balloon));
+    var textbox = new TextBoxTT(new Rectangle(20, 20, app.screen.width-60, 60));
+    textbox.addTask(app.font, 'GOT A THINGY!');
+    textbox.duration = app.framerate*2;
+    scene.addObject(textbox);
 
     // count the score.
     scene.collectibles--;
@@ -251,7 +234,7 @@ Level1.prototype.init = function ()
   this.updateScore();
 
   // show a banner.
-  var textbox = new TextBox(new Rectangle(0, 0, app.screen.width, app.screen.height, 4));
+  var textbox = new TextBox(new Rectangle(0, 0, app.screen.width, app.screen.height), 4);
   textbox.putText(app.font, ['GET ALL TEH','DAMN THINGIES!'],
 		  'center', 'center');
   textbox.bounds = null;
