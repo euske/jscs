@@ -162,12 +162,14 @@ TextBox.prototype.putText = function (font, lines, halign, valign)
 
 
 // TextTask
-function TextTask(textbox, font, text)
+function TextTask(textbox, font, text, sound, interval)
 {
   Task.call(this);
   this.textbox = textbox;
   this.font = font;
   this.text = text;
+  this.sound = (sound !== undefined)? sound : null;
+  this.interval = (interval !== undefined)? interval : 0;
   this.ended = new Slot();
   this._index = 0;
 }
@@ -181,6 +183,12 @@ TextTask.prototype.update = function ()
   } else {
     this.textbox.addText(this.font, this.text.substr(this._index, 1));
     this._index++;
+    if (this.sound !== null) {
+      if (this.interval === 0 ||
+	  blink(this.scene.ticks, this.interval)) {
+	PlaySound(this.sound);
+      }
+    }
   }
 };
 
@@ -195,8 +203,9 @@ TextBoxTT.prototype = Object.create(TextBox.prototype);
 
 TextBoxTT.prototype.update = function ()
 {
-  while (0 < this.queue.length) {
-    var task = this.queue[0];
+  while (true) {
+    var task = this.getCurrentTask();
+    if (task === null) break;
     if (task.scene === null) {
       task.start(this.scene);
     }
@@ -219,9 +228,9 @@ TextBoxTT.prototype.addPause = function (ticks)
   return task;
 };
 
-TextBoxTT.prototype.addTask = function (font, text)
+TextBoxTT.prototype.addTask = function (font, text, sound)
 {
-  var task = new TextTask(this, font, text);
+  var task = new TextTask(this, font, text, sound);
   this.queue.push(task);
   return task;
 };
