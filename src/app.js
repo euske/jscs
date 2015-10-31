@@ -76,6 +76,7 @@ App.prototype.keydown = function (ev)
   case 37:			// LEFT
   case 65:			// A
   case 72:			// H
+  case 81:			// Q (AZERTY)
     this._key_left = true;
     this.key_dir.x = -1;
     this.scene.set_dir(this.key_dir.x, 0);
@@ -102,6 +103,7 @@ App.prototype.keydown = function (ev)
     this.scene.set_dir(0, this.key_dir.y);
     break;
   case 13:			// ENTER
+  case 16:			// SHIFT
   case 32:			// SPACE
   case 90:			// Z
   case 88:			// X
@@ -131,6 +133,7 @@ App.prototype.keyup = function (ev)
   case 37:			// LEFT
   case 65:			// A
   case 72:			// H
+  case 81:			// Q (AZERTY)
     this._key_left = false;
     this.key_dir.x = (this._key_right) ? +1 : 0;
     this.scene.set_dir(this.key_dir.x, 0);
@@ -157,6 +160,7 @@ App.prototype.keyup = function (ev)
     this.scene.set_dir(0, this.key_dir.y);
     break;
   case 13:			// ENTER
+  case 16:			// SHIFT
   case 32:			// SPACE
   case 90:			// Z
   case 88:			// X
