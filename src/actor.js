@@ -67,6 +67,7 @@ function Sprite(bounds)
 {
   Task.call(this);
   this.visible = true;
+  this.zorder = 0;
   this.bounds = (bounds === null)? bounds : bounds.copy();
 }
 

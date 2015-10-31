@@ -162,6 +162,7 @@ GameScene.prototype.addObject = function (obj)
   }
   if (obj.render !== undefined) {
     this.sprites.push(obj);
+    this.sprites.sort(function (a,b) { return a.zorder-b.zorder; });
   }
   if (obj.hitbox !== undefined) {
     this.colliders.push(obj);
