@@ -64,13 +64,16 @@ Game.prototype.init = function ()
   var scene = this;
   var textbox = new TextBox(new Rectangle(0, 0, app.screen.width, app.screen.height));
   textbox.putText(app.font, ['GAME!!1'], 'center', 'center');
-  textbox.bounds = null;
   textbox.duration = app.framerate*2;
   textbox.update = function () {
     TextBox.prototype.update.call(textbox);
     textbox.visible = blink(scene.ticks, app.framerate/2);
   };
   this.addObject(textbox);
+
+  var tt = new TextBoxTT(new Rectangle(10, 10, 200, 100));
+  tt.addTask(app.font, 'THIS IS GAEM.\nYES IT IS.', app.audios.beep, 8);
+  this.addObject(tt);
 };
 
 Game.prototype.render = function (ctx, bx, by)

@@ -25,9 +25,9 @@ Font.prototype.getSize = function (text)
 Font.prototype.renderString = function (ctx, text, x, y)
 {
   for (var i = 0; i < text.length; i++) {
-    var c = text.charCodeAt(i);
+    var c = text.charCodeAt(i)-32;
     ctx.drawImage(this._glyphs,
-		  (c-32)*this._width0, 0, this._width0, this._height0,
+		  c*this._width0, 0, this._width0, this._height0,
 		  x+this.width*i, y, this.width, this.height);
   }
 };
@@ -164,6 +164,19 @@ TextBox.prototype.putText = function (font, lines, halign, valign)
   }  
 };
 
+// PauseTask
+function PauseTask(ticks)
+{
+  Task.call(this);
+  this.duration = ticks;
+}
+
+PauseTask.prototype = Object.create(Task.prototype);
+
+PauseTask.prototype.ff = function ()
+{
+  this.die();
+};
 
 // TextTask
 function TextTask(textbox, font, text, sound, interval)
@@ -190,10 +203,17 @@ TextTask.prototype.update = function ()
     if (this.sound !== null) {
       if (this.interval === 0 ||
 	  blink(this.scene.ticks, this.interval)) {
-	PlaySound(this.sound);
+	playSound(this.sound);
       }
     }
   }
+};
+
+TextTask.prototype.ff = function ()
+{
+  this.textbox.addText(this.font, this.text.substr(this._index));
+  this._index = this.text.length;
+  this.die();
 };
 
 // TextBoxTT
@@ -220,6 +240,20 @@ TextBoxTT.prototype.update = function ()
   }
 };
 
+TextTask.prototype.ff = function ()
+{
+  while (true) {
+    var task = this.getCurrentTask();
+    if (task === null) break;
+    if (task.scene === null) {
+      task.start(this.scene);
+    }
+    task.ff();
+    if (task.scene !== null) break;
+    this.queue.shift();
+  }
+};
+
 TextBoxTT.prototype.getCurrentTask = function ()
 {
   return (0 < this.queue.length)? this.queue[0] : null;
@@ -227,15 +261,14 @@ TextBoxTT.prototype.getCurrentTask = function ()
 
 TextBoxTT.prototype.addPause = function (ticks)
 {
-  var task = new Task();
-  task.duration = ticks;
+  var task = new PauseTask(ticks);
   this.queue.push(task);
   return task;
 };
 
-TextBoxTT.prototype.addTask = function (font, text, sound)
+TextBoxTT.prototype.addTask = function (font, text, sound, interval)
 {
-  var task = new TextTask(this, font, text, sound);
+  var task = new TextTask(this, font, text, sound, interval);
   this.queue.push(task);
   return task;
 };
