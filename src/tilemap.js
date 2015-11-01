@@ -68,7 +68,8 @@ TileMap.prototype.apply = function (rect, f)
     var y = rect.y+dy;
     for (var dx = 0; dx < rect.width; dx++) {
       var x = rect.x+dx;
-      if (f(x, y)) {
+      var c = this.get(x, y);
+      if (f(x, y, c)) {
 	return new Vec2(x,y);
       }
     }
@@ -85,10 +86,25 @@ TileMap.prototype.reduce = function (rect, f, v)
     var y = rect.y+dy;
     for (var dx = 0; dx < rect.width; dx++) {
       var x = rect.x+dx;
-      v = f(x, y, v);
+      var c = this.get(x, y);
+      v = f(x, y, c, v);
     }
   }
   return v;
+};
+
+TileMap.prototype.contactTile = function (rect, f0, v0)
+{
+  var ts = this.tilesize;
+  function f(x, y, c, v) {
+    if (f0(c)) {
+      var bounds = new Rectangle(x*ts, y*ts, ts, ts);
+      v = rect.contact(v, bounds);
+    }
+    return v;
+  }
+  var r = rect.move(v0.x, v0.y).union(rect);
+  return this.reduce(this.coord2map(r), f, v0);
 };
 
 TileMap.prototype.scroll = function (rect, vx, vy)
@@ -133,8 +149,11 @@ TileMap.prototype.renderFromBottomLeft =
   by = by+ts-tw;
   // Draw tiles from the bottom-left first.
   for (var dy = h-1; 0 <= dy; dy--) {
+    var y = y0+dy;
     for (var dx = 0; dx < w; dx++) {
-      var c = ft(x0+dx, y0+dy);
+      var x = x0+dx;
+      var c = this.get(x, y);
+      c = ft(x, y, c);
       if (0 <= c) {
 	ctx.drawImage(tiles,
 		      tw*c, 0, tw, tw,
@@ -154,8 +173,11 @@ TileMap.prototype.renderFromTopRight =
   by = by+ts-tw;
   // Draw tiles from the top-right first.
   for (var dy = 0; dy < h; dy++) {
+    var y = y0+dy;
     for (var dx = w-1; 0 <= dx; dx--) {
-      var c = ft(x0+dx, y0+dy);
+      var x = x0+dx;
+      var c = this.get(x, y);
+      c = ft(x, y, c);
       if (0 <= c) {
 	ctx.drawImage(tiles,
 		      tw*c, 0, tw, tw,

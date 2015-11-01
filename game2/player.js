@@ -104,9 +104,7 @@ Player.prototype.render = function (ctx, x, y, front)
   var shadow = true;
   var tilemap = this.scene.tilemap;
   var r = tilemap.coord2map(this.hitbox);
-  function isfloor(x, y) {
-    return (tilemap.get(x, y) == T.FLOOR);
-  }
+  function isfloor(x,y,c) { return (c == T.FLOOR); }
   x += this.bounds.x;
   y += this.bounds.y;
   if (front) {
@@ -153,8 +151,7 @@ Player.prototype.contactTile = function (p, v0)
   var bs = new Vec3(ts, ts, ts);
   var ws = new Vec3(ts, ts, 999);
   var box = new Box(p, new Vec3(this.hitbox.width, this.hitbox.height, ts));
-  function f(x, y, v) {
-    var c = tilemap.get(x, y);
+  function f(x, y, c, v) {
     if (T.isWall(c)) {
       var bounds = new Box(new Vec3(x*ts, y*ts, 0), ws);
       v = box.contact(v, bounds);

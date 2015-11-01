@@ -102,7 +102,7 @@ Level1.prototype.render = function (ctx, bx, by)
   }
 
   // Draw the tilemap.
-  var ft = function (x,y) {
+  var ft = function (x,y,c) {
     var k = x+','+y;
     if (objs.hasOwnProperty(k)) {
       var r = objs[k];
@@ -118,7 +118,6 @@ Level1.prototype.render = function (ctx, bx, by)
 	}
       }
     }
-    var c = tilemap.get(x,y);
     return (c == T.NONE? -1 : c);
   };
   tilemap.renderFromTopRight(

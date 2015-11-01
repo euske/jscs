@@ -113,7 +113,7 @@ Level1.prototype.render = function (ctx, bx, by)
   }
 
   // Draw the tilemap.
-  var ft = function (x,y) {
+  var ft = function (x,y,c) {
     var k = x+','+y;
     if (objs.hasOwnProperty(k)) {
       var r = objs[k];
@@ -122,7 +122,6 @@ Level1.prototype.render = function (ctx, bx, by)
 	a.render(ctx, bx-window.x, by-window.y);
       }
     }
-    var c = tilemap.get(x,y);
     return (c == T.NONE? -1 : c);
   };
   tilemap.renderFromBottomLeft(
@@ -178,8 +177,8 @@ Level1.prototype.init = function ()
   var app = this.app;
   var scene = this;
   var tilemap = this.tilemap;
-  var f = function (x,y) {
-    if (T.isCollectible(tilemap.get(x,y))) {
+  var f = function (x,y,c) {
+    if (T.isCollectible(c)) {
       var rect = tilemap.map2coord(new Vec2(x,y));
       scene.addObject(new Actor(rect, rect, S.THINGY));
       scene.collectibles++;
