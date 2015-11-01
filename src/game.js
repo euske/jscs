@@ -1,9 +1,10 @@
 // game.js
 
 // Player
-function Player(bounds, hitbox, tileno)
+function Player(bounds)
 {
-  Actor.call(this, bounds, hitbox, tileno);
+  Actor.call(this, bounds, bounds, 0);
+  this.speed = 4;
   this.gravity = 1;
   this.maxspeed = 4;
   this.jumpacc = -4;
@@ -27,6 +28,11 @@ Player.prototype.jump = function (jumping)
   }
 };
 
+Player.prototype.usermove = function (v)
+{
+  this.velocity.x = v.x*this.speed;
+}
+
 Player.prototype.update = function ()
 {
   if (0 <= this._jumpt && this._jumpt < this.maxacctime) {
@@ -37,7 +43,7 @@ Player.prototype.update = function ()
   this.velocity.y = clamp(-this.maxspeed, this.velocity.y, this.maxspeed);
   var v = this.hitbox.contact(this.velocity, this.scene.ground);
   this._landed = (0 < this.velocity.y && v.y === 0);
-  this.velocity.y = v.y;
+  this.velocity = v;
   this.move(this.velocity.x, this.velocity.y);
 };
 
@@ -57,7 +63,7 @@ Game.prototype.init = function ()
 
   var app = this.app;
   this.ground = new Rectangle(0, 200, app.screen.width, 32);
-  this.player = new Player(new Rectangle(0,0,32,32), new Rectangle(0,0,32,32), 0);
+  this.player = new Player(new Rectangle(0,0,32,32));
   this.addObject(this.player);
   
   // show a banner.
@@ -87,6 +93,11 @@ Game.prototype.render = function (ctx, bx, by)
 Game.prototype.update = function ()
 {
   GameScene.prototype.update.call(this);
-  this.player.velocity.x = this.app.key_dir.x;
-  this.player.jump(this.app.key_action);
+  this.player.usermove(this.app.key_dir);
 };
+
+Game.prototype.set_action = function (action)
+{
+  GameScene.prototype.set_action(this, action);
+  this.player.jump(action);
+}
