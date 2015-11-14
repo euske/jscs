@@ -59,7 +59,7 @@ function format(v, n, c)
   var s = '';
   while (s.length < n) {
     s = (v % 10)+s;
-    v /= 10;
+    v = Math.floor(v/10);
     if (v <= 0) break;
   }
   while (s.length < n) {
@@ -163,6 +163,38 @@ function image2array(img)
     map[y] = a;
   }
   return map;
+}
+
+// makeSprites: make sprites/tiles from the Sheet.
+function makeSprites(sheet, tw, needflip)
+{
+  var th = sheet.height;
+  var sprites = createCanvas(sheet.width*2, th);
+  var ctx = getEdgeyContext(sprites);
+  var src = Math.floor(sheet.width/tw);
+  var dst = 0;
+  var map = {};
+  function add(i, flip) {
+    ctx.save();
+    if (flip) {
+      ctx.translate((dst+1)*tw, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(sheet, i*tw, 0, tw, th, 0, 0, tw, th);
+    } else {
+      ctx.drawImage(sheet, i*tw, 0, tw, th, dst*tw, 0, tw, th);
+      map[i] = dst;
+    }
+    ctx.restore();
+    dst++;
+  }
+  for (var i = 0; i < src; i++) {
+    add(i, false);
+    if (needflip.hasOwnProperty(i)) {
+      add(i, true);
+    }
+  }
+  
+  return sprites;
 }
 
 // playSound(sound): play a sound resource.

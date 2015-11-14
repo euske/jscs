@@ -5,6 +5,7 @@ function Task()
 {
   this.scene = null;
   this.duration = 0;
+  this.died = new Slot(this);
 }
 
 Task.prototype.start = function (scene)
@@ -16,6 +17,7 @@ Task.prototype.start = function (scene)
 Task.prototype.die = function ()
 {
   this.scene = null;
+  this.died.signal();
 };
 
 Task.prototype.update = function ()
@@ -116,6 +118,7 @@ Actor.prototype.render = function (ctx, x, y)
   } else {
     var sprites = this.scene.app.sprites;
     var tw = sprites.height;
+    var th = sprites.height;
     ctx.drawImage(sprites,
 		  this.tileno*tw, tw-h, w, h,
 		  x+this.bounds.x, y+this.bounds.y, w, h);

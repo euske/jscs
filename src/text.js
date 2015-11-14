@@ -67,6 +67,8 @@ TextBox.prototype.render = function (ctx, bx, by)
     bx += this.bounds.x;
     by += this.bounds.y;
   }
+  bx += this.frame.x;
+  by += this.frame.y;
   for (var i = 0; i < this.segments.length; i++) {
     var seg = this.segments[i];
     seg.font.renderString(ctx, seg.text, bx+seg.bounds.x, by+seg.bounds.y);
@@ -75,8 +77,8 @@ TextBox.prototype.render = function (ctx, bx, by)
 
 TextBox.prototype.addNewline = function (font)
 {
-  var x = this.frame.x;
-  var y = this.frame.y;
+  var x = 0;
+  var y = 0;
   if (this.segments.length !== 0) {
     y = this.segments[this.segments.length-1].bounds.bottom()+this.linespace;
   }
@@ -87,7 +89,7 @@ TextBox.prototype.addNewline = function (font)
     for (var i = this.segments.length-1; 0 <= i; i--) {
       var seg = this.segments[i];
       seg.bounds.y -= dy;
-      if (seg.bounds.y < this.frame.y) {
+      if (seg.bounds.y < 0) {
 	this.segments.splice(i, 1);
       }
     }
@@ -137,7 +139,7 @@ TextBox.prototype.putText = function (font, lines, halign, valign)
 {
   halign = (halign !== undefined)? halign : 'left';
   valign = (valign !== undefined)? valign : 'top';
-  var y = this.frame.y;
+  var y = 0;
   switch (valign) {
   case 'center':
     y += (this.frame.height-this.getSize(font, lines).y)/2;
@@ -149,7 +151,7 @@ TextBox.prototype.putText = function (font, lines, halign, valign)
   for (var i = 0; i < lines.length; i++) {
     var text = lines[i];
     var size = font.getSize(text);
-    var x = this.frame.x;
+    var x = 0;
     switch (halign) {
     case 'center':
       x += (this.frame.width-size.x)/2;
