@@ -48,8 +48,8 @@ function Level1(app)
   GameScene.call(this, app);
   
   this.tilesize = 32;
-  this.window = new Rectangle(0, 0, app.screen.width, app.screen.height);
-  this.world = new Rectangle(0, 0, app.screen.width, app.screen.height);
+  this.window = this.frame.copy();
+  this.world = this.frame.copy();
   this.music = app.audios.music;
 }
 
@@ -206,7 +206,7 @@ Level1.prototype.init = function ()
     
     // show a balloon.
     var textbox = new TextBoxTT(new Rectangle(20, 20, app.screen.width-60, 60));
-    textbox.addTask(app.font, 'GOT A THINGY!');
+    textbox.addTask(app.font, 'GOT A THINGY!', 4);
     textbox.duration = app.framerate*2;
     scene.addObject(textbox);
 

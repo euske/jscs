@@ -188,14 +188,14 @@ PauseTask.prototype.ff = function ()
 };
 
 // TextTask
-function TextTask(textbox, font, text, sound, interval)
+function TextTask(textbox, font, text, interval, sound)
 {
   Task.call(this);
   this.textbox = textbox;
   this.font = font;
   this.text = text;
-  this.sound = (sound !== undefined)? sound : null;
   this.interval = (interval !== undefined)? interval : 0;
+  this.sound = (sound !== undefined)? sound : null;
   this.ended = new Slot();
   this._index = 0;
 }
@@ -206,14 +206,12 @@ TextTask.prototype.update = function ()
 {
   if (this.text.length <= this._index) {
     this.die();
-  } else {
+  } else if (this.interval === 0 ||
+	     (this.scene.ticks % this.interval) === 0) {
     this.textbox.addText(this.font, this.text.substr(this._index, 1));
     this._index++;
     if (this.sound !== null) {
-      if (this.interval === 0 ||
-	  blink(this.scene.ticks, this.interval)) {
-	playSound(this.sound);
-      }
+      playSound(this.sound);
     }
   }
 };
@@ -229,8 +227,8 @@ TextTask.prototype.ff = function ()
 function TextBoxTT(frame, linespace, background)
 {
   TextBox.call(this, frame, linespace, background);
-  this.sound = null;
   this.interval = 0;
+  this.sound = null;
   this.queue = [];
 }
 
@@ -277,11 +275,11 @@ TextBoxTT.prototype.addPause = function (ticks)
   return task;
 };
 
-TextBoxTT.prototype.addTask = function (font, text, sound, interval)
+TextBoxTT.prototype.addTask = function (font, text, interval, sound)
 {
-  sound = (sound !== undefined)? sound : this.sound;
   interval = (interval !== undefined)? interval : this.interval;
-  var task = new TextTask(this, font, text, sound, interval);
+  sound = (sound !== undefined)? sound : this.sound;
+  var task = new TextTask(this, font, text, interval, sound);
   this.queue.push(task);
   return task;
 };

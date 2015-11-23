@@ -5,16 +5,19 @@ function Scene(app)
 {
   this.app = app;
   this.music = null;
+  this.frame = new Rectangle(0, 0, app.screen.width, app.screen.height);
 }
 
 Scene.prototype.init = function ()
 {
   // [OVERRIDE]
+  this.ticks = 0;
 };
 
 Scene.prototype.update = function ()
 {
   // [OVERRIDE]
+  this.ticks++;
 };
 
 Scene.prototype.render = function (ctx, bx, by)
@@ -76,6 +79,7 @@ TextScene.prototype = Object.create(Scene.prototype);
 
 TextScene.prototype.init = function ()
 {
+  Scene.prototype.init.call(this);
   var scene = this;
   var frame = this.app.frame;
   var e = this.app.addElement(
@@ -111,8 +115,6 @@ TextScene.prototype.keydown = function (key)
 function GameScene(app)
 {
   Scene.call(this, app);
-
-  this.world = new Rectangle(0, 0, app.screen.width, app.screen.height);
 }
 
 GameScene.prototype = Object.create(Scene.prototype);
@@ -120,21 +122,21 @@ GameScene.prototype = Object.create(Scene.prototype);
 GameScene.prototype.init = function ()
 {
   // [OVERRIDE]
+  Scene.prototype.init.call(this);
   this.tasks = [];
   this.sprites = [];
   this.colliders = [];
-  this.ticks = 0;
 };
 
 GameScene.prototype.update = function ()
 {
   // [OVERRIDE]
+  Scene.prototype.update.call(this);
   this.updateObjects(this.tasks);
   this.collideObjects(this.colliders);
   this.cleanObjects(this.tasks);
   this.cleanObjects(this.sprites);
   this.cleanObjects(this.colliders);
-  this.ticks++;
 };
 
 GameScene.prototype.render = function (ctx, bx, by)
