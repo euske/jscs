@@ -20,6 +20,10 @@ Vec2.prototype.copy = function ()
 {
   return new Vec2(this.x, this.y);
 };
+Vec2.prototype.norm = function ()
+{
+  return Math.sqrt(this.x*this.x + this.y*this.y);
+};
 Vec2.prototype.add = function (v)
 {
   return new Vec2(this.x+v.x, this.y+v.y);
@@ -31,6 +35,10 @@ Vec2.prototype.sub = function (v)
 Vec2.prototype.modify = function (v)
 {
   return new Vec2(this.x*v, this.y*v);
+};
+Vec2.prototype.distance = function (v)
+{
+  return this.sub(v).norm();
 };
 Vec2.prototype.rotate90 = function (v)
 {
@@ -45,6 +53,27 @@ Vec2.prototype.rotate90 = function (v)
 Vec2.prototype.move = function (dx, dy)
 {
   return new Vec2(this.x+dx, this.y+dy);
+};
+Vec2.prototype.anchor = function (dx, dy, vx, vy)
+{
+  var x, y;
+  vx = (vx !== undefined)? vx : 0;
+  vy = (vy !== undefined)? vy : 0;
+  if (0 < vx) {
+    x = this.x;
+  } else if (vx < 0) {
+    x = this.x-dx;
+  } else {
+    x = this.x-dx/2;
+  }
+  if (0 < vy) {
+    y = this.y;
+  } else if (vy < 0) {
+    y = this.y-dy;
+  } else {
+    y = this.y-dy/2;
+  }
+  return new Vec2(x, y);
 };
 
 // Vec3
@@ -66,6 +95,10 @@ Vec3.prototype.copy = function ()
 {
   return new Vec3(this.x, this.y, this.z);
 };
+Vec3.prototype.norm = function ()
+{
+  return Math.sqrt(this.x*this.x + this.y*this.y + this.z*this.z);
+};
 Vec3.prototype.add = function (v)
 {
   return new Vec3(this.x+v.x, this.y+v.y, this.z+v.z);
@@ -78,12 +111,21 @@ Vec3.prototype.modify = function (v)
 {
   return new Vec3(this.x*v, this.y*v, this.z*v);
 };
+Vec3.prototype.distance = function (v)
+{
+  return this.sub(v).norm();
+};
 Vec3.prototype.move = function (dx, dy, dz)
 {
   return new Vec3(this.x+dx, this.y+dy, this.z+dz);
 };
 
 // Rectangle
+function MakeRect(p, w, h, vx, vy)
+{
+  p = p.anchor(w, h, vx, vy);
+  return new Rectangle(p.x, p.y, w, h);
+}
 function Rectangle(x, y, width, height)
 {
   this.x = x;
@@ -116,6 +158,22 @@ Rectangle.prototype.centerx = function ()
 Rectangle.prototype.centery = function ()
 {
   return this.y+this.height/2;
+};
+Rectangle.prototype.topleft = function ()
+{
+  return new Vec2(this.x, this.y);
+};
+Rectangle.prototype.topright = function ()
+{
+  return new Vec2(this.x+this.width, this.y);
+};
+Rectangle.prototype.bottomleft = function ()
+{
+  return new Vec2(this.x, this.y+this.height);
+};
+Rectangle.prototype.bottomright = function ()
+{
+  return new Vec2(this.x+this.width, this.y+this.height);
 };
 Rectangle.prototype.center = function ()
 {
@@ -253,11 +311,6 @@ Rectangle.prototype.contact = function (v, rect)
   assert(!this.move(v.x,v.y).overlap(rect), 'rect overlapped 2');
   return v;
 };
-
-function MakeRect(p, w, h)
-{
-  return new Rectangle(p.x-w/2, p.y-h/2, w, h);
-}
 
 // Box
 function Box(origin, size)

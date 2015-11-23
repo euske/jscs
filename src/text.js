@@ -34,11 +34,12 @@ Font.prototype.renderString = function (ctx, text, x, y)
 
 
 // TextBox
-function TextBox(frame, linespace)
+function TextBox(frame, linespace, background)
 {
   Sprite.call(this, null);
   this.frame = frame;
   this.linespace = (linespace !== undefined)? linespace : 0;
+  this.background = (background !== undefined)? background : null;
   this.segments = [];
 }
 
@@ -47,6 +48,24 @@ TextBox.prototype = Object.create(Sprite.prototype);
 TextBox.prototype.toString = function ()
 {
   return '<TextBox: '+this.segments+'>';
+};
+
+TextBox.prototype.render = function (ctx, bx, by)
+{
+  if (this.bounds !== null) {
+    bx += this.bounds.x;
+    by += this.bounds.y;
+  }
+  bx += this.frame.x;
+  by += this.frame.y;
+  if (this.background !== null) {
+    ctx.fillStyle = this.background;
+    ctx.fillRect(bx, by, this.frame.width, this.frame.height);
+  }
+  for (var i = 0; i < this.segments.length; i++) {
+    var seg = this.segments[i];
+    seg.font.renderString(ctx, seg.text, bx+seg.bounds.x, by+seg.bounds.y);
+  }  
 };
 
 TextBox.prototype.clear = function ()
@@ -61,20 +80,6 @@ TextBox.prototype.add = function (font, bounds, text)
   return seg;
 }
 
-TextBox.prototype.render = function (ctx, bx, by)
-{
-  if (this.bounds !== null) {
-    bx += this.bounds.x;
-    by += this.bounds.y;
-  }
-  bx += this.frame.x;
-  by += this.frame.y;
-  for (var i = 0; i < this.segments.length; i++) {
-    var seg = this.segments[i];
-    seg.font.renderString(ctx, seg.text, bx+seg.bounds.x, by+seg.bounds.y);
-  }  
-};
-
 TextBox.prototype.addNewline = function (font)
 {
   var x = 0;
@@ -82,8 +87,7 @@ TextBox.prototype.addNewline = function (font)
   if (this.segments.length !== 0) {
     y = this.segments[this.segments.length-1].bounds.bottom()+this.linespace;
   }
-  var newseg = {font:font, bounds:new Rectangle(x, y, 0, font.height), text:''};
-  this.segments.push(newseg);
+  var newseg = this.add(font, new Rectangle(x, y, 0, font.height), '');
   var dy = newseg.bounds.bottom() - this.frame.height;
   if (0 < dy) {
     for (var i = this.segments.length-1; 0 <= i; i--) {
@@ -116,6 +120,9 @@ TextBox.prototype.addText = function (font, text)
     if (last === null ||
 	this.frame.width < last.bounds.right()+size.x) {
       last = this.addNewline(font);
+    } else if (last.font !== font) {
+      var bounds = new Rectangle(last.bounds.right(), last.bounds.y);
+      last = this.add(font, bounds, '');
     }
     last.text += s;
     last.bounds.width += size.x;
@@ -219,9 +226,11 @@ TextTask.prototype.ff = function ()
 };
 
 // TextBoxTT
-function TextBoxTT(frame, linespace)
+function TextBoxTT(frame, linespace, background)
 {
-  TextBox.call(this, frame, linespace);
+  TextBox.call(this, frame, linespace, background);
+  this.sound = null;
+  this.interval = 0;
   this.queue = [];
 }
 
@@ -270,6 +279,8 @@ TextBoxTT.prototype.addPause = function (ticks)
 
 TextBoxTT.prototype.addTask = function (font, text, sound, interval)
 {
+  sound = (sound !== undefined)? sound : this.sound;
+  interval = (interval !== undefined)? interval : this.interval;
   var task = new TextTask(this, font, text, sound, interval);
   this.queue.push(task);
   return task;

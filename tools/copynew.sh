@@ -2,7 +2,7 @@
 dst="$1"
 name=${dst/*\//}
 [ -d "$dst" ] || exit 1
-echo "--exclude *.wav --exclude *.md --exclude tmp --exclude tools --exclude Makefile tabesugi:public/file/ludumdare.tabesugi.net/$name/" > "$dst"/.rsync
+echo "--exclude *.wav --exclude *.md --exclude tmp --exclude tools --exclude Makefile tabesugi:public/file/ludumdare.tabesugi.net/ohgj/$name/" > "$dst"/.rsync
 mkdir "$dst"/src
 mkdir "$dst"/assets
 cp .gitignore "$dst"

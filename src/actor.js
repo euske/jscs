@@ -14,6 +14,11 @@ Task.prototype.start = function (scene)
   this.ticks0 = scene.ticks;
 };
 
+Task.prototype.getTime = function ()
+{
+  return (this.scene.ticks - this.ticks0);
+};
+
 Task.prototype.die = function ()
 {
   this.scene = null;
@@ -96,7 +101,7 @@ Sprite.prototype.render = function (ctx, x, y)
 function Actor(bounds, hitbox, tileno)
 {
   Sprite.call(this, bounds);
-  this.hitbox = (hitbox === null)? hitbox : hitbox.copy();
+  this.hitbox = (hitbox === null)? null : hitbox.copy();
   this.tileno = tileno;
 }
 
@@ -120,7 +125,7 @@ Actor.prototype.render = function (ctx, x, y)
     var tw = sprites.height;
     var th = sprites.height;
     ctx.drawImage(sprites,
-		  this.tileno*tw, tw-h, w, h,
+		  this.tileno*tw, th-h, w, h,
 		  x+this.bounds.x, y+this.bounds.y, w, h);
   }
 };
@@ -129,5 +134,7 @@ Actor.prototype.move = function (dx, dy)
 {
   // [OVERRIDE]
   this.bounds = this.bounds.move(dx, dy);
-  this.hitbox = this.hitbox.move(dx, dy);
+  if (this.hitbox !== null) {
+    this.hitbox = this.hitbox.move(dx, dy);
+  }
 };
