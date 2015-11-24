@@ -73,8 +73,10 @@ TextBox.prototype.clear = function ()
   this.segments = [];
 };
 
-TextBox.prototype.add = function (font, bounds, text)
+TextBox.prototype.add = function (font, pt, text)
 {
+  var size = font.getSize(text);
+  var bounds = new Rectangle(pt.x, pt.y, size.x, size.y);
   var seg = {font:font, bounds:bounds, text:text};
   this.segments.push(seg);
   return seg;
@@ -87,7 +89,7 @@ TextBox.prototype.addNewline = function (font)
   if (this.segments.length !== 0) {
     y = this.segments[this.segments.length-1].bounds.bottom()+this.linespace;
   }
-  var newseg = this.add(font, new Rectangle(x, y, 0, font.height), '');
+  var newseg = this.add(font, new Vec2(x, y), '');
   var dy = newseg.bounds.bottom() - this.frame.height;
   if (0 < dy) {
     for (var i = this.segments.length-1; 0 <= i; i--) {
@@ -121,8 +123,8 @@ TextBox.prototype.addText = function (font, text)
 	this.frame.width < last.bounds.right()+size.x) {
       last = this.addNewline(font);
     } else if (last.font !== font) {
-      var bounds = new Rectangle(last.bounds.right(), last.bounds.y);
-      last = this.add(font, bounds, '');
+      var pt = new Vec2(last.bounds.right(), last.bounds.y);
+      last = this.add(font, pt, '');
     }
     last.text += s;
     last.bounds.width += size.x;
