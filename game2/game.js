@@ -262,7 +262,7 @@ Level1.prototype.init = function ()
   this.updateScore();
 
   // show a banner.
-  var textbox = new TextBox(new Rectangle(0, 0, app.screen.width, app.screen.height));
+  var textbox = new TextBox(this.frame);
   textbox.putText(app.font, ['GET ALL TEH DAMN THINGIES!'],
 		  'center', 'center');
   textbox.bounds = null;

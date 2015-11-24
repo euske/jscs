@@ -68,7 +68,7 @@ Game.prototype.init = function ()
   
   // show a banner.
   var scene = this;
-  var textbox = new TextBox(new Rectangle(0, 0, app.screen.width, app.screen.height));
+  var textbox = new TextBox(this.frame);
   textbox.putText(app.font, ['GAME!!1'], 'center', 'center');
   textbox.duration = app.framerate*2;
   textbox.update = function () {
@@ -78,7 +78,7 @@ Game.prototype.init = function ()
   this.addObject(textbox);
 
   var tt = new TextBoxTT(new Rectangle(10, 10, 200, 100));
-  tt.addTask(app.font, 'THIS IS GAEM.\nYES IT IS.', app.audios.beep, 8);
+  tt.addTask(app.font, 'THIS IS GAEM.\nYES IT IS.', 4, app.audios.beep);
   this.addObject(tt);
 };
 

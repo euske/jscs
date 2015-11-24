@@ -34,11 +34,12 @@ Font.prototype.renderString = function (ctx, text, x, y)
 
 
 // TextBox
-function TextBox(frame, linespace, background)
+function TextBox(frame, linespace, padding, background)
 {
   Sprite.call(this, null);
   this.frame = frame;
   this.linespace = (linespace !== undefined)? linespace : 0;
+  this.padding = (padding !== undefined)? padding : 0;
   this.background = (background !== undefined)? background : null;
   this.segments = [];
 }
@@ -56,11 +57,10 @@ TextBox.prototype.render = function (ctx, bx, by)
     bx += this.bounds.x;
     by += this.bounds.y;
   }
-  bx += this.frame.x;
-  by += this.frame.y;
   if (this.background !== null) {
+    var rect = this.frame.inflate(this.padding, this.padding);
     ctx.fillStyle = this.background;
-    ctx.fillRect(bx, by, this.frame.width, this.frame.height);
+    ctx.fillRect(bx+rect.x, by+rect.y, rect.width, rect.height);
   }
   for (var i = 0; i < this.segments.length; i++) {
     var seg = this.segments[i];
@@ -82,8 +82,8 @@ TextBox.prototype.add = function (font, bounds, text)
 
 TextBox.prototype.addNewline = function (font)
 {
-  var x = 0;
-  var y = 0;
+  var x = this.frame.x;
+  var y = this.frame.y;
   if (this.segments.length !== 0) {
     y = this.segments[this.segments.length-1].bounds.bottom()+this.linespace;
   }
@@ -93,7 +93,7 @@ TextBox.prototype.addNewline = function (font)
     for (var i = this.segments.length-1; 0 <= i; i--) {
       var seg = this.segments[i];
       seg.bounds.y -= dy;
-      if (seg.bounds.y < 0) {
+      if (seg.bounds.y < this.frame.y) {
 	this.segments.splice(i, 1);
       }
     }
@@ -146,7 +146,7 @@ TextBox.prototype.putText = function (font, lines, halign, valign)
 {
   halign = (halign !== undefined)? halign : 'left';
   valign = (valign !== undefined)? valign : 'top';
-  var y = 0;
+  var y = this.frame.y;
   switch (valign) {
   case 'center':
     y += (this.frame.height-this.getSize(font, lines).y)/2;
@@ -158,7 +158,7 @@ TextBox.prototype.putText = function (font, lines, halign, valign)
   for (var i = 0; i < lines.length; i++) {
     var text = lines[i];
     var size = font.getSize(text);
-    var x = 0;
+    var x = this.frame.x;
     switch (halign) {
     case 'center':
       x += (this.frame.width-size.x)/2;
@@ -224,9 +224,9 @@ TextTask.prototype.ff = function ()
 };
 
 // TextBoxTT
-function TextBoxTT(frame, linespace, background)
+function TextBoxTT(frame, linespace, padding, background)
 {
-  TextBox.call(this, frame, linespace, background);
+  TextBox.call(this, frame, linespace, padding, background);
   this.interval = 0;
   this.sound = null;
   this.queue = [];
@@ -249,7 +249,7 @@ TextBoxTT.prototype.update = function ()
   }
 };
 
-TextTask.prototype.ff = function ()
+TextBoxTT.prototype.ff = function ()
 {
   while (true) {
     var task = this.getCurrentTask();
