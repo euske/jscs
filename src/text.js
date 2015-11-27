@@ -32,15 +32,24 @@ Font.prototype.renderString = function (ctx, text, x, y)
   }
 };
 
+function MakeSegment(font, pt, text)
+{
+  text = (text !== undefined)? text : '';
+  var size = font.getSize(text);
+  var bounds = new Rectangle(pt.x, pt.y, size.x, size.y);
+  var seg = {font:font, bounds:bounds, text:text};
+  return seg;
+}
+
 
 // TextBox
-function TextBox(frame, linespace, padding, background)
+function TextBox(frame)
 {
   Sprite.call(this, null);
   this.frame = frame;
-  this.linespace = (linespace !== undefined)? linespace : 0;
-  this.padding = (padding !== undefined)? padding : 0;
-  this.background = (background !== undefined)? background : null;
+  this.linespace = 0;
+  this.padding = 0;
+  this.background = null;
   this.segments = [];
 }
 
@@ -73,14 +82,10 @@ TextBox.prototype.clear = function ()
   this.segments = [];
 };
 
-TextBox.prototype.add = function (font, pt, text)
+TextBox.prototype.add = function (seg)
 {
-  var size = font.getSize(text);
-  var bounds = new Rectangle(pt.x, pt.y, size.x, size.y);
-  var seg = {font:font, bounds:bounds, text:text};
   this.segments.push(seg);
-  return seg;
-}
+};
 
 TextBox.prototype.addNewline = function (font)
 {
@@ -89,7 +94,8 @@ TextBox.prototype.addNewline = function (font)
   if (this.segments.length !== 0) {
     y = this.segments[this.segments.length-1].bounds.bottom()+this.linespace;
   }
-  var newseg = this.add(font, new Vec2(x, y), '');
+  var newseg = MakeSegment(font, new Vec2(x, y));
+  this.add(newseg);
   var dy = newseg.bounds.bottom() - this.frame.height;
   if (0 < dy) {
     for (var i = this.segments.length-1; 0 <= i; i--) {
@@ -124,7 +130,8 @@ TextBox.prototype.addText = function (font, text)
       last = this.addNewline(font);
     } else if (last.font !== font) {
       var pt = new Vec2(last.bounds.right(), last.bounds.y);
-      last = this.add(font, pt, '');
+      last = MakeSegment(font, pt);
+      this.add(last);
     }
     last.text += s;
     last.bounds.width += size.x;
@@ -207,15 +214,14 @@ PauseTask.prototype.ff = function ()
 };
 
 // DisplayTask
-function DisplayTask(textbox, font, text, interval, sound)
+function DisplayTask(textbox, font, text)
 {
   TextTask.call(this);
   this.textbox = textbox;
   this.font = font;
   this.text = text;
-  this.interval = (interval !== undefined)? interval : 0;
-  this.sound = (sound !== undefined)? sound : null;
-  this.ended = new Slot();
+  this.interval = 0;
+  this.sound = null;
   this._index = 0;
 }
 
@@ -225,8 +231,9 @@ DisplayTask.prototype.update = function ()
 {
   if (this.text.length <= this._index) {
     this.die();
-  } else if (this.interval === 0 ||
-	     (this.scene.ticks % this.interval) === 0) {
+  } else if (this.interval === 0) {
+    this.ff();
+  } else if ((this.scene.ticks % this.interval) === 0) {
     this.textbox.addText(this.font, this.text.substr(this._index, 1));
     this._index++;
     if (this.sound !== null) {
@@ -248,94 +255,89 @@ DisplayTask.prototype.keydown = function (key)
 };
 
 // MenuTask
-function MenuTask(textbox, font, items, sound)
+function MenuTask(textbox, font)
 {
   TextTask.call(this);
   this.textbox = textbox;
   this.font = font;
-  this.items = items;
-  this.sound = (sound !== undefined)? sound : null;
+  this.cursor = MakeSegment(font, new Vec2(), '>');
+  this.vertical = false;
+  this.items = [];
   this.current = null;
+  this.sound = null;
+  this.selected = new Slot(this);
 }
 
 MenuTask.prototype = Object.create(TextTask.prototype);
+
+MenuTask.prototype.addItem = function (pos, text, value)
+{
+  value = (value !== undefined)? value : text;
+  var item = { pos:pos, text:text, value:value };
+  this.items.push(item);
+};
 
 MenuTask.prototype.start = function (scene)
 {
   Task.prototype.start.call(this, scene);
   for (var i = 0; i < this.items.length; i++) {
     var item = this.items[i];
-    this.textbox.add(this.font, item.pos, item.text);
+    this.textbox.add(MakeSegment(this.font, item.pos, item.text));
   }
   this.updateCursor();
 };
 
 MenuTask.prototype.keydown = function (key)
 {
-  var vx = 0, vy = 0;
-  switch (key) {
-  case 37:			// LEFT
-  case 65:			// A
-  case 72:			// H
-  case 81:			// Q (AZERTY)
-    vx = -1;
+  var d = 0;
+  var keysym = getKeySym(key);
+  switch (keysym) {
+  case 'left':
+    d = (this.vertical)? -999 : -1;
     break;
-  case 39:			// RIGHT
-  case 68:			// D
-  case 76:			// L
-    vx = +1;
+  case 'right':
+    d = (this.vertical)? +999 : +1;
     break;
-  case 38:			// UP
-  case 87:			// W
-  case 75:			// K
-    vy = -1;
+  case 'up':
+    d = (this.vertical)? -1 : -999;
     break;
-  case 40:			// DOWN
-  case 83:			// S
-  case 74:			// J
-    vy = +1;
+  case 'down':
+    d = (this.vertical)? +1 : +999;
     break;
-  case 13:			// ENTER
-  case 16:			// SHIFT
-  case 32:			// SPACE
-  case 90:			// Z
-  case 88:			// X
-    break;
+  case 'action':
+    if (this.current !== null) {
+      this.selected.signal(this.current.value);
+    };
+    return;
+  case 'cancel':
+    this.selected.signal(null);
+    return;
   }
   
-  var d0 = 0;
-  var choice = null;
-  for (var i = 0; i < this.items.length; i++) {
-    var item = this.items[i];
-    var d1 = ((choice === null)? 0 :
-	      ((item.pos.x-choice.x)*vx +
-	       (item.pos.y-choice.y)*vy));
-    if (choice === null || d0 < d1) {
-      d0 = d1;
-      choice = item;
-    }
-  }
+  var i = ((this.current === null)? 0 : 
+	   this.items.indexOf(this.current));
+  i = clamp(0, i+d, this.items.length-1);
+  this.current = this.items[i];
+  this.updateCursor();
   if (this.sound !== null) {
     playSound(this.sound);
   }
-  this.current = choice;
-  this.updateCursor();
 };
 
 MenuTask.prototype.updateCursor = function ()
 {
   if (this.current !== null) {
-    this.textbox.cursor = new Rectangle(
-      this.current.pos.x, this.current.pos.y,
-      this.font.width, this.font.height);
+    this.cursor.bounds.x = this.current.pos.x - this.cursor.bounds.width*2;
+    this.cursor.bounds.y = this.current.pos.y;
+    this.textbox.cursor = this.cursor;
   }
 };
 
 
 // TextBoxTT
-function TextBoxTT(frame, linespace, padding, background)
+function TextBoxTT(frame)
 {
-  TextBox.call(this, frame, linespace, padding, background);
+  TextBox.call(this, frame);
   this.interval = 0;
   this.sound = null;
   this.queue = [];
@@ -348,11 +350,12 @@ TextBoxTT.prototype = Object.create(TextBox.prototype);
 TextBoxTT.prototype.render = function (ctx, bx, by)
 {
   TextBox.prototype.render.call(this, ctx, bx, by);
-  if (this.cursor !== null) {
+  var cursor = this.cursor;
+  if (cursor !== null) {
     if (blink(this.getTime(), this.blinking)) {
-      ctx.fillStyle = 'white';
-      ctx.fillRect(bx+this.cursor.x, by+this.cursor.y,
-		   this.cursor.width, this.cursor.height);
+      cursor.font.renderString(
+	ctx, cursor.text,
+	bx+cursor.bounds.x, by+cursor.bounds.y);
     }
   }
 };
@@ -408,16 +411,16 @@ TextBoxTT.prototype.addPause = function (ticks)
 
 TextBoxTT.prototype.addDisplay = function (font, text, interval, sound)
 {
-  interval = (interval !== undefined)? interval : this.interval;
-  sound = (sound !== undefined)? sound : this.sound;
-  var task = new DisplayTask(this, font, text, interval, sound);
+  var task = new DisplayTask(this, font, text);
+  task.interval = (interval !== undefined)? interval : this.interval;
+  task.sound = (sound !== undefined)? sound : this.sound;
   this.queue.push(task);
   return task;
 };
 
-TextBoxTT.prototype.addMenu = function (font, items, sound)
+TextBoxTT.prototype.addMenu = function (font)
 {
-  var task = new MenuTask(this, font, items, sound);
+  var task = new MenuTask(this, font);
   this.queue.push(task);
   return task;
 };
