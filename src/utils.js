@@ -22,6 +22,26 @@ function assert(x, msg)
   }
 }
 
+// define a prototype.
+function define(obj, base, props)
+{
+  var proto0 = base.prototype;
+  var proto1 = Object.create(proto0);
+  for (var k in props) {
+    proto1[k] = props[k];
+  }
+  for (var k in proto0) {
+    proto1['base_'+k] = (function () {
+      var method = proto0[k];
+      return (function () { method.apply(this, arguments); });
+    })();
+  }
+  proto1.base = function () {
+    base.apply(this, arguments);
+  };
+  obj.prototype = proto1;
+}
+
 // clamp(v0, v, v1): limit the value within v0-v1.
 function clamp(v0, v, v1)
 {
@@ -211,26 +231,21 @@ function Slot(object)
   this.object = object;
   this.receivers = [];
 }
-Slot.prototype.toString = function ()
-{
-  return ('<Slot('+this.object+') '+this.receivers+'>');
-};
-
-Slot.prototype.subscribe = function (recv)
-{
-  this.receivers.push(recv);
-};
-
-Slot.prototype.unsubscribe = function (recv)
-{
-  removeArray(this.receivers, recv);
-};
-
-Slot.prototype.signal = function ()
-{
-  for (var i = 0; i < this.receivers.length; i++) {
-    var args = Array.prototype.slice.call(arguments);
-    args.unshift(this.object);
-    this.receivers[i].apply(null, args);
-  }
-};
+define(Slot, Object, {
+  toString: function () {
+    return ('<Slot('+this.object+') '+this.receivers+'>');
+  },
+  subscribe: function (recv) {
+    this.receivers.push(recv);
+  },
+  unsubscribe: function (recv) {
+    removeArray(this.receivers, recv);
+  },
+  signal: function () {
+    for (var i = 0; i < this.receivers.length; i++) {
+      var args = Array.prototype.slice.call(arguments);
+      args.unshift(this.object);
+      this.receivers[i].apply(null, args);
+    }
+  },
+});
