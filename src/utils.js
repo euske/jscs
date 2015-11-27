@@ -31,6 +31,7 @@ function clamp(v0, v, v1)
 // blink(t, d): returns true if t is within the on interval.
 function blink(t, d)
 {
+  if (d === 0) return true;
   return ((t % d) < d/2);
 }
 

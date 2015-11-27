@@ -32,6 +32,10 @@ Vec2.prototype.sub = function (v)
 {
   return new Vec2(this.x-v.x, this.y-v.y);
 };
+Vec2.prototype.delta = function (v)
+{
+  return Math.abs(this.x-v.x)+Math.abs(this.y-v.y);
+};
 Vec2.prototype.modify = function (v)
 {
   return new Vec2(this.x*v, this.y*v);
@@ -106,6 +110,10 @@ Vec3.prototype.add = function (v)
 Vec3.prototype.sub = function (v)
 {
   return new Vec3(this.x-v.x, this.y-v.y, this.z-v.z);
+};
+Vec3.prototype.delta = function (v)
+{
+  return Math.abs(this.x-v.x)+Math.abs(this.y-v.y)+Math.abs(this.z-v.z);
 };
 Vec3.prototype.modify = function (v)
 {

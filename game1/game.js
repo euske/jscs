@@ -206,7 +206,7 @@ Level1.prototype.init = function ()
     
     // show a balloon.
     var textbox = new TextBoxTT(new Rectangle(20, 20, app.screen.width-60, 60));
-    textbox.addTask(app.font, 'GOT A THINGY!', 4);
+    textbox.addDisplay(app.font, 'GOT A THINGY!', 4);
     textbox.duration = app.framerate*2;
     scene.addObject(textbox);
 

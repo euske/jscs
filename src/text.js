@@ -175,24 +175,41 @@ TextBox.prototype.putText = function (font, lines, halign, valign)
   }  
 };
 
+// TextTask
+function TextTask()
+{
+  Task.call(this);
+}
+
+TextTask.prototype = Object.create(Task.prototype);
+
+TextTask.prototype.ff = function ()
+{
+};
+
+TextTask.prototype.keydown = function (key)
+{
+  this.ff();
+};
+
 // PauseTask
 function PauseTask(ticks)
 {
-  Task.call(this);
+  TextTask.call(this);
   this.duration = ticks;
 }
 
-PauseTask.prototype = Object.create(Task.prototype);
+PauseTask.prototype = Object.create(TextTask.prototype);
 
 PauseTask.prototype.ff = function ()
 {
   this.die();
 };
 
-// TextTask
-function TextTask(textbox, font, text, interval, sound)
+// DisplayTask
+function DisplayTask(textbox, font, text, interval, sound)
 {
-  Task.call(this);
+  TextTask.call(this);
   this.textbox = textbox;
   this.font = font;
   this.text = text;
@@ -202,9 +219,9 @@ function TextTask(textbox, font, text, interval, sound)
   this._index = 0;
 }
 
-TextTask.prototype = Object.create(Task.prototype);
+DisplayTask.prototype = Object.create(TextTask.prototype);
 
-TextTask.prototype.update = function ()
+DisplayTask.prototype.update = function ()
 {
   if (this.text.length <= this._index) {
     this.die();
@@ -218,12 +235,102 @@ TextTask.prototype.update = function ()
   }
 };
 
-TextTask.prototype.ff = function ()
+DisplayTask.prototype.ff = function ()
 {
   this.textbox.addText(this.font, this.text.substr(this._index));
   this._index = this.text.length;
   this.die();
 };
+
+DisplayTask.prototype.keydown = function (key)
+{
+  TextTask.prototype.keydown.call(this, key);
+};
+
+// MenuTask
+function MenuTask(textbox, font, items, sound)
+{
+  TextTask.call(this);
+  this.textbox = textbox;
+  this.font = font;
+  this.items = items;
+  this.sound = (sound !== undefined)? sound : null;
+  this.current = null;
+}
+
+MenuTask.prototype = Object.create(TextTask.prototype);
+
+MenuTask.prototype.start = function (scene)
+{
+  Task.prototype.start.call(this, scene);
+  for (var i = 0; i < this.items.length; i++) {
+    var item = this.items[i];
+    this.textbox.add(this.font, item.pos, item.text);
+  }
+  this.updateCursor();
+};
+
+MenuTask.prototype.keydown = function (key)
+{
+  var vx = 0, vy = 0;
+  switch (key) {
+  case 37:			// LEFT
+  case 65:			// A
+  case 72:			// H
+  case 81:			// Q (AZERTY)
+    vx = -1;
+    break;
+  case 39:			// RIGHT
+  case 68:			// D
+  case 76:			// L
+    vx = +1;
+    break;
+  case 38:			// UP
+  case 87:			// W
+  case 75:			// K
+    vy = -1;
+    break;
+  case 40:			// DOWN
+  case 83:			// S
+  case 74:			// J
+    vy = +1;
+    break;
+  case 13:			// ENTER
+  case 16:			// SHIFT
+  case 32:			// SPACE
+  case 90:			// Z
+  case 88:			// X
+    break;
+  }
+  
+  var d0 = 0;
+  var choice = null;
+  for (var i = 0; i < this.items.length; i++) {
+    var item = this.items[i];
+    var d1 = ((choice === null)? 0 :
+	      ((item.pos.x-choice.x)*vx +
+	       (item.pos.y-choice.y)*vy));
+    if (choice === null || d0 < d1) {
+      d0 = d1;
+      choice = item;
+    }
+  }
+  if (this.sound !== null) {
+    playSound(this.sound);
+  }
+  this.current = choice;
+  this.updateCursor();
+};
+
+MenuTask.prototype.updateCursor = function ()
+{
+  if (this.current !== null) {
+    this.textbox.cursor = new Rectangle(
+      this.current.pos.x, this.current.pos.y,
+      this.font.width, this.font.height);
+  }
+};
+
 
 // TextBoxTT
 function TextBoxTT(frame, linespace, padding, background)
@@ -232,9 +339,23 @@ function TextBoxTT(frame, linespace, padding, background)
   this.interval = 0;
   this.sound = null;
   this.queue = [];
+  this.cursor = null;
+  this.blinking = 0;
 }
 
 TextBoxTT.prototype = Object.create(TextBox.prototype);
+
+TextBoxTT.prototype.render = function (ctx, bx, by)
+{
+  TextBox.prototype.render.call(this, ctx, bx, by);
+  if (this.cursor !== null) {
+    if (blink(this.getTime(), this.blinking)) {
+      ctx.fillStyle = 'white';
+      ctx.fillRect(bx+this.cursor.x, by+this.cursor.y,
+		   this.cursor.width, this.cursor.height);
+    }
+  }
+};
 
 TextBoxTT.prototype.update = function ()
 {
@@ -248,6 +369,14 @@ TextBoxTT.prototype.update = function ()
     task.update();
     if (task.scene !== null) break;
     this.queue.shift();
+  }
+};
+
+TextBoxTT.prototype.keydown = function (key)
+{
+  var task = this.getCurrentTask();
+  if (task !== null) {
+    task.keydown(key);
   }
 };
 
@@ -277,11 +406,18 @@ TextBoxTT.prototype.addPause = function (ticks)
   return task;
 };
 
-TextBoxTT.prototype.addTask = function (font, text, interval, sound)
+TextBoxTT.prototype.addDisplay = function (font, text, interval, sound)
 {
   interval = (interval !== undefined)? interval : this.interval;
   sound = (sound !== undefined)? sound : this.sound;
-  var task = new TextTask(this, font, text, interval, sound);
+  var task = new DisplayTask(this, font, text, interval, sound);
+  this.queue.push(task);
+  return task;
+};
+
+TextBoxTT.prototype.addMenu = function (font, items, sound)
+{
+  var task = new MenuTask(this, font, items, sound);
   this.queue.push(task);
   return task;
 };
