@@ -290,4 +290,5 @@ define(Slot, Object, '', {
       this.receivers[i].apply(null, args);
     }
   },
+
 });

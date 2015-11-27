@@ -34,6 +34,7 @@ define(Task, Object, '', {
       this.die();
     }
   },
+  
 });
 
 
@@ -65,6 +66,7 @@ define(Queue, Task, 'Task', {
   remove: function (task) {
     removeArray(this.tasks, task);
   },
+  
 });
 
 
@@ -90,6 +92,7 @@ define(Sprite, Task, 'Task', {
   render: function (ctx, x, y) {
     // [OVERRIDE]
   },
+  
 });
 
 
@@ -130,4 +133,5 @@ define(Actor, Sprite, 'Sprite', {
       this.hitbox = this.hitbox.move(dx, dy);
     }
   },
+  
 });

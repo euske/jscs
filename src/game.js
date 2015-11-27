@@ -3,7 +3,7 @@
 // Player
 function Player(bounds)
 {
-  Actor.call(this, bounds, bounds, 0);
+  this._Actor(bounds, bounds, 0);
   this.speed = 4;
   this.gravity = 1;
   this.maxspeed = 4;
@@ -51,74 +51,71 @@ define(Player, Actor, 'Actor', {
 // 
 function Game(app)
 {
-  GameScene.call(this, app);
+  this._GameScene(app);
 }
 
-Game.prototype = Object.create(GameScene.prototype);
-  
-Game.prototype.init = function ()
-{
-  GameScene.prototype.init.call(this);
+define(Game, GameScene, 'GameScene', {
+  init: function () {
+    this._GameScene_init();
 
-  var app = this.app;
-  this.ground = new Rectangle(0, 200, app.screen.width, 32);
-  this.player = new Player(new Rectangle(0,0,32,32));
-  this.addObject(this.player);
-  
-  // show a banner.
-  var scene = this;
-  var tbox = new TextBox(this.frame);
-  tbox.putText(app.font, ['GAME!!1'], 'center', 'center');
-  tbox.duration = app.framerate*2;
-  tbox.update = function () {
-    TextBox.prototype.update.call(tbox);
-    tbox.visible = blink(scene.ticks, app.framerate/2);
-  };
-  this.addObject(tbox);
+    var app = this.app;
+    this.ground = new Rectangle(0, 200, app.screen.width, 32);
+    this.player = new Player(new Rectangle(0,0,32,32));
+    this.addObject(this.player);
+    
+    // show a banner.
+    var scene = this;
+    var tbox = new TextBox(this.frame);
+    tbox.putText(app.font, ['GAME!!1'], 'center', 'center');
+    tbox.duration = app.framerate*2;
+    tbox.update = function () {
+      TextBox.prototype.update.call(tbox);
+      tbox.visible = blink(scene.ticks, app.framerate/2);
+    };
+    this.addObject(tbox);
 
-  this.textbox = new TextBoxTT(new Rectangle(10, 10, 200, 100));
-  this.textbox.addDisplay(app.font, 'THIS IS GAEM.\nYES IT IS.', 4, app.audios.beep);
-  this.textbox.blinking = 10;
-  var menu = this.textbox.addMenu(app.font);
-  menu.sound = app.audios.beep;
-  menu.addItem(new Vec2(10,50), 'AAA');
-  menu.addItem(new Vec2(20,60), 'BB');
-  menu.addItem(new Vec2(30,70), 'CCCC');
-  menu.selected.subscribe(function (obj, value) {
-    console.log("selected:"+value);
-    scene.textbox.visible = false;
-  });
-  this.addObject(this.textbox);
-};
+    this.textbox = new TextBoxTT(new Rectangle(10, 10, 200, 100));
+    this.textbox.addDisplay(app.font, 'THIS IS GAEM.\nYES IT IS.', 4, app.audios.beep);
+    this.textbox.blinking = 10;
+    var menu = this.textbox.addMenu(app.font);
+    menu.sound = app.audios.beep;
+    menu.addItem(new Vec2(10,50), 'AAA');
+    menu.addItem(new Vec2(20,60), 'BB');
+    menu.addItem(new Vec2(30,70), 'CCCC');
+    menu.selected.subscribe(function (obj, value) {
+      console.log("selected:"+value);
+      scene.textbox.visible = false;
+    });
+    this.addObject(this.textbox);
+  },
 
-Game.prototype.render = function (ctx, bx, by)
-{
-  // Fill with the background color.
-  ctx.fillStyle = 'rgb(0,0,0)';
-  ctx.fillRect(bx, by, this.app.screen.width, this.app.screen.height);
-  GameScene.prototype.render.call(this, ctx, bx, by);
-};
+  render: function (ctx, bx, by) {
+    // Fill with the background color.
+    ctx.fillStyle = 'rgb(0,0,0)';
+    ctx.fillRect(bx, by, this.app.screen.width, this.app.screen.height);
+    
+    this._GameScene_render(ctx, bx, by);
+  },
 
-Game.prototype.keydown = function (key)
-{
-  GameScene.prototype.keydown.call(this, key);
-  if (this.textbox.visible) {
-    this.textbox.keydown(key);
-  }
-};
+  keydown: function (key) {
+    this._GameScene_keydown(key);
+    if (this.textbox.visible) {
+      this.textbox.keydown(key);
+    }
+  },
 
-Game.prototype.update = function ()
-{
-  GameScene.prototype.update.call(this);
-  if (!this.textbox.visible) {
-    this.player.usermove(this.app.key_dir);
-  }
-};
+  update: function () {
+    this._GameScene_update(this);
+    if (!this.textbox.visible) {
+      this.player.usermove(this.app.key_dir);
+    }
+  },
 
-Game.prototype.set_action = function (action)
-{
-  GameScene.prototype.set_action(this, action);
-  if (!this.textbox.visible) {
-    this.player.jump(action);
-  }
-}
+  set_action: function (action) {
+    this._GameScene_set_action(action);
+    if (!this.textbox.visible) {
+      this.player.jump(action);
+    }
+  },
+
+});
