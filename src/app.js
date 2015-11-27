@@ -72,53 +72,45 @@ App.prototype.keydown = function (ev)
 {
   // [OVERRIDE]
   // [GAME SPECIFIC CODE]
-  switch (ev.keyCode) {
-  case 37:			// LEFT
-  case 65:			// A
-  case 72:			// H
-  case 81:			// Q (AZERTY)
+  var keysym = getKeySym(ev.keyCode);
+  switch (keysym) {
+  case 'left':
     this._key_left = true;
     this.key_dir.x = -1;
     this.scene.set_dir(this.key_dir.x, 0);
     break;
-  case 39:			// RIGHT
-  case 68:			// D
-  case 76:			// L
+  case 'right':
     this._key_right = true;
     this.key_dir.x = +1;
     this.scene.set_dir(this.key_dir.x, 0);
     break;
-  case 38:			// UP
-  case 87:			// W
-  case 75:			// K
+  case 'up':
     this._key_up = true;
     this.key_dir.y = -1;
     this.scene.set_dir(0, this.key_dir.y);
     break;
-  case 40:			// DOWN
-  case 83:			// S
-  case 74:			// J
+  case 'down':
     this._key_down = true;
     this.key_dir.y = +1;
     this.scene.set_dir(0, this.key_dir.y);
     break;
-  case 13:			// ENTER
-  case 16:			// SHIFT
-  case 32:			// SPACE
-  case 90:			// Z
-  case 88:			// X
+  case 'action':
     if (!this.key_action) {
       this.key_action = true;
       this.scene.set_action(this.key_action);
     }
     break;
-  case 112:			// F1
-    break;
-  case 27:			// ESC
-    if (this.active) {
-      this.blur();
-    } else {
-      this.focus();
+  default:
+    switch (ev.keyCode) {
+    case 112:			// F1
+      break;
+    case 27:			// ESC
+      if (this.active) {
+	this.blur();
+      } else {
+	this.focus();
+      }
+      break;
     }
     break;
   }

@@ -23,20 +23,23 @@ function assert(x, msg)
 }
 
 // define a prototype.
-function define(obj, base, props)
+function define(obj, base, name, props)
 {
   var proto0 = base.prototype;
   var proto1 = Object.create(proto0);
   for (var k in props) {
     proto1[k] = props[k];
   }
+  var h = '_'+name;
   for (var k in proto0) {
-    proto1['base_'+k] = (function () {
-      var method = proto0[k];
-      return (function () { method.apply(this, arguments); });
-    })();
+    if (!k.startsWith('_')) {
+      proto1[h+'_'+k] = (function () {
+        var method = proto0[k];
+        return (function () { method.apply(this, arguments); });
+      })();
+    }
   }
-  proto1.base = function () {
+  proto1[h] = function () {
     base.apply(this, arguments);
   };
   obj.prototype = proto1;
@@ -225,22 +228,61 @@ function playSound(sound)
   sound.play();
 }
 
+// getKeySym(keyCode): convert directional keys to symbol.
+function getKeySym(keyCode)
+{
+  switch (keyCode) {
+  case 37:			// LEFT
+  case 65:			// A
+  case 72:			// H
+  case 81:			// Q (AZERTY)
+    return 'left';
+  case 39:			// RIGHT
+  case 68:			// D
+  case 76:			// L
+    return 'right';
+  case 38:			// UP
+  case 87:			// W
+  case 75:			// K
+    return 'up';
+  case 40:			// DOWN
+  case 83:			// S
+  case 74:			// J
+    return 'down';
+  case 13:			// ENTER
+  case 16:			// SHIFT
+  case 32:			// SPACE
+  case 90:			// Z
+    return 'action';
+  case 8:			// BACKSPACE
+  case 27:			// ESCAPE
+  case 88:			// X
+    return 'cancel';
+  default:
+    return null;
+  }
+}
+
 // Slot: an event system
 function Slot(object)
 {
   this.object = object;
   this.receivers = [];
 }
-define(Slot, Object, {
+
+define(Slot, Object, '', {
   toString: function () {
     return ('<Slot('+this.object+') '+this.receivers+'>');
   },
+  
   subscribe: function (recv) {
     this.receivers.push(recv);
   },
+  
   unsubscribe: function (recv) {
     removeArray(this.receivers, recv);
   },
+  
   signal: function () {
     for (var i = 0; i < this.receivers.length; i++) {
       var args = Array.prototype.slice.call(arguments);

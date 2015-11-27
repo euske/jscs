@@ -233,10 +233,10 @@ Level1.prototype.init = function ()
   this.updateScore();
 
   // show a banner.
-  var textbox = new TextBox(new Rectangle(0, 0, app.screen.width, app.screen.height), 4);
+  var textbox = new TextBox(this.frame);
+  textbox.linespace = 4;
   textbox.putText(app.font, ['GET ALL TEH','DAMN THINGIES!'],
 		  'center', 'center');
-  textbox.bounds = null;
   textbox.duration = app.framerate*2;
   textbox.update = function () {
     TextBox.prototype.update.call(textbox);
