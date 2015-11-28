@@ -6,11 +6,11 @@ int = Math.floor;
 upperbound = Math.min;
 lowerbound = Math.max;
 
-// log(x): display a thing in the console (Firefox only, maybe)
-function log(x)
+// log(...): display a thing in the console (Firefox only, maybe)
+function log()
 {
   if (window.console !== undefined) {
-    window.console.log(x);
+    window.console.log.apply(window.console, arguments);
   }
 }
 
