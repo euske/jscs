@@ -5,17 +5,22 @@
 function Font(glyphs, color, scale)
 {
   scale = (scale !== undefined)? scale : 1;
+  color = (color !== undefined)? color : null;
   this._width0 = glyphs.height;
   this._height0 = glyphs.height;
-  this._glyphs = createCanvas(glyphs.width, glyphs.height);
   this.width = scale*this._width0;
   this.height = scale*this._height0;
-  var ctx = getEdgeyContext(this._glyphs);
-  ctx.clearRect(0, 0, glyphs.width, glyphs.height);
-  ctx.drawImage(glyphs, 0, 0);
-  ctx.globalCompositeOperation = 'source-in';
-  ctx.fillStyle = color;
-  ctx.fillRect(0, 0, glyphs.width, glyphs.height);
+  if (color === null) {
+    this._glyphs = glyphs;
+  } else {
+    this._glyphs = createCanvas(glyphs.width, glyphs.height);
+    var ctx = getEdgeyContext(this._glyphs);
+    ctx.clearRect(0, 0, glyphs.width, glyphs.height);
+    ctx.drawImage(glyphs, 0, 0);
+    ctx.globalCompositeOperation = 'source-in';
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, glyphs.width, glyphs.height);
+  }
 }
 
 define(Font, Object, '', {
@@ -34,22 +39,23 @@ define(Font, Object, '', {
 
 });
 
-function MakeSegment(font, pt, text)
+function MakeSegment(pt, text, font)
 {
   text = (text !== undefined)? text : '';
   var size = font.getSize(text);
   var bounds = new Rectangle(pt.x, pt.y, size.x, size.y);
-  var seg = {font:font, bounds:bounds, text:text};
+  var seg = {bounds:bounds, text:text, font:font};
   return seg;
 }
 
 
 //  TextBox
 //
-function TextBox(frame)
+function TextBox(frame, font)
 {
   this._Sprite(null);
   this.frame = frame;
+  this.font = font;
   this.linespace = 0;
   this.padding = 0;
   this.background = null;
@@ -85,14 +91,21 @@ define(TextBox, Sprite, 'Sprite', {
     this.segments.push(seg);
   },
 
+  addSegment: function (pt, text, font) {
+    font = (font !== undefined)? font : this.font;
+    var seg = MakeSegment(pt, text, font);
+    this.add(seg);
+    return seg;
+  },
+
   addNewline: function (font) {
+    font = (font !== undefined)? font : this.font;
     var x = this.frame.x;
     var y = this.frame.y;
     if (this.segments.length !== 0) {
       y = this.segments[this.segments.length-1].bounds.bottom()+this.linespace;
     }
-    var newseg = MakeSegment(font, new Vec2(x, y));
-    this.add(newseg);
+    var newseg = this.addSegment(new Vec2(x, y), '', font);
     var dy = newseg.bounds.bottom() - this.frame.height;
     if (0 < dy) {
       for (var i = this.segments.length-1; 0 <= i; i--) {
@@ -106,7 +119,8 @@ define(TextBox, Sprite, 'Sprite', {
     return newseg;
   },
 
-  addText: function (font, text) {
+  addText: function (text, font) {
+    font = (font !== undefined)? font : this.font;
     for (var i = 0; i < text.length; ) {
       if (text[i] == '\n') {
 	this.addNewline(font);
@@ -126,8 +140,7 @@ define(TextBox, Sprite, 'Sprite', {
 	last = this.addNewline(font);
       } else if (last.font !== font) {
 	var pt = new Vec2(last.bounds.right(), last.bounds.y);
-	last = MakeSegment(font, pt);
-	this.add(last);
+	last = this.addSegment(pt, '', font);
       }
       last.text += s;
       last.bounds.width += size.x;
@@ -136,7 +149,8 @@ define(TextBox, Sprite, 'Sprite', {
     }
   },
 
-  getSize: function (font, lines) {
+  getSize: function (lines, font) {
+    font = (font !== undefined)? font : this.font;
     var w = 0, h = 0;
     for (var i = 0; i < lines.length; i++) {
       var size = font.getSize(lines[i]);
@@ -146,16 +160,17 @@ define(TextBox, Sprite, 'Sprite', {
     return new Vec2(w, h-this.linespace);
   },
 
-  putText: function (font, lines, halign, valign) {
+  putText: function (lines, halign, valign, font) {
     halign = (halign !== undefined)? halign : 'left';
     valign = (valign !== undefined)? valign : 'top';
+    font = (font !== undefined)? font : this.font;
     var y = this.frame.y;
     switch (valign) {
     case 'center':
-      y += (this.frame.height-this.getSize(font, lines).y)/2;
+      y += (this.frame.height-this.getSize(lines, font).y)/2;
       break;
     case 'bottom':
-      y += this.frame.height-this.getSize(font, lines).y;
+      y += this.frame.height-this.getSize(lines, font).y;
       break;
     }
     for (var i = 0; i < lines.length; i++) {
@@ -171,7 +186,7 @@ define(TextBox, Sprite, 'Sprite', {
 	break;
       }
       var bounds = new Rectangle(x, y, size.x, size.y);
-      this.segments.push({font:font, bounds:bounds, text:text});
+      this.segments.push({bounds:bounds, text:text, font:font});
       y += size.y+this.linespace;
     }  
   },
@@ -214,11 +229,11 @@ define(PauseTask, TextTask, 'TextTask', {
 
 //  DisplayTask
 //
-function DisplayTask(textbox, font, text)
+function DisplayTask(textbox, text)
 {
   this._TextTask(textbox);
-  this.font = font;
   this.text = text;
+  this.font = textbox.font;
   this.interval = 0;
   this.sound = null;
   this._index = 0;
@@ -231,7 +246,7 @@ define(DisplayTask, TextTask, 'TextTask', {
     } else if (this.interval === 0) {
       this.ff();
     } else if ((this.scene.ticks % this.interval) === 0) {
-      this.textbox.addText(this.font, this.text.substr(this._index, 1));
+      this.textbox.addText(this.text.substr(this._index, 1), this.font);
       this._index++;
       if (this.sound !== null) {
 	playSound(this.sound);
@@ -240,7 +255,7 @@ define(DisplayTask, TextTask, 'TextTask', {
   },
 
   ff: function () {
-    this.textbox.addText(this.font, this.text.substr(this._index));
+    this.textbox.addText(this.text.substr(this._index), this.font);
     this._index = this.text.length;
     this.die();
   },
@@ -249,11 +264,11 @@ define(DisplayTask, TextTask, 'TextTask', {
 
 //  MenuTask
 //
-function MenuTask(textbox, font)
+function MenuTask(textbox)
 {
   this._TextTask(textbox);
-  this.font = font;
-  this.cursor = MakeSegment(font, new Vec2(), '>');
+  this.font = textbox.font;
+  this.cursor = MakeSegment(new Vec2(), '>', this.font);
   this.vertical = false;
   this.items = [];
   this.current = null;
@@ -272,7 +287,7 @@ define(MenuTask, TextTask, 'TextTask', {
     this._Task_start(scene);
     for (var i = 0; i < this.items.length; i++) {
       var item = this.items[i];
-      this.textbox.add(MakeSegment(this.font, item.pos, item.text));
+      this.textbox.addSegment(item.pos, item.text, this.font);
     }
     this.updateCursor();
   },
@@ -325,9 +340,9 @@ define(MenuTask, TextTask, 'TextTask', {
 
 //  TextBoxTT
 //
-function TextBoxTT(frame)
+function TextBoxTT(frame, font)
 {
-  this._TextBox(frame);
+  this._TextBox(frame, font);
   this.interval = 0;
   this.sound = null;
   this.queue = [];
@@ -340,6 +355,10 @@ define(TextBoxTT, TextBox, 'TextBox', {
     this._TextBox_render(ctx, bx, by);
     var cursor = this.cursor;
     if (cursor !== null) {
+      if (this.bounds !== null) {
+	bx += this.bounds.x;
+	by += this.bounds.y;
+      }
       if (blink(this.getTime(), this.blinking)) {
 	cursor.font.renderString(
 	  ctx, cursor.text,
@@ -392,16 +411,18 @@ define(TextBoxTT, TextBox, 'TextBox', {
     return task;
   },
 
-  addDisplay: function (font, text, interval, sound) {
-    var task = new DisplayTask(this, font, text);
+  addDisplay: function (text, interval, sound, font) {
+    var task = new DisplayTask(this, text);
     task.interval = (interval !== undefined)? interval : this.interval;
     task.sound = (sound !== undefined)? sound : this.sound;
+    task.font = (font !== undefined)? font : this.font;
     this.queue.push(task);
     return task;
   },
 
   addMenu: function (font) {
     var task = new MenuTask(this, font);
+    task.font = (font !== undefined)? font : this.font;
     this.queue.push(task);
     return task;
   },

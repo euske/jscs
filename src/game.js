@@ -65,8 +65,8 @@ define(Game, GameScene, 'GameScene', {
     
     // show a banner.
     var scene = this;
-    var tbox = new TextBox(this.frame);
-    tbox.putText(app.font, ['GAME!!1'], 'center', 'center');
+    var tbox = new TextBox(this.frame, app.font);
+    tbox.putText(['GAME!!1'], 'center', 'center');
     tbox.duration = app.framerate*2;
     tbox.update = function () {
       TextBox.prototype.update.call(tbox);
@@ -74,10 +74,10 @@ define(Game, GameScene, 'GameScene', {
     };
     this.addObject(tbox);
 
-    this.textbox = new TextBoxTT(new Rectangle(10, 10, 200, 100));
-    this.textbox.addDisplay(app.font, 'THIS IS GAEM.\nYES IT IS.', 4, app.audios.beep);
+    this.textbox = new TextBoxTT(new Rectangle(10, 10, 200, 100), app.font);
+    this.textbox.addDisplay('THIS IS GAEM.\nYES IT IS.', 4, app.audios.beep);
     this.textbox.blinking = 10;
-    var menu = this.textbox.addMenu(app.font);
+    var menu = this.textbox.addMenu();
     menu.sound = app.audios.beep;
     menu.addItem(new Vec2(10,50), 'AAA');
     menu.addItem(new Vec2(20,60), 'BB');

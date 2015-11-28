@@ -87,7 +87,7 @@ define(Actor2, Actor, 'Actor', {
   isHolding: function () {
     var tilemap = this.scene.tilemap;
     var f = (function (x,y,c) { return T.isGrabbable(c); });
-    return (tilemap.apply(tilemap.coord2map(this.hitbox), f) !== null);
+    return (tilemap.apply(f, tilemap.coord2map(this.hitbox)) !== null);
   },
 
 });

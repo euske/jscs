@@ -254,9 +254,8 @@ define(Level1, GameScene, 'GameScene', {
     this.updateScore();
 
     // show a banner.
-    var textbox = new TextBox(this.frame);
-    textbox.putText(app.font, ['GET ALL TEH DAMN THINGIES!'],
-		    'center', 'center');
+    var textbox = new TextBox(this.frame, app.font);
+    textbox.putText(['GET ALL TEH DAMN THINGIES!'], 'center', 'center');
     textbox.bounds = null;
     textbox.duration = app.framerate*2;
     textbox.update = function () {

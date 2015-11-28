@@ -180,7 +180,7 @@ define(Level1, GameScene, 'GameScene', {
 	tilemap.set(x, y, T.NONE);
       }
     };
-    this.tilemap.apply(null, f);
+    this.tilemap.apply(f);
 
     var rect = new Rectangle(1, 10, 1, 1);
     this.player = new Player(this.tilemap.map2coord(rect));
@@ -200,8 +200,8 @@ define(Level1, GameScene, 'GameScene', {
       scene.updateScore();
       
       // show a balloon.
-      var textbox = new TextBoxTT(new Rectangle(20, 20, app.screen.width-60, 60));
-      textbox.addDisplay(app.font, 'GOT A THINGY!', 4);
+      var textbox = new TextBoxTT(new Rectangle(20, 20, app.screen.width-60, 60), app.font);
+      textbox.addDisplay('GOT A THINGY!', 4);
       textbox.duration = app.framerate*2;
       scene.addObject(textbox);
 
@@ -228,10 +228,9 @@ define(Level1, GameScene, 'GameScene', {
     this.updateScore();
 
     // show a banner.
-    var textbox = new TextBox(this.frame);
+    var textbox = new TextBox(this.frame, app.font);
     textbox.linespace = 4;
-    textbox.putText(app.font, ['GET ALL TEH','DAMN THINGIES!'],
-		    'center', 'center');
+    textbox.putText(['GET ALL TEH','DAMN THINGIES!'], 'center', 'center');
     textbox.duration = app.framerate*2;
     textbox.update = function () {
       TextBox.prototype.update.call(textbox);

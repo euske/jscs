@@ -10,7 +10,7 @@ function FixedSprite(bounds, duration, tileno)
   this.tileno = tileno;
 }
 
-define(FixedSprite, Sprite, {
+define(FixedSprite, Sprite, 'Sprite', {
   update: function () {
     this._Sprite_update();
     this.bounds.y -= 1;
@@ -103,7 +103,7 @@ define(Player, Actor, 'Actor', {
     y += this.bounds.y;
     if (front) {
       if (afloat) {
-	if (tilemap.apply(r, isfloor) !== null) {
+	if (tilemap.apply(isfloor, r) !== null) {
 	  ctx.drawImage(sprites,
 			S.SHADOW*tw, tw-h, w, h,
 			x, y-h/2, w, h);
@@ -154,7 +154,7 @@ define(Player, Actor, 'Actor', {
     }
     var r = box.movev(v0).union(box);
     r = new Rectangle(r.origin.x, r.origin.y, r.size.x, r.size.y);
-    v0 = tilemap.reduce(tilemap.coord2map(r), f, v0);
+    v0 = tilemap.reduce(f, v0, tilemap.coord2map(r));
     v0 = box.contactXYPlane(v0, 0, null);
     return v0;
   },

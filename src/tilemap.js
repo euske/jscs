@@ -55,8 +55,8 @@ define(TileMap, Object, '', {
     }
   },
 
-  apply: function (rect, f) {
-    if (rect === null) {
+  apply: function (f, rect) {
+    if (rect === undefined) {
       rect = new Rectangle(0, 0, this.width, this.height);
     }
     for (var dy = 0; dy < rect.height; dy++) {
@@ -72,8 +72,8 @@ define(TileMap, Object, '', {
     return null;
   },
 
-  reduce: function (rect, f, v) {
-    if (rect === null) {
+  reduce: function (f, v, rect) {
+    if (rect === undefined) {
       rect = new Rectangle(0, 0, this.width, this.height);
     }
     for (var dy = 0; dy < rect.height; dy++) {
@@ -97,7 +97,7 @@ define(TileMap, Object, '', {
       return v;
     }
     var r = rect.move(v0.x, v0.y).union(rect);
-    return this.reduce(this.coord2map(r), f, v0);
+    return this.reduce(f, v0, this.coord2map(r));
   },
   
   scroll: function (rect, vx, vy) {
