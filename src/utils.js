@@ -32,7 +32,7 @@ function define(obj, base, name, props)
   }
   var h = '_'+name;
   for (var k in proto0) {
-    if (!k.startsWith('_')) {
+    if (k[0] != '_') {
       proto1[h+'_'+k] = (function () {
         var method = proto0[k];
         return (function () { method.apply(this, arguments); });
