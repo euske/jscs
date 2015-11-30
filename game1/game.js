@@ -245,7 +245,7 @@ define(Level1, GameScene, 'GameScene', {
     // [GAME SPECIFIC CODE]
     this.player.usermove(this.app.key_dir.x, this.app.key_dir.y);
     this.player.jump(this.app.key_action);
-    var rect = this.player.bounds.inflate(this.window.width/2, this.window.height/2);
+    var rect = this.player.bounds.inflate(this.window.width/4, this.window.height/4);
     this.setCenter(rect);
   },
 

@@ -255,8 +255,10 @@ define(DisplayTask, TextTask, 'TextTask', {
   },
 
   ff: function () {
-    this.textbox.addText(this.text.substr(this._index), this.font);
-    this._index = this.text.length;
+    while (this._index < this.text.length) {
+      this.textbox.addText(this.text.substr(this._index, 1), this.font);
+      this._index++;
+    }
     this.die();
   },
 
@@ -281,6 +283,7 @@ define(MenuTask, TextTask, 'TextTask', {
     value = (value !== undefined)? value : text;
     var item = { pos:pos, text:text, value:value };
     this.items.push(item);
+    return item;
   },
 
   start: function (scene) {
@@ -292,6 +295,9 @@ define(MenuTask, TextTask, 'TextTask', {
     this.updateCursor();
   },
 
+  ff: function () {
+  },
+  
   keydown: function (key) {
     var d = 0;
     var keysym = getKeySym(key);
@@ -310,10 +316,12 @@ define(MenuTask, TextTask, 'TextTask', {
       break;
     case 'action':
       if (this.current !== null) {
+	this.die();
 	this.selected.signal(this.current.value);
       };
       return;
     case 'cancel':
+      this.die();
       this.selected.signal(null);
       return;
     }
@@ -367,6 +375,12 @@ define(TextBoxTT, TextBox, 'TextBox', {
     }
   },
 
+  clear: function () {
+    this._TextBox_clear();
+    this.queue = [];
+    this.cursor = null;
+  },
+
   update: function () {
     this._TextBox_update();
     while (true) {
@@ -377,14 +391,21 @@ define(TextBoxTT, TextBox, 'TextBox', {
       }
       task.update();
       if (task.scene !== null) break;
-      this.queue.shift();
+      this.removeTask(task);
     }
   },
 
   keydown: function (key) {
-    var task = this.getCurrentTask();
-    if (task !== null) {
+    while (true) {
+      var task = this.getCurrentTask();
+      if (task === null) break;
+      if (task.scene === null) {
+	task.start(this.scene);
+      }
       task.keydown(key);
+      if (task.scene !== null) break;
+      this.removeTask(task);
+      break;
     }
   },
 
@@ -397,7 +418,7 @@ define(TextBoxTT, TextBox, 'TextBox', {
       }
       task.ff();
       if (task.scene !== null) break;
-      this.queue.shift();
+      this.removeTask(task);
     }
   },
 
@@ -405,9 +426,19 @@ define(TextBoxTT, TextBox, 'TextBox', {
     return (0 < this.queue.length)? this.queue[0] : null;
   },
 
+  addTask: function (task) {
+    this.queue.push(task);
+  },
+  removeTask: function (task) {
+    var i = this.queue.indexOf(task);
+    if (0 <= i) {
+      this.queue.splice(i, 1);
+    }
+  },
+
   addPause: function (ticks) {
     var task = new PauseTask(this, ticks);
-    this.queue.push(task);
+    this.addTask(task);
     return task;
   },
 
@@ -416,14 +447,14 @@ define(TextBoxTT, TextBox, 'TextBox', {
     task.interval = (interval !== undefined)? interval : this.interval;
     task.sound = (sound !== undefined)? sound : this.sound;
     task.font = (font !== undefined)? font : this.font;
-    this.queue.push(task);
+    this.addTask(task);
     return task;
   },
 
   addMenu: function (font) {
-    var task = new MenuTask(this, font);
+    var task = new MenuTask(this);
     task.font = (font !== undefined)? font : this.font;
-    this.queue.push(task);
+    this.addTask(task);
     return task;
   },
 

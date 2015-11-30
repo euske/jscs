@@ -24,6 +24,7 @@ function App(framerate, frame, images, audios, labels)
   this.sprites = this.images.sprites;
   this.tiles = this.images.tiles;
   this.font = new Font(this.images.font, 'white');
+  this.colorfont = new Font(this.images.font);
   
   this._key_left = false;
   this._key_right = false;
@@ -31,6 +32,7 @@ function App(framerate, frame, images, audios, labels)
   this._key_down = false;
   this.key_action = false;
   this.key_dir = new Vec2();
+  this.keylock = 0;
 }
 
 define(App, Object, '', {
@@ -50,7 +52,12 @@ define(App, Object, '', {
     e.parentNode.removeChild(e);
   },
 
+  lockKeys: function () {
+    this.keylock = this.framerate;
+  },
+
   keydown: function (ev) {
+    if (0 < this.keylock) return;
     // [OVERRIDE]
     // [GAME SPECIFIC CODE]
     var keysym = getKeySym(ev.keyCode);
@@ -208,6 +215,9 @@ define(App, Object, '', {
     // [OVERRIDE]
     // [GAME SPECIFIC CODE]
     this.scene.update();
+    if (0 < this.keylock) {
+      this.keylock--;
+    }
 
     while (0 < this.msgs.length) {
       var msg = this.msgs.shift();

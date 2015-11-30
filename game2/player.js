@@ -32,7 +32,7 @@ define(FixedSprite, Sprite, 'Sprite', {
 // Thingy
 function Thingy(bounds)
 {
-  var hitbox = bounds.inflate(-4, -4);
+  var hitbox = bounds.inflate(-2, -2);
   this._Actor(bounds, hitbox, S.THINGY);
 }
 
@@ -54,7 +54,7 @@ define(Thingy, Actor, 'Actor', {
 // Player
 function Player(bounds)
 {
-  var hitbox = bounds.inflate(-4, -4);
+  var hitbox = bounds.inflate(-2, -2);
   this._Actor(bounds, hitbox, S.PLAYER);
   this.speed = 8;
   this.gravity = -2;

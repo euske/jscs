@@ -34,6 +34,11 @@ function GameOver(app, score)
 }
 
 define(GameOver, TextScene, 'TextScene', {
+  init: function () {
+    this._TextScene_init();
+    this.app.lockKeys();
+  },
+  
   change: function () {
     this.changeScene(new Level1(this.app));
   },

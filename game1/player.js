@@ -31,7 +31,7 @@ define(FixedSprite, Sprite, 'Sprite', {
 // Actor2
 function Actor2(bounds, tileno)
 {
-  var hitbox = bounds.inflate(-4, -4);
+  var hitbox = bounds.inflate(-2, -2);
   this._Actor(bounds, hitbox, tileno);
   this.speed = 8;
   this.gravity = 2;
