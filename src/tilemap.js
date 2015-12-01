@@ -72,6 +72,13 @@ define(TileMap, Object, '', {
     return null;
   },
 
+  findTile: function (rect, f0) {
+    function f(x, y, c) {
+      return f0(c);
+    }
+    return this.apply(f, this.coord2map(rect));
+  },
+
   reduce: function (f, v, rect) {
     if (rect === undefined) {
       rect = new Rectangle(0, 0, this.width, this.height);
@@ -86,7 +93,7 @@ define(TileMap, Object, '', {
     }
     return v;
   },
-
+  
   contactTile: function (rect, f0, v0) {
     var ts = this.tilesize;
     function f(x, y, c, v) {
@@ -96,7 +103,7 @@ define(TileMap, Object, '', {
       }
       return v;
     }
-    var r = rect.move(v0.x, v0.y).union(rect);
+    var r = rect.movev(v0).union(rect);
     return this.reduce(f, v0, this.coord2map(r));
   },
   
