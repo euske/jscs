@@ -65,14 +65,14 @@ define(Game, GameScene, 'GameScene', {
     
     // show a banner.
     var scene = this;
-    var tbox = new TextBox(this.frame, app.font);
-    tbox.putText(['GAME!!1'], 'center', 'center');
-    tbox.duration = app.framerate*2;
-    tbox.update = function () {
-      TextBox.prototype.update.call(tbox);
-      tbox.visible = blink(scene.ticks, app.framerate/2);
+    var tb = new TextBox(this.frame, app.font);
+    tb.putText(['GAME!!1'], 'center', 'center');
+    tb.duration = app.framerate*2;
+    tb.update = function () {
+      TextBox.prototype.update.call(tb);
+      tb.visible = blink(scene.ticks, app.framerate/2);
     };
-    this.addObject(tbox);
+    this.addObject(tb);
 
     this.textbox = new TextBoxTT(new Rectangle(10, 10, 200, 100), app.font);
     this.textbox.addDisplay('THIS IS GAEM.\nYES IT IS.', 4, app.audios.beep);

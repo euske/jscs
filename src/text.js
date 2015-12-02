@@ -51,11 +51,13 @@ function MakeSegment(pt, text, font)
 
 //  TextBox
 //
-function TextBox(frame, font)
+WORD = /\w+\W*/;
+function TextBox(frame, font, header)
 {
   this._Sprite(null);
   this.frame = frame;
   this.font = font;
+  this.header = (header !== undefined)? header : '';
   this.linespace = 0;
   this.padding = 0;
   this.background = null;
@@ -147,6 +149,47 @@ define(TextBox, Sprite, 'Sprite', {
       last.bounds.height = Math.max(last.bounds.height, size.y);
       i = j;
     }
+  },
+  
+  splitWords: function (x, text, font, header) {
+    font = (font !== undefined)? font : this.font;
+    header = (header !== undefined)? header : this.header;
+    var line = '';
+    var a = [];
+    while (true) {
+      var m = WORD.exec(text);
+      if (m == null) {
+	a.push(line+text);
+	break;
+      }
+      var i = m.index+m[0].length
+      var w = text.substr(0, i);
+      var size = font.getSize(w);
+      if (this.frame.width < x+size.x) {
+	a.push(line);
+	line = header;
+	size = font.getSize(line);
+	x = this.frame.x+size.x;
+      }
+      line += w;
+      x += size.x;
+      text = text.substr(i);
+    }
+    return a;
+  },
+
+  wrapLines: function (text, font, header) {
+    var x = ((this.segments.length === 0)? 0 :
+	     this.segments[this.segments.length-1].bounds.right());
+    var a = this.splitWords(x, text, font, header);
+    var s = '';
+    for (var i = 0; i < a.length; i++) {
+      if (i != 0) {
+	s += '\n';
+      }
+      s += a[i];
+    }
+    return s;
   },
 
   getSize: function (lines, font) {
@@ -246,9 +289,10 @@ define(DisplayTask, TextTask, 'TextTask', {
     } else if (this.interval === 0) {
       this.ff();
     } else if ((this.scene.ticks % this.interval) === 0) {
-      this.textbox.addText(this.text.substr(this._index, 1), this.font);
+      var c = this.text.substr(this._index, 1);
+      this.textbox.addText(c, this.font);
       this._index++;
-      if (this.sound !== null) {
+      if (WORD.test(c) && this.sound !== null) {
 	playSound(this.sound);
       }
     }
@@ -348,9 +392,9 @@ define(MenuTask, TextTask, 'TextTask', {
 
 //  TextBoxTT
 //
-function TextBoxTT(frame, font)
+function TextBoxTT(frame, font, header)
 {
-  this._TextBox(frame, font);
+  this._TextBox(frame, font, header);
   this.interval = 0;
   this.sound = null;
   this.queue = [];
