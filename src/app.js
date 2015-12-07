@@ -194,19 +194,22 @@ define(App, Object, '', {
   init: function (scene) {
     // [OVERRIDE]
     removeChildren(this.frame.parentNode, 'div');
+
+    this.set_music(null);
+    this.scene = scene;
+    this.scene.init();
+  },
+
+  set_music: function (music) {
     if (this.music !== null) {
       this.music.pause();
     }
-
-    this.scene = scene;
-    this.scene.init();
-    this.music = this.scene.music;
-    
+    this.music = music;
     if (this.music !== null) {
       this.music.play();
     }
   },
-
+  
   post: function (msg) {
     this.msgs.push(msg);
   },

@@ -30,12 +30,12 @@ function GameOver(app, score)
 {
   this._TextScene(app);
   this.text = '<b>Game Over!</b><p><b>Score: '+score+'</b><p>Press Enter to restart.';
-  this.music = app.audios.explosion;
 }
 
 define(GameOver, TextScene, 'TextScene', {
   init: function () {
     this._TextScene_init();
+    this.app.set_music(this.app.audios.explosion);
     this.app.lockKeys();
   },
   
@@ -58,7 +58,6 @@ function Level1(app)
   this._Scene(app);
   
   this.tilesize = 32;
-  //this.music = app.audios.music;
 }
 
 define(Level1, GameScene, 'GameScene', {

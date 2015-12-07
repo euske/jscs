@@ -29,10 +29,14 @@ function EndGame(app, score)
 {
   this._TextScene(app);
   this.text = '<b>You Won!</b><p><b>Score: '+score+'</b><p>Press Enter to restart.';
-  this.music = app.audios.ending;
 }
 
 define(EndGame, TextScene, 'TextScene', {
+  init: function () {
+    this._TextScene_init();
+    this.app.set_music(this.app.audios.ending);
+  },
+  
   change: function () {
     this.changeScene(new Level1(this.app));
   },
@@ -49,7 +53,6 @@ function Level1(app)
   this.tilesize = 32;
   this.window = this.frame.copy();
   this.world = this.frame.copy();
-  this.music = app.audios.music;
 }
 
 define(Level1, GameScene, 'GameScene', {
@@ -140,6 +143,7 @@ define(Level1, GameScene, 'GameScene', {
 
   init: function () {
     this._GameScene_init();
+    this.app.set_music(this.app.audios.music);
     
     // [OVERRIDE]
     // [GAME SPECIFIC CODE]
@@ -209,11 +213,12 @@ define(Level1, GameScene, 'GameScene', {
       scene.collectibles--;
       if (scene.collectibles === 0) {
 	// delay calling.
-	scene.addObject(new Task(function (task) {
-	  if (task.ticks0+app.framerate < scene.ticks) {
-	    scene.changeScene(new EndGame(app, scene.score));
-	  }
-	}));
+	var task = new Task();
+	task.duration = app.framerate;
+	task.died.subscribe(function (_) {
+	  scene.changeScene(new EndGame(app, scene.score));
+	});
+	scene.addObject(task);
       }
     }
     this.player.picked.subscribe(player_picked);
