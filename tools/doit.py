@@ -8,7 +8,7 @@ import pygame
 def main(argv):
     import getopt
     def usage():
-        print 'usage: %s [-d] [-o output] [file ...]' % argv[0]
+        print ('usage: %s [-d] [-o output] [file ...]' % argv[0])
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'do:')
