@@ -89,7 +89,7 @@ define(Sprite, Task, 'Task', {
     this._Task_update();
   },
   
-  render: function (ctx, x, y) {
+  render: function (ctx, bx, by) {
     // [OVERRIDE]
   },
   
@@ -102,6 +102,8 @@ function Actor(bounds, hitbox, tileno)
   this._Sprite(bounds);
   this.hitbox = (hitbox === null)? null : hitbox.copy();
   this.tileno = tileno;
+  this.flipped = false;
+  this.phase = 0;
 }
 
 define(Actor, Sprite, 'Sprite', {
@@ -109,20 +111,26 @@ define(Actor, Sprite, 'Sprite', {
     // [OVERRIDE]
   },
 
-  render: function (ctx, x, y) {
+  render: function (ctx, bx, by) {
     // [OVERRIDE]
     var w = this.bounds.width;
     var h = this.bounds.height;
     if (typeof(this.tileno) === 'string') {
       ctx.fillStyle = this.tileno;
-      ctx.fillRect(x+this.bounds.x, y+this.bounds.y, w, h);
+      ctx.fillRect(bx+this.bounds.x, by+this.bounds.y, w, h);
     } else {
       var sprites = this.scene.app.sprites;
       var tw = sprites.height;
       var th = sprites.height;
-      ctx.drawImage(sprites,
-		    this.tileno*tw, th-h, w, h,
-		    x+this.bounds.x, y+this.bounds.y, w, h);
+      if (this.flipped) {
+	drawImageFlipped(ctx, sprites,
+			 this.tileno*tw, th-h, w, h,
+			 bx+this.bounds.x, by+this.bounds.y, w, h);
+      } else {
+	ctx.drawImage(sprites,
+		      this.tileno*tw, th-h, w, h,
+		      bx+this.bounds.x, by+this.bounds.y, w, h);
+      }
     }
   },
   

@@ -108,7 +108,7 @@ define(TextBox, Sprite, 'Sprite', {
       y = this.segments[this.segments.length-1].bounds.bottom()+this.linespace;
     }
     var newseg = this.addSegment(new Vec2(x, y), '', font);
-    var dy = newseg.bounds.bottom() - this.frame.height;
+    var dy = newseg.bounds.bottom() - this.frame.bottom();
     if (0 < dy) {
       for (var i = this.segments.length-1; 0 <= i; i--) {
 	var seg = this.segments[i];
@@ -123,6 +123,7 @@ define(TextBox, Sprite, 'Sprite', {
 
   addText: function (text, font) {
     font = (font !== undefined)? font : this.font;
+    var rx = this.frame.right();
     for (var i = 0; i < text.length; ) {
       if (text[i] == '\n') {
 	this.addNewline(font);
@@ -137,8 +138,7 @@ define(TextBox, Sprite, 'Sprite', {
       var size = font.getSize(s);
       var last = ((this.segments.length === 0)? null :
 		  this.segments[this.segments.length-1]);	
-      if (last === null ||
-	  this.frame.width < last.bounds.right()+size.x) {
+      if (last === null || rx < last.bounds.right()+size.x) {
 	last = this.addNewline(font);
       } else if (last.font !== font) {
 	var pt = new Vec2(last.bounds.right(), last.bounds.y);
@@ -396,6 +396,7 @@ function TextBoxTT(frame, font, header)
 {
   this._TextBox(frame, font, header);
   this.interval = 0;
+  this.autohide = false;
   this.sound = null;
   this.queue = [];
   this.cursor = null;
@@ -427,8 +428,9 @@ define(TextBoxTT, TextBox, 'TextBox', {
 
   update: function () {
     this._TextBox_update();
+    var task = null;
     while (true) {
-      var task = this.getCurrentTask();
+      task = this.getCurrentTask();
       if (task === null) break;
       if (task.scene === null) {
 	task.start(this.scene);
@@ -436,6 +438,9 @@ define(TextBoxTT, TextBox, 'TextBox', {
       task.update();
       if (task.scene !== null) break;
       this.removeTask(task);
+    }
+    if (this.autohide && task === null) {
+      this.visible = false;
     }
   },
 
@@ -472,11 +477,17 @@ define(TextBoxTT, TextBox, 'TextBox', {
 
   addTask: function (task) {
     this.queue.push(task);
+    if (this.autohide) {
+      this.visible = true;
+    }
   },
   removeTask: function (task) {
     var i = this.queue.indexOf(task);
     if (0 <= i) {
       this.queue.splice(i, 1);
+    }
+    if (this.autohide && this.queue.length == 0) {
+      this.visible = false;
     }
   },
 

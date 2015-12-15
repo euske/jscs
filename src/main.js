@@ -37,7 +37,14 @@ function run(scene0)
   
   function keydown(e) {
     if (app.active) {
-      app.keydown(e);
+      switch (e.keyCode) {
+      case 17:			// Control
+      case 18:			// Meta
+	break;
+      default:
+	app.keydown(e);
+	break;
+      }
       switch (e.keyCode) {
       case 8:			// Backspace
       case 9:			// Tab
@@ -60,7 +67,14 @@ function run(scene0)
   
   function keyup(e) {
     if (app.active) {
-      app.keyup(e);
+      switch (e.keyCode) {
+      case 17:			// Control
+      case 18:			// Meta
+	break;
+      default:
+	app.keyup(e);
+	break;
+      }
     }
   }
   

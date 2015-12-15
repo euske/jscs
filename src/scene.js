@@ -185,6 +185,7 @@ define(GameScene, Scene, 'Scene', {
 	      obj1 !== obj0 && obj1.hitbox.overlap(obj0.hitbox)) {
 	    obj0.collide(obj1);
 	    obj1.collide(obj0);
+	    if (obj0.scene === null || obj0.hitbox === null) break;
 	  }
 	}
       }
