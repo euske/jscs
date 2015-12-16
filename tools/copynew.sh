@@ -1,8 +1,10 @@
 #!/bin/sh
 dst="$1"
 name=${dst/*\//}
+rsyn="$dst/.rsyn"
 [ -d "$dst" ] || exit 1
-echo "--exclude *.wav --exclude *.md --exclude tmp --exclude tools --exclude Makefile tabesugi:public/file/ludumdare.tabesugi.net/ohgj/$name/" > "$dst"/.rsync
+echo "opts='--exclude *.wav --exclude *.md --exclude tmp --exclude tools --exclude Makefile'" > "$rsyn"
+echo "remote='tabesugi:public/file/ludumdare.tabesugi.net/ohgj/$name'" > "$rsyn"
 mkdir "$dst"/src
 mkdir "$dst"/assets
 cp .gitignore "$dst"
