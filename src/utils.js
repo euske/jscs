@@ -189,13 +189,16 @@ function image2array(img)
   return map;
 }
 
-// drawImageFlipped: draw a flipped image.
-function drawImageFlipped(ctx, src, sx, sy, sw, sh, dx, dy, dw, dh)
+// drawImageScaled: draw a scaled image.
+function drawImageScaled(ctx, src, sx, sy, sw, sh, dx, dy, dw, dh)
 {
   ctx.save();
-  ctx.translate(dx+dw, dy);
-  ctx.scale(-1, 1);
-  ctx.drawImage(src, sx, sy, sw, sh, 0, 0, dw, dh);
+  ctx.translate(dx+((0 < dw)? 0 : -dw),
+		dy+((0 < dh)? 0 : -dh));
+  ctx.scale((0 < dw)? 1 : -1,
+	    (0 < dh)? 1 : -1);
+  ctx.drawImage(src, sx, sy, sw, sh, 0, 0,
+		Math.abs(dw), Math.abs(dh));
   ctx.restore();
 }
 

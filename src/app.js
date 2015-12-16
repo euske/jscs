@@ -22,6 +22,7 @@ function App(framerate, frame, images, audios, labels)
 
   // [GAME SPECIFIC CODE]
   this.sprites = this.images.sprites;
+  this.sprites_size = new Vec2(this.sprites.height, this.sprites.height);
   this.tiles = this.images.tiles;
   this.font = new Font(this.images.font, 'white');
   this.colorfont = new Font(this.images.font);

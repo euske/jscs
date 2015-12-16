@@ -102,7 +102,7 @@ function Actor(bounds, hitbox, tileno)
   this._Sprite(bounds);
   this.hitbox = (hitbox === null)? null : hitbox.copy();
   this.tileno = tileno;
-  this.flipped = false;
+  this.scale = new Vec2(1, 1);
   this.phase = 0;
 }
 
@@ -113,24 +113,18 @@ define(Actor, Sprite, 'Sprite', {
 
   render: function (ctx, bx, by) {
     // [OVERRIDE]
+    var app = this.scene.app;
     var w = this.bounds.width;
     var h = this.bounds.height;
     if (typeof(this.tileno) === 'string') {
       ctx.fillStyle = this.tileno;
       ctx.fillRect(bx+this.bounds.x, by+this.bounds.y, w, h);
     } else {
-      var sprites = this.scene.app.sprites;
-      var tw = sprites.height;
-      var th = sprites.height;
-      if (this.flipped) {
-	drawImageFlipped(ctx, sprites,
-			 this.tileno*tw, th-h, w, h,
-			 bx+this.bounds.x, by+this.bounds.y, w, h);
-      } else {
-	ctx.drawImage(sprites,
-		      this.tileno*tw, th-h, w, h,
-		      bx+this.bounds.x, by+this.bounds.y, w, h);
-      }
+      var size = app.sprites_size;
+      drawImageScaled(ctx, app.sprites,
+		      size.x*this.tileno, size.y*(this.phase+1)-h, w, h,
+		      bx+this.bounds.x, by+this.bounds.y,
+		      w*this.scale.x, h*this.scale.y);
     }
   },
   
