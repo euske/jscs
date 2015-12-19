@@ -3,18 +3,20 @@
 // predictLandingPoint: returns the estimated landing position.
 function predictLandingPoint(
   tilemap, hitbox,
-  velocity, descend, maxdt)
+  velocity, fallfunc, maxdt)
 {
   maxdt = (maxdt !== undefined)? maxdt : 20;
   var stoppable = tilemap.getRangeMap(T.isStoppable);
   var rect0 = hitbox;
+  var dy = velocity.y;
   for (var dt = 0; dt < maxdt; dt++) {
-    var rect1 = hitbox.move(velocity.x*dt, velocity.y*dt-descend(dt));
+    var rect1 = hitbox.move(velocity.x*dt, dy);
     var b = tilemap.coord2map(rect1);
     if (stoppable.get(b.x, b.y, b.x+b.width, b.y+b.height) !== 0) {
       return rect0;
     }
     rect0 = rect1;
+    dy += fallfunc(dt);
   }
   return null;
 }

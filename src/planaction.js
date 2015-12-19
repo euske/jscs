@@ -35,17 +35,16 @@ define(PlanAction, Object, '', {
 
 });
 
-function PlanActionRunner(plan, actor, timeout)
+function PlanActionRunner(plan, actor)
 {
   this.plan = plan;
   this.actor = actor;
-  this.timeout = timeout;
-  this.count = this.timeout;
   var cur = actor.getTilePos();
   this.action = plan.getAction(cur.x, cur.y);
 
-  this.moveto = new Slot(this);
-  this.jump = new Slot(this);
+  this.timeout = -1;
+  this.moveto = null;
+  this.jump = null;
 }
 
 define(PlanActionRunner, Object, '', {
@@ -54,8 +53,9 @@ define(PlanActionRunner, Object, '', {
   },
 
   update: function (goal) {
-    if (this.count <= 0) return false;
     if (this.action === null || this.action.next === null) return false;
+    if (this.count == 0) return false;
+    this.count--;
     
     var plan = this.plan;
     var actor = this.actor;
@@ -69,7 +69,9 @@ define(PlanActionRunner, Object, '', {
     case A.WALK:
     case A.CLIMB:
       var r = tilemap.map2coord(dst);
-      this.moveto.signal(r.center());
+      if (this.moveto !== null) {
+	this.moveto(r.center());
+      }
       if (cur.equals(dst)) {
 	this.action = (valid)? this.action.next : null;
 	this.count = this.timeout;
@@ -84,7 +86,9 @@ define(PlanActionRunner, Object, '', {
 	var v = actor.getPos();
 	var v = new Vec2(r.x-v.x, r.y-v.y);
 	if (actor.isMovable(v)) {
-	  this.moveto.signal(r.center());
+	  if (this.moveto !== null) {
+	    this.moveto(r.center());
+	  }
 	  break;
 	}
       }
@@ -97,19 +101,22 @@ define(PlanActionRunner, Object, '', {
     case A.JUMP:
       if (actor.isLanded() && !actor.isHolding() &&
 	  this.hasClearance(cur.x, dst.y)) {
-	this.jump.signal();
+	if (this.jump !== null) {
+	  this.jump();
+	}
 	// once you leap, the action is considered finished.
 	this.action = (valid)? this.action.next : null;
 	this.count = this.timeout;
       } else {
 	// not landed, holding something, or has no clearance.
 	var r = tilemap.map2coord(cur);
-	this.moveto.signal(r.center());
+	if (this.moveto !== null) {
+	  this.moveto(r.center());
+	}
       }
       break;
     }
 
-    this.count--;
     return true;
   },
 

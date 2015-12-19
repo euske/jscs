@@ -33,21 +33,32 @@ function Actor2(bounds, tileno)
 {
   var hitbox = bounds.inflate(-2, -2);
   this._Actor(bounds, hitbox, tileno);
-  this.speed = 8;
-  this.gravity = 2;
-  this.maxspeed = 16;
-  this.jumpacc = -8;
   this.tilebounds = new Rectangle(0, 0, 1, 1);
+  this.speed = 8;
+  this.fallfunc = (function (t) { return clamp(-16, t*2, +16); });
+  this.jumpfunc = (function (t) { return clamp(-16, (t < 8)? -10 : -8+2*(t-8), 16); });
   this.velocity = new Vec2(0, 0);
   this.landed = false;
+  this._jumpt = -1;
+  this._fallt = -1;
 }
 
 define(Actor2, Actor, 'Actor', {
   update: function () {
-    this.velocity.y += this.gravity;
-    this.velocity.y = clamp(-this.maxspeed, this.velocity.y, this.maxspeed);
+    if (0 <= this._jumpt) {
+      this.velocity.y = this.jumpfunc(this._jumpt);
+      this._jumpt++;
+    } else if (0 <= this._fallt) {
+      this.velocity.y = this.fallfunc(this._fallt);
+      this._fallt++;
+    }
     var v = this.getMove(this.velocity);
     this.landed = (0 < this.velocity.y && v.y === 0);
+    if (this.landed) {
+      this._fallt = -1; 
+    } else if (this._fallt < 0) {
+      this._fallt = 0;
+    }
     this.velocity = v;
     this.move(this.velocity.x, this.velocity.y);
   },
@@ -90,17 +101,23 @@ define(Actor2, Actor, 'Actor', {
     return (tilemap.apply(f, tilemap.coord2map(this.hitbox)) !== null);
   },
 
+  setJumping: function (jumping) {
+    if (jumping && this.landed) {
+      this._jumpt = 0;
+    } else {
+      this._jumpt = -1;
+    }
+  },
+
 });
 
 // Player
 function Player(bounds)
 {
   this._Actor2(bounds, S.PLAYER);
-  this.maxacctime = 8;
   
   this.picked = new Slot(this);
   this.jumped = new Slot(this);
-  this._jumpt = -1;
 }
 
 define(Player, Actor2, 'Actor2', {
@@ -114,14 +131,6 @@ define(Player, Actor2, 'Actor2', {
     }
   },
 
-  update: function () {
-    if (0 <= this._jumpt && this._jumpt < this.maxacctime) {
-      this._jumpt++;
-      this.velocity.y -= this.gravity;
-    }
-    this._Actor2_update(this);  
-  },
-  
   usermove: function (vx, vy) {
     this.velocity.x = vx*this.speed;
   },
@@ -129,12 +138,11 @@ define(Player, Actor2, 'Actor2', {
   jump: function (jumping) {
     if (jumping) {
       if (this.isLanded()) {
-	this._jumpt = 0;
-	this.velocity.y = this.jumpacc;
+	this.setJumping(true);
 	this.jumped.signal();
       }
     } else {
-      this._jumpt = -1;
+      this.setJumping(false);
     }
   },
 
@@ -152,9 +160,9 @@ define(Player, Actor2, 'Actor2', {
 function Enemy(bounds)
 {
   this._Actor2(bounds, S.ENEMY);
-  this.jumpacc = -16;
   this.target = null;
   this.runner = null;
+  this._jumptime = 0;
 }
 
 RANGE = 10;
@@ -163,10 +171,9 @@ define(Enemy, Actor2, 'Actor2', {
     return '<Enemy: '+this.bounds+'>';
   },
 
-  jump: function () {
-    if (this.isLanded()) {
-      this.velocity.y = this.jumpacc;
-    }
+  jump: function (t) {
+    this._jumptime = t;
+    this.setJumping(true);
   },
 
   moveToward: function (p) {
@@ -175,26 +182,22 @@ define(Enemy, Actor2, 'Actor2', {
   },
 
   update: function () {
+    if (0 < this._jumptime) {
+      this._jumptime--;
+      if (this._jumptime === 0) {
+	this.setJumping(false);
+      }
+    }
     this._Actor2_update();
 
     if (this.target === null) return;
 
-    var actor = this;
     var target = this.target;
-    function jump(e) {
-      actor.jump();
-    }
-    function moveto(e, p) {
-      actor.moveToward(p);
-    }
     function ascend(t) {
       return t;
     }
     function descend(t) {
-      return t*t*actor.gravity;
-    }
-    function t_descend(t) {
-      return t*t*target.gravity;
+      return t*t*2;
     }
     
     var scene = this.scene;
@@ -202,7 +205,7 @@ define(Enemy, Actor2, 'Actor2', {
     var hitbox = ((target.isLanded())? 
 		  target.hitbox :
 		  predictLandingPoint(tilemap, target.hitbox, 
-				      target.velocity, t_descend));
+				      target.velocity, target.fallfunc));
     if (hitbox === null) return;
     var goal = target.getTilePos();
     
@@ -225,9 +228,11 @@ define(Enemy, Actor2, 'Actor2', {
 			     new Vec2(2, 3), ascend, descend);
       if (plan.fillPlan(this.getTilePos())) {
 	// start following a plan.
-	this.runner = new PlanActionRunner(plan, this, scene.app.framerate*2);
-	this.runner.jump.subscribe(jump);
-	this.runner.moveto.subscribe(moveto);
+	var actor = this;
+	this.runner = new PlanActionRunner(plan, this);
+	this.runner.timeout = scene.app.framerate*2;
+	this.runner.moveto = function (p) { actor.moveToward(p); }
+	this.runner.jump = function (t) { actor.jump(t); }
 	log("begin:"+this.runner);
       }
     }

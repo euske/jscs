@@ -59,8 +59,7 @@ function Player(bounds)
   this.speed = 8;
   this.gravity = -2;
   this.maxspeed = -16;
-  this.jumpacc = 8;
-  this.maxacctime = 8;
+  this.jumpfunc = (function (t) { return (t < 8)? 10 : 8-2*(t-8); });
   
   this.picked = new Slot(this);
   this.jumped = new Slot(this);
@@ -82,11 +81,11 @@ define(Player, Actor, 'Actor', {
   },
 
   update: function () {
-    if (0 <= this._jumpt && this._jumpt < this.maxacctime) {
+    if (0 <= this._jumpt) {
+      this._gz = this.jumpfunc(this._jumpt);
       this._jumpt++;
-    } else {
-      this._gz = Math.max(this._gz + this.gravity, this.maxspeed);
     }
+    this._gz = Math.max(this._gz + this.gravity, this.maxspeed);
   },
 
   render: function (ctx, x, y, front) {
@@ -182,7 +181,6 @@ define(Player, Actor, 'Actor', {
       var v = new Vec3(0, 0, this._gz);
       var d = this.contactTile(p, v);
       if (this._gz < 0 && d.z === 0) {
-	this._gz = this.jumpacc;
 	this._jumpt = 0;
 	this.jumped.signal();
       }
