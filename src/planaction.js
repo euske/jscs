@@ -81,7 +81,7 @@ define(PlanActionRunner, Object, '', {
     case A.FALL:
       var map = tilemap.getRangeMap(T.isObstacle);
       var path = map.findSimplePath(cur.x, cur.y, dst.x, dst.y, actor.tilebounds);
-      for (var i in path) {
+      for (var i = 0; i < path.length; i++) {
 	var r = tilemap.map2coord(path[i]);
 	var v = actor.getPos();
 	var v = new Vec2(r.x-v.x, r.y-v.y);

@@ -22,45 +22,45 @@ function predictLandingPoint(
 }
 
 // PlanMap
-  // public var tilemap:TileMap;
-  // public var goal:Point;      // target position
-  // public var range:Rectangle; // search range
-  // public var cb:Rectangle;    // character offset and size
-  // public var speed:int;       // moving speed while jumping
-  // public var jumprange:Point;   // jump range
-  // public var ascend:Function;   // ascend at t
-  // public var descend:Function;   // descende at t
+// public var tilemap:TileMap;
+// public var goal:Point;      // target position
+// public var range:Rectangle; // search range
+// public var cb:Rectangle;    // character offset and size
+// public var speed:int;       // moving speed while jumping
+// public var jumprange:Point;   // jump range
+// public var ascend:Function;   // ascend at t
+// public var descend:Function;   // descende at t
 function PlanMap(tilemap, goal, range, cb,
 		 speed, jumprange, ascend, descend)
 {
   this.tilemap = tilemap;
   this.goal = goal;
   this.range = range;
-  this.cb = cb;
-  this.speed = speed;
-  this.jumprange = jumprange;
-  this.ascend = ascend;
-  this.descend = descend;
-  
-  this._map = {};
+  this.cb = new Rectangle(0, 0, 1, 1);
+  this.speed = 1;
+  this.jumprange = new Vec2(1, 1);
+  this.ascend = (function (t) { return t; });
+  this.descend = (function (t) { return t*t; });
+
+  this.resetPlan();
 }
 
 define(PlanMap, Object, '', {
   toString: function () {
-  return ('<PlanMap '+this.range+'>');
+    return ('<PlanMap '+this.range+'>');
   },
 
   isValid: function (p) {
-  return (p !== null && this.goal.equals(p));
+    return (p !== null && this.goal.equals(p));
   },
 
   getAction: function (x, y, context) {
-  var k = getKey(x, y, context);
-  if (this._map.hasOwnProperty(k)) {
-    return this._map[k];
-  } else {
-    return null;
-  }
+    var k = getKey(x, y, context);
+    if (this._map.hasOwnProperty(k)) {
+      return this._map[k];
+    } else {
+      return null;
+    }
   },
 
   addAction: function (queue, start, p, context, type, cost, next) {
@@ -80,6 +80,10 @@ define(PlanMap, Object, '', {
     return a1;
   },
 
+  resetPlan: function () {
+    this._map = {};
+  },
+  
   fillPlan: function (start, maxcost, falldx, falldy) {
     maxcost = (maxcost !== undefined)? maxcost : 100;
     falldx = (falldx !== undefined)? falldx : 10;

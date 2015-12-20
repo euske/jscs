@@ -193,13 +193,6 @@ define(Enemy, Actor2, 'Actor2', {
     if (this.target === null) return;
 
     var target = this.target;
-    function ascend(t) {
-      return t;
-    }
-    function descend(t) {
-      return t*t*2;
-    }
-    
     var scene = this.scene;
     var tilemap = scene.tilemap;
     var hitbox = ((target.isLanded())? 
@@ -223,16 +216,19 @@ define(Enemy, Actor2, 'Actor2', {
     // make a plan.
     if (this.runner === null) {
       var range = new Rectangle(goal.x-RANGE, goal.y-RANGE, RANGE*2+1, RANGE*2+1);
-      var plan = new PlanMap(tilemap, goal, range,
-			     tilebounds, this.speed,
-			     new Vec2(2, 3), ascend, descend);
+      var plan = new PlanMap(tilemap, goal, range);
+      plan.tilebounds = tilebounds;
+      plan.speed = this.speed;
+      plan.fallfunc = this.fallfunc;
+      plan.jumpfunc = this.jumpfunc;
+      plan.jumprange = new Vec2(2, 3);
       if (plan.fillPlan(this.getTilePos())) {
 	// start following a plan.
 	var actor = this;
 	this.runner = new PlanActionRunner(plan, this);
 	this.runner.timeout = scene.app.framerate*2;
 	this.runner.moveto = function (p) { actor.moveToward(p); }
-	this.runner.jump = function (t) { actor.jump(t); }
+	this.runner.jump = function (t) { actor.jump(10); }
 	log("begin:"+this.runner);
       }
     }
