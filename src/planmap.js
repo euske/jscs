@@ -12,7 +12,7 @@ function predictLandingPoint(
   for (var dt = 0; dt < maxdt; dt++) {
     var rect1 = hitbox.move(velocity.x*dt, dy);
     var b = tilemap.coord2map(rect1);
-    if (stoppable.find(b)) {
+    if (stoppable.exists(b)) {
       return rect0;
     }
     rect0 = rect1;
@@ -23,26 +23,23 @@ function predictLandingPoint(
 
 // PlanMap
 // public var tilemap:TileMap;
-// public var goal:Point;      // target position
 // public var range:Rectangle; // search range
-// public var cb:Rectangle;    // character offset and size
+// public var tilebounds:Rectangle;    // character offset and size
 // public var speed:int;       // moving speed while jumping
 // public var jumprange:Point;   // jump range
 // public var ascend:Function;   // ascend at t
 // public var descend:Function;   // descende at t
-function PlanMap(tilemap, goal, range, cb,
+function PlanMap(tilemap, range, tilebounds,
 		 speed, jumprange, ascend, descend)
 {
   this.tilemap = tilemap;
-  this.goal = goal;
   this.range = range;
-  this.cb = new Rectangle(0, 0, 1, 1);
+  this.tilebounds = new Rectangle(0, 0, 1, 1);
   this.speed = 1;
   this.jumprange = new Vec2(1, 1);
   this.ascend = (function (t) { return t; });
   this.descend = (function (t) { return t*t; });
-
-  this.resetPlan();
+  this.init(null);
 }
 
 define(PlanMap, Object, '', {
@@ -51,7 +48,7 @@ define(PlanMap, Object, '', {
   },
 
   isValid: function (p) {
-    return (p !== null && this.goal.equals(p));
+    return (p !== null && this._goal.equals(p));
   },
 
   getAction: function (x, y, context) {
@@ -74,7 +71,8 @@ define(PlanMap, Object, '', {
     }
   },
 
-  resetPlan: function () {
+  init: function (goal) {
+    this._goal = goal;
     this._map = {};
   },
   
@@ -88,29 +86,30 @@ define(PlanMap, Object, '', {
     var obstacle = tilemap.getRangeMap(T.isObstacle);
     var stoppable = tilemap.getRangeMap(T.isStoppable);
     var grabbable = tilemap.getRangeMap(T.isGrabbable);
-    var cbx0 = this.cb.x, cbx1 = this.cb.right();
-    var cby0 = this.cb.y, cby1 = this.cb.bottom();
+    var cbx0 = this.tilebounds.x, cbx1 = this.tilebounds.right();
+    var cby0 = this.tilebounds.y, cby1 = this.tilebounds.bottom();
+    var cb = this.tilebounds;
+    var cb1 = this.tilebounds.move(0, 1);
+    var pb = new Rect(this.tilebounds.x, this.tilebounds.bottom(),
+		      this.tilebounds.width, 1);
 
+    // a start position cannot be in the mid air.
     if (start !== null &&
-	grabbable.get(start.x+cbx0, start.y+cby0,
-		      start.y+cbx1, start.y+cby1) === 0 &&
-	stoppable.get(start.x+cbx0, start.y+cby1, 
-		      start.x+cbx1, start.y+cby1+1) === 0) return false;
+	!grabbable.exists(cb.movev(start)) &&
+	!stoppable.exists(pb.movev(start))) return false;
 
     var queue = [];
-    this.addAction(queue, start, new PlanAction(this.goal));
+    this.addAction(queue, start, new PlanAction(this._goal));
     while (0 < queue.length) {
       var a0 = queue.pop().action;
       var p = a0.p;
       var context = a0.context;
       if (start !== null && start.equals(p)) return true;
-      if (obstacle.get(p.x+cbx0, p.y+cby0, 
-		       p.x+cbx1, p.y+cby1) !== 0) continue;
+      if (obstacle.exists(cb.movev(p))) continue;
+      // a character cannot stand in the mid air.
       if (context === null &&
-	  grabbable.get(p.x+cbx0, p.y+cby0,
-			p.x+cbx1, p.y+cby1) === 0 &&
-	  stoppable.get(p.x+cbx0, p.y+cby1, 
-			p.x+cbx1, p.y+cby1+1) === 0) continue;
+	  !grabbable.exists(cb.movev(p)) &&
+	  !stoppable.exists(pb.movev(p))) continue;
       // assert(range.x <= p.x && p.x <= range.right());
       // assert(range.y <= p.y && p.y <= range.bottom());
       var cost = a0.cost;
@@ -118,8 +117,7 @@ define(PlanMap, Object, '', {
       // try climbing down.
       if (context === null &&
 	  range.y <= p.y-1 &&
-	  grabbable.get(p.x+cbx0, p.y+cby1,
-			p.x+cbx1, p.y+cby1+1) !== 0) {
+	  grabbable.exists(pb.movev(p))) {
 	cost += 1;
 	this.addAction(queue, start, 
 		       new PlanAction(new Vec2(p.x, p.y-1), null, A.CLIMB, cost, a0));
@@ -127,8 +125,7 @@ define(PlanMap, Object, '', {
       // try climbing up.
       if (context === null &&
 	  p.y+1 <= range.bottom &&
-	  grabbable.get(p.x+cbx0, p.y+cby0+1,
-			p.x+cbx1, p.y+cby1+1) !== 0) {
+	  grabbable.exists(cb1.movev(p))) {
 	cost += 1;
 	this.addAction(queue, start, 
 		       new PlanAction(new Vec2(p.x, p.y+1), null, A.CLIMB, cost, a0));
@@ -140,18 +137,15 @@ define(PlanMap, Object, '', {
 	var bx1 = (0 < vx)? cbx1 : cbx0;
 
 	// try walking.
-	var wx = p.x-vx;
+	var wp = new Vec2(p.x-vx, p.y);
 	if (context === null &&
-	    range.x <= wx && wx <= range.right() &&
-	    obstacle.get(wx+cbx0, p.y+cby0,
-			 wx+cbx1, p.y+cby1) === 0 &&
-	    (grabbable.get(wx+cbx0, p.y+cby0,
-			   wx+cbx1, p.y+cby1) !== 0 ||
-	     stoppable.get(wx+cbx0, p.y+cby1,
-			   wx+cbx1, p.y+cby1+1) !== 0)) {
+	    range.x <= wp.x && wp.x <= range.right() &&
+	    !obstacle.exists(cb.movev(wp)) &&
+	    (grabbable.exists(cb.movev(wp)) ||
+	     stoppable.exists(pb.movev(wp)))) {
 	  cost += 1;
 	  this.addAction(queue, start, 
-			 new PlanAction(new Vec2(wx, p.y), null, A.WALK, cost, a0));
+			 new PlanAction(wp, null, A.WALK, cost, a0));
 	}
 
 	// try falling.
@@ -166,6 +160,7 @@ define(PlanMap, Object, '', {
 	    for (; fdy <= falldy; fdy++) {
 	      var fy = p.y-fdy;
 	      if (fy < range.y || range.bottom() < fy) break;
+	      var fp = new Vec2(fx, fy);
 	      //  +--+....  [vx = +1]
 	      //  |  |....
 	      //  +-X+.... (fx,fy) original position.
@@ -174,16 +169,13 @@ define(PlanMap, Object, '', {
 	      //   ...|  |
 	      //   ...+-X+ (p.x,p.y)
 	      //     ######
-	      if (obstacle.get(fx+cbx0, fy+cby0,
-			       fx+cbx1, fy+cby1) !== 0) continue;
+	      if (obstacle.exists(cb.movev(fp))) continue;
 	      cost += Math.abs(fdx)+Math.abs(fdy)+1;
 	      if (0 < fdx &&
 		  stoppable.get(fx+bx0+vx, fy+cby0, 
 				p.x+bx1, p.y+cby1) === 0 &&
-		  (grabbable.get(fx+cbx0, fy+cby0, 
-				 fx+cbx1, fy+cby1) !== 0 ||
-		   stoppable.get(fx+cbx0, fy+cby1, 
-				 fx+cbx1, fy+cby1+1) !== 0)) {
+		  (grabbable.exists(cb.movev(fp)) ||
+		   stoppable.exists(pb.movev(fp)))) {
 		// normal fall.
 		this.addAction(queue, start, 
 			       new PlanAction(new Vec2(fx, fy), null, A.FALL, cost, a0));
@@ -212,6 +204,7 @@ define(PlanMap, Object, '', {
 	      if (jx < range.x || range.right() < jx) break;
 	      var jy = p.y+jdy;
 	      if (jy < range.y || range.bottom() < jy) break;
+	      var jp = new Vec2(jx, jy);
 	      //  ....+--+  [vx = +1]
 	      //  ....|  |
 	      //  ....+-X+ (p.x,p.y) tip point
@@ -222,10 +215,8 @@ define(PlanMap, Object, '', {
 	      // ######
 	      if (stoppable.get(jx+bx0, jy+cby1, 
 				p.x+bx1-vx, p.y+cby0) !== 0) break;
-	      if (grabbable.get(jx+cbx0, jy+cby0, 
-				jx+cbx1, jy+cby1) === 0 &&
-		  stoppable.get(jx+cbx0, jy+cby1, 
-				jx+cbx1, jy+cby1+1) === 0) continue;
+	      if (!grabbable.exists(cb.movev(jp)) &&
+		  !stoppable.exists(pb.movev(jp))) continue;
 	      // extra care is needed not to allow the following case:
 	      //      .#
 	      //    +--+

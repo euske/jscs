@@ -216,7 +216,8 @@ define(Enemy, Actor2, 'Actor2', {
     // make a plan.
     if (this.runner === null) {
       var range = new Rectangle(goal.x-RANGE, goal.y-RANGE, RANGE*2+1, RANGE*2+1);
-      var plan = new PlanMap(tilemap, goal, range);
+      var plan = new PlanMap(tilemap, range);
+      plan.init(goal);
       plan.tilebounds = tilebounds;
       plan.speed = this.speed;
       plan.fallfunc = this.fallfunc;

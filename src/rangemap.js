@@ -44,7 +44,7 @@ define(RangeMap, Object, '', {
 	    this.data[y0][x1] + this.data[y0][x0]);
   },
 
-  find: function (rect) {
+  exists: function (rect) {
     return (this.get(rect.x, rect.y,
 		     rect.x+rect.width,
 		     rect.y+rect.height) !== 0);
