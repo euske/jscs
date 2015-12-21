@@ -12,7 +12,7 @@ function predictLandingPoint(
   for (var dt = 0; dt < maxdt; dt++) {
     var rect1 = hitbox.move(velocity.x*dt, dy);
     var b = tilemap.coord2map(rect1);
-    if (stoppable.get(b.x, b.y, b.x+b.width, b.y+b.height) !== 0) {
+    if (stoppable.find(b)) {
       return rect0;
     }
     rect0 = rect1;
@@ -63,21 +63,15 @@ define(PlanMap, Object, '', {
     }
   },
 
-  addAction: function (queue, start, p, context, type, cost, next) {
-    context = (context !== undefined)? context : null;
-    type = (type !== undefined)? type : A.NONE;
-    cost = (cost !== undefined)? cost : 0;
-    next = (next !== undefined)? next : null;
-    var a1 = new PlanAction(p, context, type, cost, next);
-    var a0 = this._map[a1.key];
-    if (a0 === undefined || a1.cost < a0.cost) {
-      this._map[a1.key] = a1;
+  addAction: function (queue, start, action) {
+    var prev = this._map[action.key];
+    if (prev === undefined || action.cost < prev.cost) {
+      this._map[action.key] = action;
       var dist = ((start === null)? 0 :
-		  (Math.abs(start.x-a1.p.x)+
-		   Math.abs(start.y-a1.p.y)));
-      queue.push({ action:a1, prio:dist });
+		  (Math.abs(start.x-action.p.x)+
+		   Math.abs(start.y-action.p.y)));
+      queue.push({ action:action, prio:dist });
     }
-    return a1;
   },
 
   resetPlan: function () {
@@ -104,7 +98,7 @@ define(PlanMap, Object, '', {
 		      start.x+cbx1, start.y+cby1+1) === 0) return false;
 
     var queue = [];
-    this.addAction(queue, start, this.goal);
+    this.addAction(queue, start, new PlanAction(this.goal));
     while (0 < queue.length) {
       var a0 = queue.pop().action;
       var p = a0.p;
@@ -127,8 +121,8 @@ define(PlanMap, Object, '', {
 	  grabbable.get(p.x+cbx0, p.y+cby1,
 			p.x+cbx1, p.y+cby1+1) !== 0) {
 	cost += 1;
-	this.addAction(queue, start,
-		       new Vec2(p.x, p.y-1), null, A.CLIMB, cost, a0);
+	this.addAction(queue, start, 
+		       new PlanAction(new Vec2(p.x, p.y-1), null, A.CLIMB, cost, a0));
       }
       // try climbing up.
       if (context === null &&
@@ -137,7 +131,7 @@ define(PlanMap, Object, '', {
 			p.x+cbx1, p.y+cby1+1) !== 0) {
 	cost += 1;
 	this.addAction(queue, start, 
-		       new Vec2(p.x, p.y+1), null, A.CLIMB, cost, a0);
+		       new PlanAction(new Vec2(p.x, p.y+1), null, A.CLIMB, cost, a0));
       }
 
       // for left and right.
@@ -157,7 +151,7 @@ define(PlanMap, Object, '', {
 			   wx+cbx1, p.y+cby1+1) !== 0)) {
 	  cost += 1;
 	  this.addAction(queue, start, 
-			 new Vec2(wx, p.y), null, A.WALK, cost, a0);
+			 new PlanAction(new Vec2(wx, p.y), null, A.WALK, cost, a0));
 	}
 
 	// try falling.
@@ -192,14 +186,14 @@ define(PlanMap, Object, '', {
 				 fx+cbx1, fy+cby1+1) !== 0)) {
 		// normal fall.
 		this.addAction(queue, start, 
-			       new Vec2(fx, fy), null, A.FALL, cost, a0);
+			       new PlanAction(new Vec2(fx, fy), null, A.FALL, cost, a0));
 	      }
 	      if (fdy === 0 ||
 		  stoppable.get(fx+bx0, fy+cby1, 
 				p.x+bx1, p.y+cby1) === 0) {
 		// fall after jump.
 		this.addAction(queue, start, 
-			       new Vec2(fx, fy), A.FALL, A.FALL, cost, a0);
+			       new PlanAction(new Vec2(fx, fy), A.FALL, A.FALL, cost, a0));
 	      }
 	    }
 	  }
@@ -243,7 +237,7 @@ define(PlanMap, Object, '', {
 		  !T.isObstacle(tilemap.get(p.x+bx1-vx, p.y+cby0-1))) continue;
 	      cost += Math.abs(jdx)+Math.abs(jdy)+1;
 	      this.addAction(queue, start, 
-			     new Vec2(jx, jy), null, A.JUMP, cost, a0);
+			     new PlanAction(new Vec2(jx, jy), null, A.JUMP, cost, a0));
 	    }
 	  }
 	}
