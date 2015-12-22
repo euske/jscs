@@ -86,8 +86,6 @@ define(PlanMap, Object, '', {
     var obstacle = tilemap.getRangeMap(T.isObstacle);
     var stoppable = tilemap.getRangeMap(T.isStoppable);
     var grabbable = tilemap.getRangeMap(T.isGrabbable);
-    var cbx0 = this.tilebounds.x, cbx1 = this.tilebounds.right();
-    var cby0 = this.tilebounds.y, cby1 = this.tilebounds.bottom();
     var cb = this.tilebounds;
     var cb1 = this.tilebounds.move(0, 1);
     var pb = new Rect(this.tilebounds.x, this.tilebounds.bottom(),
@@ -133,8 +131,9 @@ define(PlanMap, Object, '', {
 
       // for left and right.
       for (var vx = -1; vx <= +1; vx += 2) {
-	var bx0 = (0 < vx)? cbx0 : cbx1;
-	var bx1 = (0 < vx)? cbx1 : cbx0;
+	var bx0 = (0 < vx)? this.tilebounds.x : this.tilebounds.right();
+	var bx1 = (0 < vx)? this.tilebounds.right() : this.tilebounds.x;
+	var by0 = this.tilebounds.y, by1 = this.tilebounds.bottom();
 
 	// try walking.
 	var wp = new Vec2(p.x-vx, p.y);
@@ -172,8 +171,8 @@ define(PlanMap, Object, '', {
 	      if (obstacle.exists(cb.movev(fp))) continue;
 	      cost += Math.abs(fdx)+Math.abs(fdy)+1;
 	      if (0 < fdx &&
-		  stoppable.get(fx+bx0+vx, fy+cby0, 
-				p.x+bx1, p.y+cby1) === 0 &&
+		  stoppable.get(fx+bx0+vx, fy+by0, 
+				p.x+bx1, p.y+by1) === 0 &&
 		  (grabbable.exists(cb.movev(fp)) ||
 		   stoppable.exists(pb.movev(fp)))) {
 		// normal fall.
@@ -181,8 +180,8 @@ define(PlanMap, Object, '', {
 			       new PlanAction(new Vec2(fx, fy), null, A.FALL, cost, a0));
 	      }
 	      if (fdy === 0 ||
-		  stoppable.get(fx+bx0, fy+cby1, 
-				p.x+bx1, p.y+cby1) === 0) {
+		  stoppable.get(fx+bx0, fy+by1, 
+				p.x+bx1, p.y+by1) === 0) {
 		// fall after jump.
 		this.addAction(queue, start, 
 			       new PlanAction(new Vec2(fx, fy), A.FALL, A.FALL, cost, a0));
@@ -213,8 +212,8 @@ define(PlanMap, Object, '', {
 	      //  |  |...
 	      //  +-X+... (jx,jy) original position.
 	      // ######
-	      if (stoppable.get(jx+bx0, jy+cby1, 
-				p.x+bx1-vx, p.y+cby0) !== 0) break;
+	      if (stoppable.get(jx+bx0, jy+by1, 
+				p.x+bx1-vx, p.y+by0) !== 0) break;
 	      if (!grabbable.exists(cb.movev(jp)) &&
 		  !stoppable.exists(pb.movev(jp))) continue;
 	      // extra care is needed not to allow the following case:
@@ -223,9 +222,9 @@ define(PlanMap, Object, '', {
 	      //    |  |  (this is impossible!)
 	      //    +-X+
 	      //       #
-	      if (T.isObstacle(tilemap.get(p.x+bx1, p.y+cby0-1)) &&
-		  T.isObstacle(tilemap.get(p.x+bx1, p.y+cby1+1)) &&
-		  !T.isObstacle(tilemap.get(p.x+bx1-vx, p.y+cby0-1))) continue;
+	      if (T.isObstacle(tilemap.get(p.x+bx1, p.y+by0-1)) &&
+		  T.isObstacle(tilemap.get(p.x+bx1, p.y+by1+1)) &&
+		  !T.isObstacle(tilemap.get(p.x+bx1-vx, p.y+by0-1))) continue;
 	      cost += Math.abs(jdx)+Math.abs(jdy)+1;
 	      this.addAction(queue, start, 
 			     new PlanAction(new Vec2(jx, jy), null, A.JUMP, cost, a0));
@@ -270,8 +269,8 @@ define(PlanMap, Object, '', {
       if (a.next !== null) {
 	var p1 = a.next.p;
 	ctx.beginPath();
-	ctx.moveTo(bx+tilesize*(p0.x+.5), by+tilesize*(p0.y+.5));
-	ctx.lineTo(bx+tilesize*(p1.x+.5), by+tilesize*(p1.y+.5));
+	ctx.moveTo(bx+tilesize*p0.x+rs+.5, by+tilesize*p0.y+rs+.5);
+	ctx.lineTo(bx+tilesize*p1.x+rs+.5, by+tilesize*p1.y+rs+.5);
 	ctx.stroke();
       }
     }
