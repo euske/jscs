@@ -135,5 +135,13 @@ define(Actor, Sprite, 'Sprite', {
       this.hitbox = this.hitbox.move(dx, dy);
     }
   },
+
+  movev: function (v) {
+    // [OVERRIDE]
+    this.bounds = this.bounds.movev(v);
+    if (this.hitbox !== null) {
+      this.hitbox = this.hitbox.movev(v);
+    }
+  },
   
 });

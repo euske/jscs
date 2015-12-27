@@ -35,55 +35,38 @@ function Actor2(bounds, tileno)
   this._Actor(bounds, hitbox, tileno);
   this.tilebounds = new Rectangle(0, 0, 1, 1);
   this.speed = 8;
-  this.fallfunc = (function (t) { return clamp(-16, t*2, +16); });
-  this.jumpfunc = (function (t) { return clamp(-16, (t < 8)? -10 : -8+2*(t-8), 16); });
+  this.jumpfunc = (function (t) { return (t < 8)? -8 : 0; });
+  this.fallfunc = (function (vy) { return clamp(-16, vy+2, +16); });
   this.velocity = new Vec2(0, 0);
   this.landed = false;
   this._jumpt = -1;
-  this._fallt = -1;
 }
 
 define(Actor2, Actor, 'Actor', {
   update: function () {
+    var v = this.velocity.copy();
     if (0 <= this._jumpt) {
-      this.velocity.y = this.jumpfunc(this._jumpt);
+      v.y += this.jumpfunc(this._jumpt);
       this._jumpt++;
-    } else if (0 <= this._fallt) {
-      this.velocity.y = this.fallfunc(this._fallt);
-      this._fallt++;
     }
-    var v = this.getMove(this.velocity);
-    this.landed = (0 < this.velocity.y && v.y === 0);
-    if (this.landed) {
-      this._fallt = -1; 
-    } else if (this._fallt < 0) {
-      this._fallt = 0;
-    }
-    this.velocity = v;
-    this.move(this.velocity.x, this.velocity.y);
+    v.y = this.fallfunc(v.y);
+    this.velocity = this.getMove(v);
+    this.landed = (0 < v.y && this.velocity.y < v.y);
+    this.movev(this.velocity);
   },
 
   getMove: function (v) {
-    var rect = this.hitbox;
+    var hitbox = this.hitbox;
     var tilemap = this.scene.tilemap;
-    var d0 = tilemap.contactTile(rect, T.isObstacle, v);
-    rect = rect.move(d0.x, d0.y);
+    var d0 = tilemap.contactTile(hitbox, T.isObstacle, v);
+    hitbox = hitbox.move(d0.x, d0.y);
     v = v.sub(d0);
-    var d1 = tilemap.contactTile(rect, T.isObstacle, new Vec2(v.x, 0));
-    rect = rect.move(d1.x, d1.y);
+    var d1 = tilemap.contactTile(hitbox, T.isObstacle, new Vec2(v.x, 0));
+    hitbox = hitbox.move(d1.x, d1.y);
     v = v.sub(d1);
-    var d2 = tilemap.contactTile(rect, T.isObstacle, new Vec2(0, v.y));
+    var d2 = tilemap.contactTile(hitbox, T.isObstacle, new Vec2(0, v.y));
     return new Vec2(d0.x+d1.x+d2.x,
 		    d0.y+d1.y+d2.y);
-  },
-
-  getPos: function () {
-    return this.hitbox.center();
-  },
-
-  getTilePos: function () {
-    var r = this.scene.tilemap.coord2map(this.hitbox.center());
-    return new Vec2(r.x, r.y);
   },
 
   isMovable: function (v0) {
@@ -99,6 +82,15 @@ define(Actor2, Actor, 'Actor', {
     var tilemap = this.scene.tilemap;
     var f = (function (x,y,c) { return T.isGrabbable(c); });
     return (tilemap.apply(f, tilemap.coord2map(this.hitbox)) !== null);
+  },
+
+  getPos: function () {
+    return this.hitbox.center();
+  },
+
+  getTilePos: function () {
+    var r = this.scene.tilemap.coord2map(this.hitbox.center());
+    return new Vec2(r.x, r.y);
   },
 
   setJumping: function (jumping) {

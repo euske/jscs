@@ -5,43 +5,67 @@ function Player(bounds)
 {
   this._Actor(bounds, bounds, 0);
   this.speed = 4;
-  this.gravity = 1;
-  this.maxspeed = 4;
-  this.jumpacc = -4;
-  this.maxacctime = 4;
+  this.jumpfunc = (function (t) { return (t < 4)? -5 : 0; });
+  this.fallfunc = (function (vy) { return clamp(-8, vy+1, +8); });
   this.velocity = new Vec2(0, 0);
-  this._landed = false;
+  this.landed = false;
   this._jumpt = -1;
 }
 
 define(Player, Actor, 'Actor', {
-  jump: function (jumping) {
-    if (jumping) {
-      if (this._landed) {
-	this._jumpt = 0;
-	this.velocity.y = this.jumpacc;
-      }
+  update: function () {
+    var v = this.velocity.copy();
+    if (0 <= this._jumpt) {
+      v.y += this.jumpfunc(this._jumpt);
+      this._jumpt++;
+    }
+    v.y = this.fallfunc(v.y);
+    this.velocity = this.getMove(v);
+    this.landed = (0 < v.y && this.velocity.y < v.y);
+    this.movev(this.velocity);
+  },
+
+  getMoveFor: function (v, rect) {
+    var hitbox = this.hitbox;
+    var d0 = hitbox.contact(v, rect);
+    hitbox = hitbox.move(d0.x, d0.y);
+    v = v.sub(d0);
+    var d1 = hitbox.contact(new Vec2(v.x, 0), rect);
+    hitbox = hitbox.move(d1.x, d1.y);
+    v = v.sub(d1);
+    var d2 = hitbox.contact(new Vec2(0, v.y), rect);
+    return new Vec2(d0.x+d1.x+d2.x,
+		    d0.y+d1.y+d2.y);
+  },
+
+  getMove: function (v) {
+    return this.getMoveFor(v, this.scene.ground);
+  },
+
+  isLanded: function () {
+    return this.landed;
+  },
+
+  setJumping: function (jumping) {
+    if (jumping && this.landed) {
+      this._jumpt = 0;
     } else {
       this._jumpt = -1;
     }
   },
 
-  usermove: function (v) {
-    this.velocity.x = v.x*this.speed;
+  jump: function (jumping) {
+    if (jumping) {
+      if (this.isLanded()) {
+	this.setJumping(true);
+      }
+    } else {
+      this.setJumping(false);
+    }
   },
 
-  update: function () {
-    this._Actor_update();
-    if (0 <= this._jumpt && this._jumpt < this.maxacctime) {
-      this._jumpt++;
-      this.velocity.y -= this.gravity;
-    }
-    this.velocity.y += this.gravity;
-    this.velocity.y = clamp(-this.maxspeed, this.velocity.y, this.maxspeed);
-    var v = this.hitbox.contact(this.velocity, this.scene.ground);
-    this._landed = (0 < this.velocity.y && v.y === 0);
-    this.velocity = v;
-    this.move(this.velocity.x, this.velocity.y);
+  usermove: function (v) {
+    this.velocity.x = v.x*this.speed;
   },
 });
 
@@ -90,10 +114,8 @@ define(Game, GameScene, 'GameScene', {
   },
 
   render: function (ctx, bx, by) {
-    // Fill with the background color.
     ctx.fillStyle = 'rgb(0,0,0)';
     ctx.fillRect(bx, by, this.app.screen.width, this.app.screen.height);
-    
     this._GameScene_render(ctx, bx, by);
   },
 
