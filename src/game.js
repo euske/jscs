@@ -1,10 +1,9 @@
 // game.js
 
-// Player
-function Player(bounds)
+// MovingActor
+function MovingActor(bounds, hitbox, tileno)
 {
-  this._Actor(bounds, bounds, 0);
-  this.speed = 4;
+  this._Actor(bounds, hitbox, tileno)
   this.jumpfunc = (function (t) { return (t < 4)? -5 : 0; });
   this.fallfunc = (function (vy) { return clamp(-8, vy+1, +8); });
   this.velocity = new Vec2(0, 0);
@@ -12,7 +11,7 @@ function Player(bounds)
   this._jumpt = -1;
 }
 
-define(Player, Actor, 'Actor', {
+define(MovingActor, Actor, 'Actor', {
   update: function () {
     var v = this.velocity.copy();
     if (0 <= this._jumpt) {
@@ -39,9 +38,9 @@ define(Player, Actor, 'Actor', {
   },
 
   getMove: function (v) {
-    return this.getMoveFor(v, this.scene.ground);
+    return v;
   },
-
+  
   isLanded: function () {
     return this.landed;
   },
@@ -52,6 +51,20 @@ define(Player, Actor, 'Actor', {
     } else {
       this._jumpt = -1;
     }
+  },
+});
+
+
+// Player
+function Player(bounds)
+{
+  this._MovingActor(bounds, bounds, 0);
+  this.speed = 4;
+}
+
+define(Player, MovingActor, 'MovingActor', {
+  getMove: function (v) {
+    return this.getMoveFor(v, this.scene.ground);
   },
 
   jump: function (jumping) {
@@ -64,11 +77,10 @@ define(Player, Actor, 'Actor', {
     }
   },
 
-  usermove: function (v) {
-    this.velocity.x = v.x*this.speed;
+  usermove: function (vx, vy) {
+    this.velocity.x = vx*this.speed;
   },
 });
-
 
 
 //  Game
@@ -83,7 +95,7 @@ define(Game, GameScene, 'GameScene', {
     this._GameScene_init();
 
     var app = this.app;
-    this.ground = new Rectangle(0, 200, app.screen.width, 32);
+    this.ground = new Rectangle(0, this.frame.height-32, this.frame.width, 32);
     this.player = new Player(new Rectangle(0,0,32,32));
     this.addObject(this.player);
     
@@ -103,9 +115,9 @@ define(Game, GameScene, 'GameScene', {
     this.textbox.blinking = 10;
     var menu = this.textbox.addMenu();
     menu.sound = app.audios.beep;
-    menu.addItem(new Vec2(10,50), 'AAA');
-    menu.addItem(new Vec2(20,60), 'BB');
-    menu.addItem(new Vec2(30,70), 'CCCC');
+    menu.addItem(new Vec2(110,50), 'AAA');
+    menu.addItem(new Vec2(120,60), 'BB');
+    menu.addItem(new Vec2(130,70), 'CCCC');
     menu.selected.subscribe(function (obj, value) {
       console.log("selected:"+value);
       scene.textbox.visible = false;
@@ -115,7 +127,10 @@ define(Game, GameScene, 'GameScene', {
 
   render: function (ctx, bx, by) {
     ctx.fillStyle = 'rgb(0,0,0)';
-    ctx.fillRect(bx, by, this.app.screen.width, this.app.screen.height);
+    ctx.fillRect(bx, by, this.frame.width, this.frame.height);
+    ctx.fillStyle = 'rgb(128,128,128)';
+    ctx.fillRect(bx+this.ground.x, by+this.ground.y,
+		 this.ground.width, this.ground.height);
     this._GameScene_render(ctx, bx, by);
   },
 
@@ -126,10 +141,10 @@ define(Game, GameScene, 'GameScene', {
     }
   },
 
-  update: function () {
-    this._GameScene_update(this);
+  set_dir: function (vx, vy) {
+    this._GameScene_set_dir(vx, vy);
     if (!this.textbox.visible) {
-      this.player.usermove(this.app.key_dir);
+      this.player.usermove(vx, vy);
     }
   },
 
