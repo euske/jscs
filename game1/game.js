@@ -51,46 +51,15 @@ function Level1(app)
   this._GameScene(app);
   
   this.tilesize = 32;
-  this.window = this.frame.copy();
   this.world = this.frame.copy();
 }
 
 define(Level1, GameScene, 'GameScene', {
-  setCenter: function (rect) {
-    if (this.window.width < rect.width) {
-      this.window.x = (rect.width-this.window.width)/2;
-    } else if (rect.x < this.window.x) {
-      this.window.x = rect.x;
-    } else if (this.window.x+this.window.width < rect.x+rect.width) {
-      this.window.x = rect.x+rect.width - this.window.width;
-    }
-    if (this.window.height < rect.height) {
-      this.window.y = (rect.height-this.window.height)/2;
-    } else if (rect.y < this.window.y) {
-      this.window.y = rect.y;
-    } else if (this.window.y+this.window.height < rect.y+rect.height) {
-      this.window.y = rect.y+rect.height - this.window.height;
-    }
-    this.window.x = clamp(0, this.window.x, this.world.width-this.window.width);
-    this.window.y = clamp(0, this.window.y, this.world.height-this.window.height);
-  },
-
   render: function (ctx, bx, by) {
     // [OVERRIDE]
 
-    // Fill with the background color.
-    ctx.fillStyle = 'rgb(0,0,128)';
-    ctx.fillRect(bx, by, this.window.width, this.window.height);
-
-    var tilesize = this.tilesize;
-    var window = this.window;
-    var tilemap = this.tilemap;
-    var x0 = Math.floor(window.x/tilesize);
-    var y0 = Math.floor(window.y/tilesize);
-    var x1 = Math.ceil((window.x+window.width)/tilesize);
-    var y1 = Math.ceil((window.y+window.height)/tilesize);
-    var fx = x0*tilesize-window.x;
-    var fy = y0*tilesize-window.y;
+    var ts = this.tilesize;
+    var window = this.camera.window;
 
     // Set the drawing order.
     var objs = [];
@@ -101,8 +70,8 @@ define(Level1, GameScene, 'GameScene', {
       if (obj.bounds === null) continue;
       var bounds = obj.bounds;
       if (bounds.overlap(window)) {
-	var x = int((bounds.x+bounds.width/2)/tilesize);
-	var y = int((bounds.y+bounds.height/2)/tilesize);
+	var x = int((bounds.x+bounds.width/2)/ts);
+	var y = int((bounds.y+bounds.height/2)/ts);
 	var k = x+','+y;
 	if (!objs.hasOwnProperty(k)) {
 	  objs[k] = [];
@@ -123,9 +92,10 @@ define(Level1, GameScene, 'GameScene', {
       }
       return (c == T.NONE? -1 : c);
     };
-    tilemap.renderFromBottomLeft(
-      ctx, this.app.tiles, ft, 
-      bx+fx, by+fy, x0, y0, x1-x0+1, y1-y0+1);
+    ctx.fillStyle = 'rgb(0,0,128)';
+    ctx.fillRect(bx, by, window.width, window.height);
+    this.camera.renderTilesFromBottomLeft(
+      ctx, bx, by, this.tilemap, this.app.tiles, ft);
 
     // Draw floating objects.
     for (var i = 0; i < this.sprites.length; i++) {
@@ -169,8 +139,11 @@ define(Level1, GameScene, 'GameScene', {
     this.tilemap = new TileMap(this.tilesize, map);
     this.world.width = this.tilemap.width * this.tilesize;
     this.world.height = this.tilemap.height * this.tilesize;
-    this.window.width = Math.min(this.world.width, this.window.width);
-    this.window.height = Math.min(this.world.height, this.window.height);
+    this.camera = new Camera(
+      new Rect(0, 0, 
+	       Math.min(this.world.width, this.frame.width),
+	       Math.min(this.world.height, this.frame.height)));
+    this.addObject(this.camera);
 
     this.collectibles = 0;
     var app = this.app;
@@ -250,8 +223,9 @@ define(Level1, GameScene, 'GameScene', {
     // [GAME SPECIFIC CODE]
     this.player.usermove(this.app.key_dir.x, this.app.key_dir.y);
     this.player.jump(this.app.key_action);
-    var rect = this.player.bounds.inflate(this.window.width/4, this.window.height/4);
-    this.setCenter(rect);
+    var rect = this.player.bounds.inflate(this.camera.window.width/4,
+					  this.camera.window.height/4);
+    this.camera.setCenter(this.world, rect);
   },
 
   updateScore: function () {

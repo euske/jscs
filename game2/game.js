@@ -63,24 +63,12 @@ function Level1(app)
 define(Level1, GameScene, 'GameScene', {
   render: function (ctx, bx, by) {
     // [OVERRIDE]
-    var tilesize = this.tilesize;
-    var window = this.window;
-    var tilemap = this.tilemap;
-    var dx = -tilesize;
-    var dy = (this.app.screen.height-this.window.height)/2;
+    var ts = this.tilesize;
+    var window = this.camera.window;
+    var dx = -ts;
+    var dy = (this.frame.height-window.height)/2;
     var tx = bx+dx-window.x;
     var ty = by+dy-window.y;
-
-    // Fill with the background color.
-    ctx.fillStyle = 'rgb(0,128,224)';
-    ctx.fillRect(bx+dx, bx+dy, this.window.width, this.window.height);
-
-    var x0 = Math.floor(window.x/tilesize);
-    var y0 = Math.floor(window.y/tilesize);
-    var x1 = Math.ceil((window.x+window.width)/tilesize);
-    var y1 = Math.ceil((window.y+window.height)/tilesize);
-    var fx = dx+x0*tilesize-window.x;
-    var fy = dy+y0*tilesize-window.y;
 
     // Set the drawing order.
     var objs = [];
@@ -91,8 +79,8 @@ define(Level1, GameScene, 'GameScene', {
       if (obj.bounds === null) continue;
       var bounds = obj.bounds;
       if (bounds.overlap(window)) {
-	var x = int((bounds.x+bounds.width/2)/tilesize);
-	var y = int((bounds.y+bounds.height/2)/tilesize);
+	var x = int((bounds.x+bounds.width/2)/ts);
+	var y = int((bounds.y+bounds.height/2)/ts);
 	var k = x+','+y;
 	if (!objs.hasOwnProperty(k)) {
 	  objs[k] = [];
@@ -120,9 +108,11 @@ define(Level1, GameScene, 'GameScene', {
       }
       return (c == T.NONE? -1 : c);
     };
-    tilemap.renderFromTopRight(
-      ctx, this.app.tiles, ft, 
-      bx+fx, by+fy, x0, y0, x1-x0+1, y1-y0+1);
+    // Fill with the background color.
+    ctx.fillStyle = 'rgb(0,128,224)';
+    ctx.fillRect(bx+dx, bx+dy, window.width, window.height);
+    this.camera.renderTilesFromTopRight(
+      ctx, bx+dx, by+dy, this.tilemap, this.app.tiles, ft);
 
     // Draw floating objects.
     for (var i = 0; i < this.sprites.length; i++) {
@@ -171,19 +161,19 @@ define(Level1, GameScene, 'GameScene', {
   },
 
   moveAll: function (vx, vy) {
-    var tilesize = this.tilesize;
-    var window = this.window;
+    var ts = this.tilesize;
+    var window = this.camera.window;
     window.x += vx;
     window.y += vy;
     this.player.move(vx, vy);
     
-    var x0 = int(window.x/tilesize);
-    var y0 = int(window.y/tilesize);
+    var x0 = int(window.x/ts);
+    var y0 = int(window.y/ts);
     if (x0 !== 0 || y0 !== 0) {
       // warp all the tiles and characters.
       this.scrollTile(x0, y0);
-      var wx = -x0*tilesize;
-      var wy = -y0*tilesize;
+      var wx = -x0*ts;
+      var wy = -y0*ts;
       window.x += wx;
       window.y += wy;
       for (var i = 0; i < this.sprites.length; i++) {
@@ -228,8 +218,10 @@ define(Level1, GameScene, 'GameScene', {
     }
     this.tilemap = new TileMap(this.tilesize, map);
 
+    var ts = this.tilesize;
     this.speed = new Vec2(2, 0);
-    this.window = new Rectangle(0, 0, this.tilemap.width*this.tilesize, this.tilemap.height*this.tilesize);
+    this.camera = new Camera(new Rectangle(0, 0, this.tilemap.width*ts, this.tilemap.height*ts));
+    this.addObject(this.camera);
     
     var app = this.app;
     var scene = this;

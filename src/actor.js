@@ -110,6 +110,10 @@ function Actor(bounds, hitbox, tileno)
 }
 
 define(Actor, Sprite, 'Sprite', {
+  toString: function () {
+    return '<Actor: '+this.hitbox+'>';
+  },
+
   collide: function (actor) {
     // [OVERRIDE]
   },
@@ -147,4 +151,74 @@ define(Actor, Sprite, 'Sprite', {
     }
   },
   
+});
+
+
+// Camera: a camera object.
+function Camera(window)
+{
+  this._Task();
+  this.window = window;
+}
+
+define(Camera, Task, 'Task', {
+  toString: function () {
+    return '<Camera: '+this.window+'>';
+  },
+  
+  move: function (dx, dy) {
+    this.window = this.window.move(dx, dy);
+  },
+
+  movev: function (v) {
+    this.window = this.window.movev(v);
+  },
+  
+  renderTilesFromBottomLeft: function (ctx, bx, by, tilemap, tiles, ft) {
+    var window = this.window;
+    var ts = tilemap.tilesize;
+    var x0 = Math.floor(window.x/ts);
+    var y0 = Math.floor(window.y/ts);
+    var x1 = Math.ceil((window.x+window.width)/ts);
+    var y1 = Math.ceil((window.y+window.height)/ts);
+    var fx = x0*ts-window.x;
+    var fy = y0*ts-window.y;
+    tilemap.renderFromBottomLeft(
+      ctx, tiles, ft, 
+      bx+fx, by+fy, x0, y0, x1-x0+1, y1-y0+1);
+  },
+
+  renderTilesFromTopRight: function (ctx, bx, by, tilemap, tiles, ft) {
+    var window = this.window;
+    var ts = tilemap.tilesize;
+    var x0 = Math.floor(window.x/ts);
+    var y0 = Math.floor(window.y/ts);
+    var x1 = Math.ceil((window.x+window.width)/ts);
+    var y1 = Math.ceil((window.y+window.height)/ts);
+    var fx = x0*ts-window.x;
+    var fy = y0*ts-window.y;
+    tilemap.renderFromTopRight(
+      ctx, tiles, ft, 
+      bx+fx, by+fy, x0, y0, x1-x0+1, y1-y0+1);
+  },
+  
+  setCenter: function (world, rect) {
+    if (this.window.width < rect.width) {
+      this.window.x = (rect.width-this.window.width)/2;
+    } else if (rect.x < this.window.x) {
+      this.window.x = rect.x;
+    } else if (this.window.x+this.window.width < rect.x+rect.width) {
+      this.window.x = rect.x+rect.width - this.window.width;
+    }
+    if (this.window.height < rect.height) {
+      this.window.y = (rect.height-this.window.height)/2;
+    } else if (rect.y < this.window.y) {
+      this.window.y = rect.y;
+    } else if (this.window.y+this.window.height < rect.y+rect.height) {
+      this.window.y = rect.y+rect.height - this.window.height;
+    }
+    this.window.x = clamp(0, this.window.x, world.width-this.window.width);
+    this.window.y = clamp(0, this.window.y, world.height-this.window.height);
+  },
+
 });
