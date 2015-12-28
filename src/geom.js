@@ -100,7 +100,7 @@ function Rectangle(x, y, width, height)
   this.width = (width !== undefined)? width : 0;
   this.height = (height !== undefined)? height : 0;
 }
-Rect = Rectangle;
+var Rect = Rectangle;
 define(Rectangle, Object, '', {
   toString: function () {
     return '('+this.x+', '+this.y+', '+this.width+', '+this.height+')';
