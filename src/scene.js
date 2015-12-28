@@ -9,7 +9,7 @@ function Scene(app)
 {
   this.app = app;
   this.music = null;
-  this.frame = new Rectangle(0, 0, app.screen.width, app.screen.height);
+  this.screen = new Rectangle(0, 0, app.screen.width, app.screen.height);
 }
 
 define(Scene, Object, '', {
@@ -86,6 +86,11 @@ define(TextScene, Scene, 'Scene', {
     e.style.border = 'solid black 2px';
     e.innerHTML = this.text;
     e.onmousedown = (function (e) { scene.change(); });
+  },
+  
+  render: function (ctx, bx, by) {
+    ctx.fillStyle = 'rgb(0,0,0)';
+    ctx.fillRect(bx, by, this.screen.width, this.screen.height);
   },
 
   change: function () {

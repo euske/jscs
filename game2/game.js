@@ -13,12 +13,7 @@ function Title(app)
 
 define(Title, TextScene, 'TextScene', {
   change: function () {
-    this.changeScene(new Level1(this.app));
-  },
-
-  render: function (ctx, bx, by) {
-    ctx.fillStyle = 'rgb(0,0,0)';
-    ctx.fillRect(bx, by, this.app.screen.width, this.app.screen.height);
+    this.changeScene(new Game(this.app));
   },
 
 });
@@ -40,33 +35,28 @@ define(GameOver, TextScene, 'TextScene', {
   },
   
   change: function () {
-    this.changeScene(new Level1(this.app));
-  },
-
-  render: function (ctx, bx, by) {
-    ctx.fillStyle = 'rgb(0,0,0)';
-    ctx.fillRect(bx, by, this.app.screen.width, this.app.screen.height);
+    this.changeScene(new Game(this.app));
   },
 
 });
 
 
-//  Level1
+//  Game
 // 
-function Level1(app)
+function Game(app)
 {
   this._Scene(app);
   
   this.tilesize = 32;
 }
 
-define(Level1, GameScene, 'GameScene', {
+define(Game, GameScene, 'GameScene', {
   render: function (ctx, bx, by) {
     // [OVERRIDE]
     var ts = this.tilesize;
     var window = this.camera.window;
     var dx = -ts;
-    var dy = (this.frame.height-window.height)/2;
+    var dy = (this.screen.height-window.height)/2;
     var tx = bx+dx-window.x;
     var ty = by+dy-window.y;
 
@@ -250,7 +240,7 @@ define(Level1, GameScene, 'GameScene', {
     this.updateScore();
 
     // show a banner.
-    var textbox = new TextBox(this.frame, app.font);
+    var textbox = new TextBox(this.screen, app.font);
     textbox.putText(['GET ALL TEH DAMN THINGIES!'], 'center', 'center');
     textbox.bounds = null;
     textbox.duration = app.framerate*2;

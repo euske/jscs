@@ -103,13 +103,13 @@ define(Game, GameScene, 'GameScene', {
     this._GameScene_init();
 
     var app = this.app;
-    this.ground = new Rectangle(0, this.frame.height-32, this.frame.width, 32);
+    this.ground = new Rectangle(0, this.screen.height-32, this.screen.width, 32);
     this.player = new Player(new Rectangle(0,0,32,32));
     this.addObject(this.player);
     
     // show a banner.
     var scene = this;
-    var tb = new TextBox(this.frame, app.font);
+    var tb = new TextBox(this.screen, app.font);
     tb.putText(['GAME!!1'], 'center', 'center');
     tb.duration = app.framerate*2;
     tb.update = function () {
@@ -135,7 +135,7 @@ define(Game, GameScene, 'GameScene', {
 
   render: function (ctx, bx, by) {
     ctx.fillStyle = 'rgb(0,0,0)';
-    ctx.fillRect(bx, by, this.frame.width, this.frame.height);
+    ctx.fillRect(bx, by, this.screen.width, this.screen.height);
     ctx.fillStyle = 'rgb(128,128,128)';
     ctx.fillRect(bx+this.ground.x, by+this.ground.y,
 		 this.ground.width, this.ground.height);
