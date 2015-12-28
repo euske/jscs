@@ -1,4 +1,7 @@
 // actor.js
+//   requires: utils.js
+//   requires: geom.js
+'use strict';
 
 // Task: a single procedure that runs at each frame.
 function Task()

@@ -1,4 +1,8 @@
 // text.js
+//   requires: utils.js
+//   requires: geom.js
+//   requires: actor.js
+'use strict';
 
 //  Font
 //
@@ -51,7 +55,6 @@ function MakeSegment(pt, text, font)
 
 //  TextBox
 //
-WORD = /\w+\W*/;
 function TextBox(frame, font, header)
 {
   this._Sprite(null);
@@ -156,8 +159,9 @@ define(TextBox, Sprite, 'Sprite', {
     header = (header !== undefined)? header : this.header;
     var line = '';
     var a = [];
+    var word = /\w+\W*/;
     while (true) {
-      var m = WORD.exec(text);
+      var m = word.exec(text);
       if (m == null) {
 	a.push(line+text);
 	break;
@@ -292,7 +296,7 @@ define(DisplayTask, TextTask, 'TextTask', {
       var c = this.text.substr(this._index, 1);
       this.textbox.addText(c, this.font);
       this._index++;
-      if (WORD.test(c) && this.sound !== null) {
+      if (/\w/.test(c) && this.sound !== null) {
 	playSound(this.sound);
       }
     }

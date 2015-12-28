@@ -1,4 +1,5 @@
 // main.js
+'use strict';
 
 // Browser interaction.
 

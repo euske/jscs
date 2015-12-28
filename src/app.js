@@ -1,4 +1,9 @@
 // app.js
+//   requires: utils.js
+//   requires: geom.js
+//   requires: scene.js
+//   requires: text.js
+'use strict';
 
 // App class handles the event loop and global state management.
 // It also has shared resources (images, audios, etc.)

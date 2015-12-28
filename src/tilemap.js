@@ -2,6 +2,7 @@
 // TileMap is a generic class that handles a scrollable map.
 //   requires: utils.js
 //   requires: geom.js
+'use strict';
 
 function TileMap(tilesize, map)
 {

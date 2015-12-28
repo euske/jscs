@@ -1,10 +1,11 @@
 // utils.js
 // Misc. routines.
+'use strict';
 
 // aliases
-int = Math.floor;
-upperbound = Math.min;
-lowerbound = Math.max;
+var int = Math.floor;
+var upperbound = Math.min;
+var lowerbound = Math.max;
 
 // log(...): display a thing in the console (Firefox only, maybe)
 function log()
@@ -83,7 +84,7 @@ function format(v, n, c)
   var s = '';
   while (s.length < n) {
     s = (v % 10)+s;
-    v = Math.floor(v/10);
+    v = int(v/10);
     if (v <= 0) break;
   }
   while (s.length < n) {

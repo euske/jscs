@@ -1,6 +1,12 @@
 // planaction.js
+//   requires: utils.js
+//   requires: geom.js
+//   requires: tilemap.js
+//   requires: rangemap.js
+//   requires: planmap.js
+'use strict';
 
-A = {
+var A = {
   NONE: 'NONE',
   WALK: 'WALK',
   FALL: 'FALL',

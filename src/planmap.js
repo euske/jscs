@@ -3,6 +3,7 @@
 //   requires: geom.js
 //   requires: tilemap.js
 //   requires: rangemap.js
+'use strict';
 
 // predictLandingPoint: returns the estimated landing position.
 function predictLandingPoint(
@@ -43,7 +44,7 @@ function calcJumpRange(
     p.y += vy;      
   }
   var a = [];
-  for (k in pts) {
+  for (var k in pts) {
     a.push(pts[k]);
   }
   return a;
@@ -69,7 +70,7 @@ function calcFallRange(
     p.y += vy;      
   }
   var a = [];
-  for (k in pts) {
+  for (var k in pts) {
     a.push(pts[k]);
   }
   return a;

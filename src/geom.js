@@ -1,6 +1,7 @@
 // geom.js
 // Geometric functions.
 //   requires: utils.js
+'use strict';
 
 // Vec2
 function Vec2(x, y)
@@ -8,7 +9,7 @@ function Vec2(x, y)
   this.x = (x !== undefined)? x : 0;
   this.y = (y !== undefined)? y : 0;
 }
-Point = Vec2;
+var Point = Vec2;
 define(Vec2, Object, '', {
   toString: function () {
     return '('+this.x+', '+this.y+')';
@@ -245,7 +246,7 @@ define(Rectangle, Object, '', {
       return v;
     }
     dy = v.y*dx / v.x;
-    y = this.y+dy;
+    var y = this.y+dy;
     if (y+this.height < y0 || y1 < y ||
 	(y+this.height == y0 && v.y <= 0) ||
 	(y1 == y && 0 <= v.y)) {
@@ -265,7 +266,7 @@ define(Rectangle, Object, '', {
       return v;
     }
     dx = v.x*dy / v.y;
-    x = this.x+dx;
+    var x = this.x+dx;
     if (x+this.width < x0 || x1 < x ||
 	(x+this.width == x0 && v.x <= 0) ||
 	(x1 == x && 0 <= v.x)) {

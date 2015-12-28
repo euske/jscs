@@ -1,4 +1,12 @@
 // game.js
+//   requires: utils.js
+//   requires: geom.js
+//   requires: actor.js
+//   requires: scene.js
+//   requires: text.js
+//   requires: tilemap.js
+//   requires: app.js
+'use strict';
 
 // MovingActor
 function MovingActor(bounds, hitbox, tileno)

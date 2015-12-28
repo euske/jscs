@@ -1,4 +1,7 @@
 // rangemap.js
+//   requires: utils.js
+//   requires: geom.js
+'use strict';
 
 function RangeMap(tilemap, f)
 {

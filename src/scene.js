@@ -1,5 +1,9 @@
 // scene.js
 // Scene object takes care of every in-game object and the scrollable map.
+//   requires: utils.js
+//   requires: geom.js
+//   requires: actor.js
+'use strict';
 
 function Scene(app)
 {
