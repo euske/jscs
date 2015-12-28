@@ -157,7 +157,6 @@ function Enemy(bounds)
   this._jumptime = 0;
 }
 
-RANGE = 10;
 define(Enemy, Actor2, 'Actor2', {
   toString: function () {
     return '<Enemy: '+this.bounds+'>';
@@ -184,13 +183,15 @@ define(Enemy, Actor2, 'Actor2', {
 
     if (this.target === null) return;
 
+    const DT = 10;
+    const R = 10;
     var target = this.target;
     var scene = this.scene;
     var tilemap = scene.tilemap;
     var hitbox = ((target.isLanded())? 
 		  target.hitbox :
 		  predictLandingPoint(tilemap, target.hitbox, 
-				      target.velocity, target.fallfunc));
+				      target.velocity, target.fallfunc, DT));
     if (hitbox === null) return;
     var goal = target.getTilePos();
     
@@ -207,15 +208,12 @@ define(Enemy, Actor2, 'Actor2', {
     
     // make a plan.
     if (this.runner === null) {
-      var range = new Rectangle(goal.x-RANGE, goal.y-RANGE, RANGE*2+1, RANGE*2+1);
-      var plan = new PlanMap(tilemap, range);
-      plan.init(goal);
+      var range = new Rectangle(goal.x-R, goal.y-R, R*2+1, R*2+1);
+      var plan = new PlanMap(tilemap);
       plan.tilebounds = tilebounds;
-      plan.speed = this.speed;
-      plan.fallfunc = this.fallfunc;
-      plan.jumpfunc = this.jumpfunc;
-      plan.jumprange = new Vec2(2, 3);
-      if (plan.fillPlan(this.getTilePos())) {
+      plan.setJumpRange(this.speed, this.jumpfunc, this.fallfunc, DT);
+      plan.initPlan(goal);
+      if (plan.fillPlan(range, this.getTilePos())) {
 	// start following a plan.
 	var actor = this;
 	this.runner = new PlanActionRunner(plan, this);

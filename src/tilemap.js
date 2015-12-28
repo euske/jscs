@@ -1,5 +1,7 @@
 // tilemap.js
 // TileMap is a generic class that handles a scrollable map.
+//   requires: utils.js
+//   requires: geom.js
 
 function TileMap(tilesize, map)
 {
@@ -32,17 +34,17 @@ define(TileMap, Object, '', {
 
   coord2map: function (rect) {
     var ts = this.tilesize;
-    var x0 = Math.floor(rect.x/ts);
-    var y0 = Math.floor(rect.y/ts);
-    var x1, y1;
     if (rect instanceof Rectangle) {
-      x1 = Math.ceil((rect.x+rect.width)/ts);
-      y1 = Math.ceil((rect.y+rect.height)/ts);
+      var x0 = Math.floor(rect.x/ts);
+      var y0 = Math.floor(rect.y/ts);
+      var x1 = Math.ceil((rect.x+rect.width)/ts);
+      var y1 = Math.ceil((rect.y+rect.height)/ts);
+      return new Rectangle(x0, y0, x1-x0, y1-y0);
     } else {
-      x1 = x0+1;
-      y1 = y0+1;
+      var x = Math.floor(rect.x/ts);
+      var y = Math.floor(rect.y/ts);
+      return new Rectangle(x, y, 1, 1);
     }
-    return new Rectangle(x0, y0, x1-x0, y1-y0);
   },
 
   map2coord: function (rect) {

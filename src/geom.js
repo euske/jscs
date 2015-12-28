@@ -1,5 +1,6 @@
 // geom.js
 // Geometric functions.
+//   requires: utils.js
 
 // Vec2
 function Vec2(x, y)

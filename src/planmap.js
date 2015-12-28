@@ -1,54 +1,102 @@
 // planmap.js
+//   requires: utils.js
+//   requires: geom.js
+//   requires: tilemap.js
+//   requires: rangemap.js
 
 // predictLandingPoint: returns the estimated landing position.
 function predictLandingPoint(
   tilemap, hitbox,
-  velocity, fallfunc, maxdt)
+  velocity, fallfunc, maxtime)
 {
-  maxdt = (maxdt !== undefined)? maxdt : 20;
   var stoppable = tilemap.getRangeMap(T.isStoppable);
-  var rect0 = hitbox;
   var dy = velocity.y;
-  for (var dt = 0; dt < maxdt; dt++) {
-    var rect1 = hitbox.move(velocity.x*dt, dy);
-    var b = tilemap.coord2map(rect1);
-    if (stoppable.exists(b)) {
-      return rect0;
-    }
-    rect0 = rect1;
-    dy += fallfunc(dt);
+  for (var t = 0; t < maxtime; t++) {
+    var rect = hitbox.move(velocity.x, dy);
+    dy = fallfunc(dy);
+    var b = tilemap.coord2map(rect);
+    if (stoppable.exists(b)) return hitbox;
+    hitbox = rect;
   }
   return null;
 }
 
-// PlanMap
-// public var tilemap:TileMap;
-// public var range:Rectangle; // search range
-// public var tilebounds:Rectangle;    // character offset and size
-// public var speed:int;       // moving speed while jumping
-// public var jumprange:Point;   // jump range
-// public var ascend:Function;   // ascend at t
-// public var descend:Function;   // descende at t
-function PlanMap(tilemap, range, tilebounds,
-		 speed, jumprange, ascend, descend)
+// calcJumpRange
+function calcJumpRange(
+  tilemap, speed, jumpfunc, fallfunc, maxtime)
 {
+  var ts = tilemap.tilesize;
+  var p = new Vec2(0, 0);
+  var vy = 0;
+  var pts = {};
+  for (var t = 0; t < maxtime; t++) {
+    var cy = Math.floor(p.y/ts+.5);
+    for (var x = 0; x <= +p.x; x++) {
+      var c = new Vec2(Math.floor(x/ts+.5), cy);
+      if (c.x == 0 && c.y == 0) continue;
+      pts[c.x+','+c.y] = c;
+    }
+    var dy = jumpfunc(t);
+    if (0 <= dy) break;
+    vy = fallfunc(vy+dy);
+    p.x += speed;
+    p.y += vy;      
+  }
+  var a = [];
+  for (k in pts) {
+    a.push(pts[k]);
+  }
+  return a;
+}
+
+// calcFallRange
+function calcFallRange(
+  tilemap, speed, fallfunc, maxtime)
+{
+  var ts = tilemap.tilesize;
+  var p = new Vec2(0, 0);
+  var vy = 0;
+  var pts = {};
+  for (var t = 0; t < maxtime; t++) {
+    var cy = Math.floor(p.y/ts+.5);
+    for (var x = -p.x; x <= +p.x; x++) {
+      var c = new Vec2(Math.floor(x/ts+.5), cy);
+      if (c.x == 0 && c.y == 0) continue;
+      pts[c.x+','+c.y] = c;
+    }
+    vy = fallfunc(vy);
+    p.x += speed;
+    p.y += vy;      
+  }
+  var a = [];
+  for (k in pts) {
+    a.push(pts[k]);
+  }
+  return a;
+}
+
+//  PlanMap
+//
+function PlanMap(tilemap, tilebounds)
+{
+  tilebounds = ((tilebounds !== undefined)?
+		tilebounds : new Rectangle(0, 0, 1, 1));
   this.tilemap = tilemap;
-  this.range = range;
-  this.tilebounds = new Rectangle(0, 0, 1, 1);
-  this.speed = 1;
-  this.jumprange = new Vec2(1, 1);
-  this.ascend = (function (t) { return t; });
-  this.descend = (function (t) { return t*t; });
-  this.init(null);
+  this.tilebounds = tilebounds;
 }
 
 define(PlanMap, Object, '', {
   toString: function () {
-    return ('<PlanMap '+this.range+'>');
+    return ('<PlanMap '+this._goal+'>');
   },
 
   isValid: function (p) {
     return (p !== null && this._goal.equals(p));
+  },
+
+  setJumpRange: function (speed, jumpfunc, fallfunc, maxtime) {
+    this.jumppt = calcJumpRange(this.tilemap, speed, jumpfunc, fallfunc, maxtime);
+    this.fallpt = calcFallRange(this.tilemap, speed, fallfunc, maxtime);
   },
 
   getAction: function (x, y, context) {
@@ -71,18 +119,16 @@ define(PlanMap, Object, '', {
     }
   },
 
-  init: function (goal) {
+  initPlan: function (goal) {
     this._goal = goal;
     this._map = {};
   },
   
-  fillPlan: function (start, maxcost, falldx, falldy) {
+  fillPlan: function (range, start, maxcost) {
+    start = (start !== undefined)? start : null;
     maxcost = (maxcost !== undefined)? maxcost : 100;
-    falldx = (falldx !== undefined)? falldx : 10;
-    falldy = (falldy !== undefined)? falldy : 20;
 
     var tilemap = this.tilemap;
-    var range = this.range;
     var obstacle = tilemap.getRangeMap(T.isObstacle);
     var stoppable = tilemap.getRangeMap(T.isStoppable);
     var grabbable = tilemap.getRangeMap(T.isGrabbable);
@@ -111,6 +157,7 @@ define(PlanMap, Object, '', {
       // assert(range.x <= p.x && p.x <= range.right());
       // assert(range.y <= p.y && p.y <= range.bottom());
       var cost = a0.cost;
+      if (maxcost < cost) continue;
 
       // try climbing down.
       if (context === null &&
@@ -149,89 +196,73 @@ define(PlanMap, Object, '', {
 
 	// try falling.
 	if (context === null) {
-	  for (var fdx = 0; fdx <= falldx; fdx++) {
-	    var fx = p.x-vx*fdx;
-	    if (fx < range.x || range.right() < fx) break;
-	    // fdt: time for falling.
-	    var fdt = Math.floor(tilemap.tilesize*fdx/this.speed);
-	    // fdy: amount of falling.
-	    var fdy = Math.ceil(this.descend(fdt) / tilemap.tilesize);
-	    for (; fdy <= falldy; fdy++) {
-	      var fy = p.y-fdy;
-	      if (fy < range.y || range.bottom() < fy) break;
-	      var fp = new Vec2(fx, fy);
-	      //  +--+....  [vx = +1]
-	      //  |  |....
-	      //  +-X+.... (fx,fy) original position.
-	      // ##.......
-	      //   ...+--+
-	      //   ...|  |
-	      //   ...+-X+ (p.x,p.y)
-	      //     ######
-	      if (obstacle.exists(cb.movev(fp))) continue;
-	      cost += Math.abs(fdx)+Math.abs(fdy)+1;
-	      if (0 < fdx &&
-		  stoppable.get(fx+bx0+vx, fy+by0, 
-				p.x+bx1, p.y+by1) === 0 &&
-		  (grabbable.exists(cb.movev(fp)) ||
-		   stoppable.exists(pb.movev(fp)))) {
-		// normal fall.
-		this.addAction(queue, start, 
-			       new PlanAction(new Vec2(fx, fy), null, A.FALL, cost, a0));
-	      }
-	      if (fdy === 0 ||
-		  stoppable.get(fx+bx0, fy+by1, 
-				p.x+bx1, p.y+by1) === 0) {
-		// fall after jump.
-		this.addAction(queue, start, 
-			       new PlanAction(new Vec2(fx, fy), A.FALL, A.FALL, cost, a0));
-	      }
+	  for (var i = 0; i < this.fallpt.length; i++) {
+	    var v = this.fallpt[i];
+	    var f = p.move(-v.x*vx, -v.y);
+	    if (!range.contains(f)) continue;
+	    //  +--+....  [vx = +1]
+	    //  |  |....
+	    //  +-X+.... (f.x,f.y) original position.
+	    // ##.......
+	    //   ...+--+
+	    //   ...|  |
+	    //   ...+-X+ (p.x,p.y)
+	    //     ######
+	    if (obstacle.exists(cb.movev(f))) continue;
+	    cost += (v.x+v.y+1);
+	    if (0 < v.x &&
+		stoppable.get(f.x+bx0+vx, f.y+by0, 
+			      p.x+bx1, p.y+by1) === 0 &&
+		(grabbable.exists(cb.movev(f)) ||
+		 stoppable.exists(pb.movev(f)))) {
+	      // normal fall.
+	      this.addAction(queue, start, 
+			     new PlanAction(f, null, A.FALL, cost, a0));
+	    }
+	    if (v.y === 0 ||
+		stoppable.get(f.x+bx0, f.y+by1, 
+			      p.x+bx1, p.y+by1) === 0) {
+	      // fall after jump.
+	      this.addAction(queue, start, 
+			     new PlanAction(f, A.FALL, A.FALL, cost, a0));
 	    }
 	  }
 	}
 
 	// try jumping.
 	if (context === A.FALL) {
-	  for (var jdx = 1; jdx <= this.jumprange.x; jdx++) {
-	    // adt: time for ascending.
-	    var adt = Math.floor(jdx*tilemap.tilesize/this.speed);
-	    // ady: minimal ascend.
-	    var ady = Math.floor(this.ascend(adt) / tilemap.tilesize);
-	    for (var jdy = ady; jdy <= this.jumprange.y; jdy++) {
-	      // (jx,jy): original position.
-	      var jx = p.x-vx*jdx;
-	      if (jx < range.x || range.right() < jx) break;
-	      var jy = p.y+jdy;
-	      if (jy < range.y || range.bottom() < jy) break;
-	      var jp = new Vec2(jx, jy);
-	      //  ....+--+  [vx = +1]
-	      //  ....|  |
-	      //  ....+-X+ (p.x,p.y) tip point
-	      //  .......
-	      //  +--+...
-	      //  |  |...
-	      //  +-X+... (jx,jy) original position.
-	      // ######
-	      if (stoppable.get(jx+bx0, jy+by1, 
-				p.x+bx1-vx, p.y+by0) !== 0) break;
-	      if (!grabbable.exists(cb.movev(jp)) &&
-		  !stoppable.exists(pb.movev(jp))) continue;
-	      // extra care is needed not to allow the following case:
-	      //      .#
-	      //    +--+
-	      //    |  |  (this is impossible!)
-	      //    +-X+
-	      //       #
-	      if (T.isObstacle(tilemap.get(p.x+bx1, p.y+by0-1)) &&
-		  T.isObstacle(tilemap.get(p.x+bx1, p.y+by1+1)) &&
-		  !T.isObstacle(tilemap.get(p.x+bx1-vx, p.y+by0-1))) continue;
-	      cost += Math.abs(jdx)+Math.abs(jdy)+1;
-	      this.addAction(queue, start, 
-			     new PlanAction(new Vec2(jx, jy), null, A.JUMP, cost, a0));
-	    }
+	  for (var i = 0; i < this.jumppt.length; i++) {
+	    var v = this.jumppt[i];
+	    var j = p.move(-v.x*vx, -v.y);
+	    if (!range.contains(j)) continue;
+	    //  ....+--+  [vx = +1]
+	    //  ....|  |
+	    //  ....+-X+ (p.x,p.y) tip point
+	    //  .......
+	    //  +--+...
+	    //  |  |...
+	    //  +-X+... (j.x,j.y) original position.
+	    // ######
+	    if (stoppable.get(j.x+bx0, j.y+by1, 
+			      p.x+bx1-vx, p.y+by0) !== 0) break;
+	    if (!grabbable.exists(cb.movev(j)) &&
+		!stoppable.exists(pb.movev(j))) continue;
+	    // extra care is needed not to allow the following case:
+	    //      .#
+	    //    +--+
+	    //    |  |  (this is impossible!)
+	    //    +-X+
+	    //       #
+	    if (T.isObstacle(tilemap.get(p.x+bx1, p.y+by0-1)) &&
+		T.isObstacle(tilemap.get(p.x+bx1, p.y+by1+1)) &&
+		!T.isObstacle(tilemap.get(p.x+bx1-vx, p.y+by0-1))) continue;
+	    cost += (v.x+v.y+1);
+	    this.addAction(queue, start, 
+			   new PlanAction(j, null, A.JUMP, cost, a0));
 	  }
 	}
       }
+      
       if (start !== null) {
 	// A* search.
 	queue.sort(function (a,b) { return b.prio-a.prio; });
