@@ -159,7 +159,7 @@ define(Game, GameScene, 'GameScene', {
     this.addObject(this.player);
 
     var rect = new Rectangle(10, 10, 1, 1);
-    var enemy = new Enemy(this.tilemap.map2coord(rect));
+    var enemy = new Enemy(this.tilemap, this.tilemap.map2coord(rect));
     enemy.target = this.player;
     this.addObject(enemy);
     

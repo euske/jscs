@@ -35,7 +35,7 @@ function Actor2(bounds, tileno)
   this._Actor(bounds, hitbox, tileno);
   this.tilebounds = new Rectangle(0, 0, 1, 1);
   this.speed = 8;
-  this.jumpfunc = (function (t) { return (t < 8)? -8 : 0; });
+  this.jumpfunc = (function (t) { return (t < 4)? -6 : 0; });
   this.fallfunc = (function (vy) { return clamp(-16, vy+2, +16); });
   this.velocity = new Vec2(0, 0);
   this.landed = false;
@@ -149,11 +149,15 @@ define(Player, Actor2, 'Actor2', {
 });
 
 // Enemy
-function Enemy(bounds)
+function Enemy(tilemap, bounds)
 {
   this._Actor2(bounds, S.ENEMY);
+  this.tilemap = tilemap;
   this.target = null;
   this.runner = null;
+  this.plan = new PlanMap(tilemap);
+  this.plan.tilebounds = this.tilebounds;
+  this.plan.setJumpRange(this.speed, this.jumpfunc, this.fallfunc);
   this._jumptime = 0;
 }
 
@@ -183,15 +187,13 @@ define(Enemy, Actor2, 'Actor2', {
 
     if (this.target === null) return;
 
-    const DT = 10;
-    const R = 10;
     var target = this.target;
+    var tilemap = this.tilemap;
     var scene = this.scene;
-    var tilemap = scene.tilemap;
     var hitbox = ((target.isLanded())? 
 		  target.hitbox :
 		  predictLandingPoint(tilemap, target.hitbox, 
-				      target.velocity, target.fallfunc, DT));
+				      target.velocity, target.fallfunc));
     if (hitbox === null) return;
     var goal = target.getTilePos();
     
@@ -208,16 +210,13 @@ define(Enemy, Actor2, 'Actor2', {
     
     // make a plan.
     if (this.runner === null) {
-      var range = new Rectangle(goal.x-R, goal.y-R, R*2+1, R*2+1);
-      var plan = new PlanMap(tilemap);
-      plan.tilebounds = tilebounds;
-      plan.setJumpRange(this.speed, this.jumpfunc, this.fallfunc, DT);
-      plan.initPlan(goal);
-      if (plan.fillPlan(range, this.getTilePos())) {
+      var range = MakeRect(goal, 1, 1).inflate(10, 10);
+      this.plan.initPlan(goal);
+      if (this.plan.fillPlan(range, this.getTilePos())) {
 	// start following a plan.
 	var actor = this;
-	this.runner = new PlanActionRunner(plan, this);
-	this.runner.timeout = scene.app.framerate*2;
+	this.runner = new PlanActionRunner(this.plan, this);
+	this.runner.timeout = this.scene.app.framerate*2;
 	this.runner.moveto = function (p) { actor.moveToward(p); }
 	this.runner.jump = function (t) { actor.jump(10); }
 	log("begin:"+this.runner);
