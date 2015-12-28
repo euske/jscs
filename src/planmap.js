@@ -31,9 +31,9 @@ function calcJumpRange(
   var vy = 0;
   var pts = {};
   for (var t = 0; t < maxtime; t++) {
-    var cy = Math.floor(p.y/ts+.5);
+    var cy = int(p.y/ts+.5);
     for (var x = 0; x <= +p.x; x++) {
-      var c = new Vec2(Math.floor(x/ts+.5), cy);
+      var c = new Vec2(int(x/ts+.5), cy);
       if (c.x == 0 && c.y == 0) continue;
       pts[c.x+','+c.y] = c;
     }
@@ -59,9 +59,9 @@ function calcFallRange(
   var vy = 0;
   var pts = {};
   for (var t = 0; t < maxtime; t++) {
-    var cy = Math.floor(p.y/ts+.5);
+    var cy = int(p.y/ts+.5);
     for (var x = -p.x; x <= +p.x; x++) {
-      var c = new Vec2(Math.floor(x/ts+.5), cy);
+      var c = new Vec2(int(x/ts+.5), cy);
       if (c.x == 0 && c.y == 0) continue;
       pts[c.x+','+c.y] = c;
     }

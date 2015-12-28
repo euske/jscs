@@ -101,8 +101,8 @@ define(Level1, GameScene, 'GameScene', {
       if (obj.bounds === null) continue;
       var bounds = obj.bounds;
       if (bounds.overlap(window)) {
-	var x = Math.floor((bounds.x+bounds.width/2)/tilesize);
-	var y = Math.floor((bounds.y+bounds.height/2)/tilesize);
+	var x = int((bounds.x+bounds.width/2)/tilesize);
+	var y = int((bounds.y+bounds.height/2)/tilesize);
 	var k = x+','+y;
 	if (!objs.hasOwnProperty(k)) {
 	  objs[k] = [];

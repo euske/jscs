@@ -42,8 +42,8 @@ define(TileMap, Object, '', {
       var y1 = Math.ceil((rect.y+rect.height)/ts);
       return new Rectangle(x0, y0, x1-x0, y1-y0);
     } else {
-      var x = Math.floor(rect.x/ts);
-      var y = Math.floor(rect.y/ts);
+      var x = int(rect.x/ts);
+      var y = int(rect.y/ts);
       return new Rectangle(x, y, 1, 1);
     }
   },

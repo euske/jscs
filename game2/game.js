@@ -91,8 +91,8 @@ define(Level1, GameScene, 'GameScene', {
       if (obj.bounds === null) continue;
       var bounds = obj.bounds;
       if (bounds.overlap(window)) {
-	var x = Math.floor((bounds.x+bounds.width/2)/tilesize);
-	var y = Math.floor((bounds.y+bounds.height/2)/tilesize);
+	var x = int((bounds.x+bounds.width/2)/tilesize);
+	var y = int((bounds.y+bounds.height/2)/tilesize);
 	var k = x+','+y;
 	if (!objs.hasOwnProperty(k)) {
 	  objs[k] = [];
@@ -177,8 +177,8 @@ define(Level1, GameScene, 'GameScene', {
     window.y += vy;
     this.player.move(vx, vy);
     
-    var x0 = Math.floor(window.x/tilesize);
-    var y0 = Math.floor(window.y/tilesize);
+    var x0 = int(window.x/tilesize);
+    var y0 = int(window.y/tilesize);
     if (x0 !== 0 || y0 !== 0) {
       // warp all the tiles and characters.
       this.scrollTile(x0, y0);
