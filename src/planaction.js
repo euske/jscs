@@ -58,7 +58,11 @@ define(PlanActionRunner, Object, '', {
     return ('<PlanActionRunner: actor='+this.actor+', action='+this.action+'>');
   },
 
-  update: function (goal) {
+  isValid: function (goal) {
+    return this.plan.isValid(goal);
+  },
+
+  update: function () {
     if (this.action === null || this.action.next === null) return false;
     if (this.count == 0) return false;
     this.count--;
@@ -66,20 +70,22 @@ define(PlanActionRunner, Object, '', {
     var plan = this.plan;
     var actor = this.actor;
     var tilemap = plan.tilemap;
-    var valid = plan.isValid(goal);
     var cur = actor.getTilePos();
     var dst = this.action.next.p;
 
     // Get a micro-level (greedy) plan.
     switch (this.action.type) {
+    case A.NONE:
+      break;
+
     case A.WALK:
     case A.CLIMB:
-      var r = tilemap.map2coord(dst);
       if (this.moveto !== null) {
+	var r = tilemap.map2coord(dst);
 	this.moveto(r.center());
       }
       if (cur.equals(dst)) {
-	this.action = (valid)? this.action.next : null;
+	this.action = this.action.next;
 	this.count = this.timeout;
       }
       break;
@@ -89,8 +95,7 @@ define(PlanActionRunner, Object, '', {
       var path = map.findSimplePath(cur.x, cur.y, dst.x, dst.y, actor.tilebounds);
       for (var i = 0; i < path.length; i++) {
 	var r = tilemap.map2coord(path[i]);
-	var v = actor.getPos();
-	var v = new Vec2(r.x-v.x, r.y-v.y);
+	var v = r.diff(actor.hitbox);
 	if (actor.isMovable(v)) {
 	  if (this.moveto !== null) {
 	    this.moveto(r.center());
@@ -99,7 +104,7 @@ define(PlanActionRunner, Object, '', {
 	}
       }
       if (cur.equals(dst)) {
-	this.action = (valid)? this.action.next : null;
+	this.action = this.action.next;
 	this.count = this.timeout;
       }
       break;
@@ -111,12 +116,12 @@ define(PlanActionRunner, Object, '', {
 	  this.jump();
 	}
 	// once you leap, the action is considered finished.
-	this.action = (valid)? this.action.next : null;
+	this.action = this.action.next;
 	this.count = this.timeout;
       } else {
 	// not landed, holding something, or has no clearance.
-	var r = tilemap.map2coord(cur);
 	if (this.moveto !== null) {
+	  var r = tilemap.map2coord(cur);
 	  this.moveto(r.center());
 	}
       }

@@ -33,17 +33,17 @@ function calcJumpRange(
   var vy = 0;
   var pts = {};
   for (var t = 0; t < maxtime; t++) {
-    var cy = Math.ceil(p.y/ts+.5);
+    var dy = jumpfunc(t);
+    vy = fallfunc(vy+dy);
+    if (0 < vy) break;
+    p.x += speed;
+    p.y += vy;      
+    var cy = Math.ceil(p.y/ts);
     for (var x = 0; x <= p.x; x++) {
       var c = new Vec2(int(x/ts+.5), cy);
       if (c.x == 0 && c.y == 0) continue;
       pts[c.x+','+c.y] = c;
     }
-    var dy = jumpfunc(t);
-    vy = fallfunc(vy+dy);
-    if (0 <= vy) break;
-    p.x += speed;
-    p.y += vy;      
   }
   var a = [];
   for (var k in pts) {
@@ -62,15 +62,15 @@ function calcFallRange(
   var vy = 0;
   var pts = {};
   for (var t = 0; t < maxtime; t++) {
-    var cy = Math.floor(p.y/ts+.5);
+    vy = fallfunc(vy);
+    p.x += speed;
+    p.y += vy;
+    var cy = Math.ceil(p.y/ts);
     for (var x = 0; x <= p.x; x++) {
       var c = new Vec2(int(x/ts+.5), cy);
       if (c.x == 0 && c.y == 0) continue;
       pts[c.x+','+c.y] = c;
     }
-    vy = fallfunc(vy);
-    p.x += speed;
-    p.y += vy;      
   }
   var a = [];
   for (var k in pts) {
@@ -97,8 +97,6 @@ define(PlanMap, Object, '', {
   setJumpRange: function (speed, jumpfunc, fallfunc, maxtime) {
     this.jumppts = calcJumpRange(this.tilemap, speed, jumpfunc, fallfunc, maxtime);
     this.fallpts = calcFallRange(this.tilemap, speed, fallfunc, maxtime);
-    log("jump="+this.jumppts);
-    log("fall="+this.fallpts);
   },
 
   isValid: function (p) {
@@ -132,7 +130,7 @@ define(PlanMap, Object, '', {
   
   fillPlan: function (range, start, maxcost) {
     start = (start !== undefined)? start : null;
-    maxcost = (maxcost !== undefined)? maxcost : 100;
+    maxcost = (maxcost !== undefined)? maxcost : 20;
 
     var tilemap = this.tilemap;
     var obstacle = tilemap.getRangeMap(T.isObstacle);
@@ -310,6 +308,12 @@ define(PlanMap, Object, '', {
 	ctx.lineTo(bx+tilesize*p1.x+rs+.5, by+tilesize*p1.y+rs+.5);
 	ctx.stroke();
       }
+    }
+    if (this._goal !== null) {
+      ctx.strokeStyle = 'green';
+      ctx.strokeRect(bx+tilesize*this._goal.x+.5,
+		     by+tilesize*this._goal.y+.5,
+		     tilesize, tilesize);
     }
   },
 

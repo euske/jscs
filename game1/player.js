@@ -158,7 +158,7 @@ function Enemy(tilemap, bounds)
   this.plan = new PlanMap(tilemap);
   this.plan.tilebounds = this.tilebounds;
   this.plan.setJumpRange(this.speed, this.jumpfunc, this.fallfunc);
-  this._jumptime = 0;
+  this._jumpleft = 0;
 }
 
 define(Enemy, Actor2, 'Actor2', {
@@ -167,72 +167,68 @@ define(Enemy, Actor2, 'Actor2', {
   },
 
   jump: function (t) {
-    this._jumptime = t;
+    this._jumpleft = t;
     this.setJumping(true);
   },
 
   moveToward: function (p) {
-    var dx = (p.x - this.getPos().x);
-    this.velocity.x = ((0 < dx) ? +1 : -1) * this.speed;
+    if (p !== null) {
+      var dx = (p.x - this.getPos().x);
+      this.velocity.x = clamp(-this.speed, dx, +this.speed);
+    } else {
+      this.velocity.x = 0;
+    }      
   },
 
   update: function () {
-    if (0 < this._jumptime) {
-      this._jumptime--;
-      if (this._jumptime === 0) {
+    if (0 < this._jumpleft) {
+      this._jumpleft--;
+      if (this._jumpleft === 0) {
 	this.setJumping(false);
       }
     }
-    this._Actor2_update();
-
-    if (this.target === null) return;
+    if (this.isLanded()) {
+      this._jumpleft = 0;
+    }
 
     var target = this.target;
-    var tilemap = this.tilemap;
-    var scene = this.scene;
-    var hitbox = ((target.isLanded())? 
-		  target.hitbox :
-		  predictLandingPoint(tilemap, target.hitbox, 
-				      target.velocity, target.fallfunc));
-    if (hitbox === null) return;
-    var goal = target.getTilePos();
-    
-    // adjust the goal position when it cannot fit.
-    var tilebounds = this.tilebounds;
-    var obstacle = tilemap.getRangeMap(T.isObstacle);
-    for (var dx = 0; dx <= tilebounds.width; dx++) {
-      if (obstacle.get(goal.x-dx+tilebounds.x, goal.y+tilebounds.y,
-		       goal.x-dx+tilebounds.right(), goal.y+tilebounds.bottom()) === 0) {
-	goal.x -= dx;
-	break;
+    if (target !== null) {
+      var tilemap = this.tilemap;
+      var hitbox = ((target.isLanded())? 
+		    target.hitbox :
+		    predictLandingPoint(tilemap, target.hitbox, 
+					target.velocity, target.fallfunc));
+      if (hitbox !== null) {
+	// make a plan.
+	var goal = tilemap.coord2map(hitbox.center()).topleft();
+	if (this.runner === null || !this.runner.isValid(goal)) {
+	  this.runner = null;
+	  var range = MakeRect(goal, 1, 1).inflate(10, 10);
+	  var start = this.getTilePos();
+	  this.plan.initPlan(goal);
+	  if (this.plan.fillPlan(range, start)) {
+	    // start following a plan.
+	    var actor = this;
+	    this.runner = new PlanActionRunner(this.plan, this);
+	    this.runner.timeout = this.scene.app.framerate*2;
+	    this.runner.moveto = function (p) { actor.moveToward(p); }
+	    this.runner.jump = function (t) { actor.jump(Infinity); }
+	    log("begin:"+this.runner);
+	  }
+	}
+      }
+      // follow a plan.
+      if (this.runner !== null) {
+	// end following a plan.
+	if (!this.runner.update()) {
+	  log("end:  "+this.runner);
+	  this.runner = null;
+	  this.moveToward(null);
+	}
       }
     }
     
-    // make a plan.
-    if (this.runner === null) {
-      var range = MakeRect(goal, 1, 1).inflate(10, 10);
-      this.plan.initPlan(goal);
-      if (this.plan.fillPlan(range, this.getTilePos())) {
-	// start following a plan.
-	var actor = this;
-	this.runner = new PlanActionRunner(this.plan, this);
-	this.runner.timeout = this.scene.app.framerate*2;
-	this.runner.moveto = function (p) { actor.moveToward(p); }
-	this.runner.jump = function (t) { actor.jump(10); }
-	log("begin:"+this.runner);
-      }
-    }
-
-    // follow a plan.
-    if (this.runner !== null) {
-      // end following a plan.
-      if (!this.runner.update(goal)) {
-	log("end:  "+this.runner);
-	//this.runner.jump.unsubscribe(jump);
-	//this.runner.moveto.unsubscribe(moveto);
-	this.runner = null;
-      }
-    }
+    this._Actor2_update();
   },
   
   renderPlan: function (ctx, bx, by) {
