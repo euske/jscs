@@ -26,6 +26,7 @@ function PlanAction(p, context, type, cost, next)
   type = (type !== undefined)? type : A.NONE;
   cost = (cost !== undefined)? cost : 0;
   next = (next !== undefined)? next : null;
+  assert(0 <= cost);
   this.p = p;
   this.context = context;
   this.type = type;

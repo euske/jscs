@@ -112,20 +112,22 @@ define(PlanMap, Object, '', {
     }
   },
 
-  addAction: function (queue, start, action) {
+  addAction: function (start, action) {
     var prev = this._map[action.key];
     if (prev === undefined || action.cost < prev.cost) {
       this._map[action.key] = action;
-      var dist = ((start === null)? 0 :
+      var dist = ((start === null)? Infinity :
 		  (Math.abs(start.x-action.p.x)+
 		   Math.abs(start.y-action.p.y)));
-      queue.push({ action:action, prio:dist });
+      this._queue.push({ action:action, prio:dist });
     }
   },
 
   initPlan: function (goal) {
     this._goal = goal;
     this._map = {};
+    this._queue = [];
+    this.addAction(null, new PlanAction(goal));
   },
   
   fillPlan: function (range, start, maxcost) {
@@ -146,10 +148,8 @@ define(PlanMap, Object, '', {
 	!grabbable.exists(cb.movev(start)) &&
 	!stoppable.exists(pb.movev(start))) return false;
 
-    var queue = [];
-    this.addAction(queue, start, new PlanAction(this._goal));
-    while (0 < queue.length) {
-      var a0 = queue.pop().action;
+    while (0 < this._queue.length) {
+      var a0 = this._queue.pop().action;
       var p = a0.p;
       var context = a0.context;
       if (start !== null && start.equals(p)) return true;
@@ -160,23 +160,21 @@ define(PlanMap, Object, '', {
 	  !stoppable.exists(pb.movev(p))) continue;
       // assert(range.x <= p.x && p.x <= range.right());
       // assert(range.y <= p.y && p.y <= range.bottom());
-      var cost = a0.cost;
+      var cost = a0.cost+1;
       if (maxcost < cost) continue;
 
       // try climbing down.
       if (context === null &&
 	  range.y <= p.y-1 &&
 	  grabbable.exists(pb.movev(p))) {
-	cost += 1;
-	this.addAction(queue, start, 
+	this.addAction(start, 
 		       new PlanAction(new Vec2(p.x, p.y-1), null, A.CLIMB, cost, a0));
       }
       // try climbing up.
       if (context === null &&
 	  p.y+1 <= range.bottom &&
 	  grabbable.exists(cb1.movev(p))) {
-	cost += 1;
-	this.addAction(queue, start, 
+	this.addAction(start, 
 		       new PlanAction(new Vec2(p.x, p.y+1), null, A.CLIMB, cost, a0));
       }
 
@@ -193,8 +191,7 @@ define(PlanMap, Object, '', {
 	    !obstacle.exists(cb.movev(wp)) &&
 	    (grabbable.exists(cb.movev(wp)) ||
 	     stoppable.exists(pb.movev(wp)))) {
-	  cost += 1;
-	  this.addAction(queue, start, 
+	  this.addAction(start, 
 			 new PlanAction(wp, null, A.WALK, cost, a0));
 	}
 
@@ -213,22 +210,22 @@ define(PlanMap, Object, '', {
 	    //   ...+-X+ (p.x,p.y)
 	    //     ######
 	    if (obstacle.exists(cb.movev(fp))) continue;
-	    cost += (v.x+v.y+1);
+	    var dc = Math.abs(v.x)+Math.abs(v.y);
 	    if (0 < v.x &&
 		stoppable.get(fp.x+bx0+vx, fp.y+by0, 
 			      p.x+bx1, p.y+by1) === 0 &&
 		(grabbable.exists(cb.movev(fp)) ||
 		 stoppable.exists(pb.movev(fp)))) {
 	      // normal fall.
-	      this.addAction(queue, start, 
-			     new PlanAction(fp, null, A.FALL, cost, a0));
+	      this.addAction(start, 
+			     new PlanAction(fp, null, A.FALL, cost+dc, a0));
 	    }
 	    if (v.y === 0 ||
 		stoppable.get(fp.x+bx0, fp.y+by1, 
 			      p.x+bx1, p.y+by1) === 0) {
 	      // fall after jump.
-	      this.addAction(queue, start, 
-			     new PlanAction(fp, A.FALL, A.FALL, cost, a0));
+	      this.addAction(start, 
+			     new PlanAction(fp, A.FALL, A.FALL, cost+dc, a0));
 	    }
 	  }
 	}
@@ -260,16 +257,16 @@ define(PlanMap, Object, '', {
 	    if (T.isObstacle(tilemap.get(p.x+bx1, p.y+by0-1)) &&
 		T.isObstacle(tilemap.get(p.x+bx1, p.y+by1+1)) &&
 		!T.isObstacle(tilemap.get(p.x+bx1-vx, p.y+by0-1))) continue;
-	    cost += (v.x+v.y+1);
-	    this.addAction(queue, start, 
-			   new PlanAction(jp, null, A.JUMP, cost, a0));
+	    var dc = Math.abs(v.x)+Math.abs(v.y);
+	    this.addAction(start, 
+			   new PlanAction(jp, null, A.JUMP, cost+dc, a0));
 	  }
 	}
       }
       
       if (start !== null) {
 	// A* search.
-	queue.sort(function (a,b) { return b.prio-a.prio; });
+	this._queue.sort(function (a,b) { return b.prio-a.prio; });
       }
     }
     
