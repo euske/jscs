@@ -2,6 +2,91 @@
 
 // [GAME SPECIFIC CODE]
 
+// Particle
+function Particle(bounds, tileno)
+{
+  this._Sprite(bounds);
+  this.velocity = new Vec2();  
+  this.tileno = tileno;
+}
+
+define(Particle, Sprite, 'Sprite', {
+  update: function () {
+    this._Sprite_update(this);
+    this.bounds = this.bounds.movev(this.velocity);
+  },
+
+  render: function (ctx, bx, by) {
+    var sprites = this.scene.app.sprites;
+    var tw = sprites.height;
+    var w = this.bounds.width;
+    var h = this.bounds.height;
+    ctx.drawImage(sprites,
+		  this.tileno*tw, tw-h, w, h,
+		  bx+this.bounds.x, by+this.bounds.y, w, h);
+  },
+
+});
+
+// Player
+function Player(bounds)
+{
+  this._JumpingActor(bounds, bounds.inflate(-2, -2), S.PLAYER);
+  
+  this.picked = new Slot(this);
+  this.jumped = new Slot(this);
+}
+
+define(Player, JumpingActor, 'JumpingActor', {
+  toString: function () {
+    return '<Player: '+this.bounds+'>';
+  },
+
+  setMove: function (v) {
+    this.velocity.x = v.x*this.speed;
+  },
+
+  setJump: function (jumpend) {
+    this._JumpingActor_setJump(jumpend);
+    if (0 < jumpend && 0 < this._jumpend) {
+      this.jumped.signal();
+    }
+  },
+
+  collide: function (actor) {
+    if (actor instanceof Actor && actor.tileno == S.THINGY) {
+      actor.die();
+      this.picked.signal();
+      // show a particle.
+      var particle = new Particle(actor.bounds, S.YAY);
+      particle.duration = 30;
+      particle.velocity = new Vec2(0, -1);
+      this.scene.addObject(particle);
+    }
+  },
+
+});
+
+// Enemy
+function Enemy(tilemap, bounds)
+{
+  this._PlanningActor(bounds, bounds.inflate(-2, -2), S.ENEMY);
+}
+
+define(Enemy, PlanningActor, 'PlanningActor', {
+  toString: function () {
+    return '<Enemy: '+this.bounds+'>';
+  },
+  
+  renderPlan: function (ctx, bx, by) {
+    if (this.runner !== null) {
+      this.runner.plan.render(ctx, bx, by, this.scene.tilesize);
+    }
+  },
+
+});
+
+
 //  Title
 //
 function Title(app)
@@ -23,6 +108,7 @@ define(Title, TextScene, 'TextScene', {
 function EndGame(app, score)
 {
   this._TextScene(app);
+  this.app.lockKeys();
   this.text = '<b>You Won!</b><p><b>Score: '+score+'</b><p>Press Enter to restart.';
 }
 
@@ -216,8 +302,8 @@ define(Game, GameScene, 'GameScene', {
     this._GameScene_update();
     
     // [GAME SPECIFIC CODE]
-    this.player.usermove(this.app.key_dir.x, this.app.key_dir.y);
-    this.player.jump(this.app.key_action);
+    this.player.setMove(this.app.key_dir);
+    this.player.setJump(this.app.key_action? Infinity : 0);
     var rect = this.player.bounds.inflate(this.camera.window.width/4,
 					  this.camera.window.height/4);
     this.camera.setCenter(this.world, rect);
