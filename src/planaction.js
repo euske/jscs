@@ -144,3 +144,99 @@ define(PlanActionRunner, Object, '', {
   },
 
 });
+
+
+
+
+// PlanningActor
+function PlanningActor(bounds, hitbox, tileno)
+{
+  this._JumpingActor(bounds, hitbox, tileno)
+  this.tilebounds = new Rectangle(0, 0, 1, 1);
+  this.target = null;
+  this.plan = null;
+  this.runner = null;
+}
+
+define(PlanningActor, JumpingActor, 'JumpingActor', {
+  isHolding: function () {
+    var tilemap = this.scene.tilemap;
+    var f = (function (x,y,c) { return T.isGrabbable(c); });
+    return (tilemap.apply(f, tilemap.coord2map(this.hitbox)) !== null);
+  },
+
+  getContactFor: function (range, hitbox, v) {
+    return this.scene.tilemap.contactTile(hitbox, T.isObstacle, v);
+  },
+  
+  getTilePos: function () {
+    var r = this.scene.tilemap.coord2map(this.hitbox.center());
+    return new Vec2(r.x, r.y);
+  },
+
+  moveToward: function (p) {
+    var dx = (p.x - this.hitbox.centerx());
+    this.velocity.x = clamp(-this.speed, dx, +this.speed);
+  },
+
+  start: function (scene) {
+    this._JumpingActor_start(scene);
+    this.plan = new PlanMap(scene.tilemap);
+    this.plan.tilebounds = this.tilebounds;
+    this.plan.setJumpRange(this.speed, this.jumpfunc, this.fallfunc);
+  },
+
+  startPlan: function (runner) {
+    var actor = this;
+    var app = this.scene.app;
+    runner.timeout = app.framerate*2;
+    runner.moveto = function (p) { actor.moveToward(p); }
+    runner.jump = function (t) { actor.setJump(Infinity); }
+    this.runner = runner;
+    log("begin:"+this.runner);
+  },
+  
+  stopPlan: function () {
+    if (this.runner !== null) {
+      log("end:  "+this.runner);
+      this.velocity = new Vec2();
+    }
+    this.runner = null;
+  },
+
+  update: function () {
+    var target = this.target;
+    if (target !== null) {
+      var tilemap = this.scene.tilemap;
+      var hitbox = ((target.isLanded())? 
+		    target.hitbox :
+		    predictLandingPoint(tilemap, target.hitbox, 
+					target.velocity, target.fallfunc));
+      if (hitbox !== null) {
+	// make a plan.
+	var goal = tilemap.coord2map(hitbox.center()).topleft();
+	if (this.runner === null ||
+	    this.runner.plan.goal.equals(goal)) {
+	  this.stopPlan();
+	  var range = MakeRect(goal, 1, 1).inflate(10, 10);
+	  var start = this.getTilePos();
+	  this.plan.initPlan(goal);
+	  if (this.plan.fillPlan(range, start)) {
+	    // start following a plan.
+	    this.startPlan(new PlanActionRunner(this.plan, this));
+	  }
+	}
+      }
+      // follow a plan.
+      if (this.runner !== null) {
+	// end following a plan.
+	if (!this.runner.update()) {
+	  this.stopPlan();
+	}
+      }
+    }
+    
+    this._JumpingActor_update();
+  },
+
+});

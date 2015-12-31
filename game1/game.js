@@ -5,34 +5,31 @@
 // Particle
 function Particle(bounds, tileno)
 {
-  this._Sprite(bounds);
+  this._Actor(bounds, null, tileno);
   this.velocity = new Vec2();  
-  this.tileno = tileno;
 }
 
-define(Particle, Sprite, 'Sprite', {
+define(Particle, Actor, 'Actor', {
   update: function () {
-    this._Sprite_update(this);
+    this._Actor_update(this);
     this.bounds = this.bounds.movev(this.velocity);
   },
 
-  render: function (ctx, bx, by) {
-    var sprites = this.scene.app.sprites;
-    var tw = sprites.height;
-    var w = this.bounds.width;
-    var h = this.bounds.height;
-    ctx.drawImage(sprites,
-		  this.tileno*tw, tw-h, w, h,
-		  bx+this.bounds.x, by+this.bounds.y, w, h);
-  },
+});
 
+// Thingy
+function Thingy(bounds)
+{
+  this._Actor(bounds, bounds.inflate(-2, -2), S.THINGY);
+}
+
+define(Thingy, Actor, 'Actor', {
 });
 
 // Player
 function Player(bounds)
 {
   this._JumpingActor(bounds, bounds.inflate(-2, -2), S.PLAYER);
-  
   this.picked = new Slot(this);
   this.jumped = new Slot(this);
 }
@@ -53,11 +50,14 @@ define(Player, JumpingActor, 'JumpingActor', {
     }
   },
 
+  getContactFor: function (range, hitbox, v) {
+    return this.scene.tilemap.contactTile(hitbox, T.isObstacle, v);
+  },
+  
   collide: function (actor) {
-    if (actor instanceof Actor && actor.tileno == S.THINGY) {
+    if (actor instanceof Thingy) {
       actor.die();
       this.picked.signal();
-      // show a particle.
       var particle = new Particle(actor.bounds, S.YAY);
       particle.duration = 30;
       particle.velocity = new Vec2(0, -1);
@@ -80,7 +80,7 @@ define(Enemy, PlanningActor, 'PlanningActor', {
   
   renderPlan: function (ctx, bx, by) {
     if (this.plan !== null) {
-      this.plan.render(ctx, bx, by, this.scene.tilesize, this.getTilePos());
+      this.plan.render(ctx, bx, by, this.scene.tilesize);
     }
   },
 
@@ -233,7 +233,7 @@ define(Game, GameScene, 'GameScene', {
     var f = function (x,y,c) {
       if (T.isCollectible(c)) {
 	var rect = tilemap.map2coord(new Vec2(x,y));
-	scene.addObject(new Actor(rect, rect, S.THINGY));
+	scene.addObject(new Thingy(rect));
 	scene.collectibles++;
 	tilemap.set(x, y, T.NONE);
       }

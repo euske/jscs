@@ -87,6 +87,7 @@ function PlanMap(tilemap, tilebounds)
 		tilebounds : new Rectangle(0, 0, 1, 1));
   this.tilemap = tilemap;
   this.tilebounds = tilebounds;
+  this.start = null;
   this.goal = null;
 }
 
@@ -130,6 +131,7 @@ define(PlanMap, Object, '', {
   fillPlan: function (range, start, maxcost) {
     start = (start !== undefined)? start : null;
     maxcost = (maxcost !== undefined)? maxcost : 20;
+    this.start = start;
 
     var tilemap = this.tilemap;
     var obstacle = tilemap.getRangeMap(T.isObstacle);
@@ -303,10 +305,10 @@ define(PlanMap, Object, '', {
 	ctx.stroke();
       }
     }
-    if (start !== null) {
+    if (this.start !== null) {
       ctx.strokeStyle = '#0000ff';
-      ctx.strokeRect(bx+tilesize*start.x+.5,
-		     by+tilesize*start.y+.5,
+      ctx.strokeRect(bx+tilesize*this.start.x+.5,
+		     by+tilesize*this.start.y+.5,
 		     tilesize, tilesize);
     }
     if (this.goal !== null) {
