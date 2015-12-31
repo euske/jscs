@@ -49,7 +49,8 @@ function PlanActionRunner(plan, actor)
   var cur = actor.getTilePos();
   this.action = plan.getAction(cur.x, cur.y);
 
-  this.timeout = -1;
+  this.timeout = Infinity;
+  this.count = Infinity;
   this.moveto = null;
   this.jump = null;
 }
@@ -61,7 +62,7 @@ define(PlanActionRunner, Object, '', {
 
   update: function () {
     if (this.action === null || this.action.next === null) return false;
-    if (this.count == 0) return false;
+    if (this.count <= 0) return false;
     this.count--;
     
     var plan = this.plan;
@@ -183,7 +184,8 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
     this._JumpingActor_start(scene);
     this.plan = new PlanMap(scene.tilemap);
     this.plan.tilebounds = this.tilebounds;
-    this.plan.setJumpRange(this.speed, this.jumpfunc, this.fallfunc);
+    this.plan.setJumpRange(scene.tilemap.tilesize,
+			   this.speed, this.jumpfunc, this.fallfunc);
   },
 
   startPlan: function (runner) {
@@ -216,7 +218,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
 	// make a plan.
 	var goal = tilemap.coord2map(hitbox.center()).topleft();
 	if (this.runner === null ||
-	    this.runner.plan.goal.equals(goal)) {
+	    !this.runner.plan.goal.equals(goal)) {
 	  this.stopPlan();
 	  var range = MakeRect(goal, 1, 1).inflate(10, 10);
 	  var start = this.getTilePos();
