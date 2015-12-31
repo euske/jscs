@@ -87,20 +87,17 @@ function PlanMap(tilemap, tilebounds)
 		tilebounds : new Rectangle(0, 0, 1, 1));
   this.tilemap = tilemap;
   this.tilebounds = tilebounds;
+  this.goal = null;
 }
 
 define(PlanMap, Object, '', {
   toString: function () {
-    return ('<PlanMap '+this._goal+'>');
+    return ('<PlanMap '+this.goal+'>');
   },
 
   setJumpRange: function (speed, jumpfunc, fallfunc, maxtime) {
     this.jumppts = calcJumpRange(this.tilemap, speed, jumpfunc, fallfunc, maxtime);
     this.fallpts = calcFallRange(this.tilemap, speed, fallfunc, maxtime);
-  },
-
-  isValid: function (p) {
-    return (p !== null && this._goal.equals(p));
   },
 
   getAction: function (x, y, context) {
@@ -124,7 +121,7 @@ define(PlanMap, Object, '', {
   },
 
   initPlan: function (goal) {
-    this._goal = goal;
+    this.goal = goal;
     this._map = {};
     this._queue = [];
     this.addAction(null, new PlanAction(goal));
@@ -273,7 +270,7 @@ define(PlanMap, Object, '', {
     return false;
   },
 
-  render: function (ctx, bx, by, tilesize) {
+  render: function (ctx, bx, by, tilesize, start) {
     var rs = tilesize/2;
     ctx.lineWidth = 1;
     for (var k in this._map) {
@@ -306,10 +303,16 @@ define(PlanMap, Object, '', {
 	ctx.stroke();
       }
     }
-    if (this._goal !== null) {
-      ctx.strokeStyle = 'green';
-      ctx.strokeRect(bx+tilesize*this._goal.x+.5,
-		     by+tilesize*this._goal.y+.5,
+    if (start !== null) {
+      ctx.strokeStyle = '#0000ff';
+      ctx.strokeRect(bx+tilesize*start.x+.5,
+		     by+tilesize*start.y+.5,
+		     tilesize, tilesize);
+    }
+    if (this.goal !== null) {
+      ctx.strokeStyle = '#00ff00';
+      ctx.strokeRect(bx+tilesize*this.goal.x+.5,
+		     by+tilesize*this.goal.y+.5,
 		     tilesize, tilesize);
     }
   },

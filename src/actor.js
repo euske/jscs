@@ -320,12 +320,8 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
   },
 
   moveToward: function (p) {
-    if (p !== null) {
-      var dx = (p.x - this.hitbox.centerx());
-      this.velocity.x = clamp(-this.speed, dx, +this.speed);
-    } else {
-      this.velocity.x = 0;
-    }      
+    var dx = (p.x - this.hitbox.centerx());
+    this.velocity.x = clamp(-this.speed, dx, +this.speed);
   },
 
   start: function (scene) {
@@ -333,6 +329,24 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
     this.plan = new PlanMap(scene.tilemap);
     this.plan.tilebounds = this.tilebounds;
     this.plan.setJumpRange(this.speed, this.jumpfunc, this.fallfunc);
+  },
+
+  startPlan: function (runner) {
+    var actor = this;
+    var app = this.scene.app;
+    runner.timeout = app.framerate*2;
+    runner.moveto = function (p) { actor.moveToward(p); }
+    runner.jump = function (t) { actor.setJump(Infinity); }
+    this.runner = runner;
+    log("begin:"+this.runner);
+  },
+  
+  stopPlan: function () {
+    if (this.runner !== null) {
+      log("end:  "+this.runner);
+      this.velocity = new Vec2();
+    }
+    this.runner = null;
   },
 
   update: function () {
@@ -346,20 +360,15 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
       if (hitbox !== null) {
 	// make a plan.
 	var goal = tilemap.coord2map(hitbox.center()).topleft();
-	if (this.runner === null || !this.runner.isValid(goal)) {
-	  this.runner = null;
+	if (this.runner === null ||
+	    this.runner.plan.goal.equals(goal)) {
+	  this.stopPlan();
 	  var range = MakeRect(goal, 1, 1).inflate(10, 10);
 	  var start = this.getTilePos();
 	  this.plan.initPlan(goal);
 	  if (this.plan.fillPlan(range, start)) {
 	    // start following a plan.
-	    var actor = this;
-	    var app = this.scene.app;
-	    this.runner = new PlanActionRunner(this.plan, this);
-	    this.runner.timeout = app.framerate*2;
-	    this.runner.moveto = function (p) { actor.moveToward(p); }
-	    this.runner.jump = function (t) { actor.setJump(Infinity); }
-	    log("begin:"+this.runner);
+	    this.startPlan(new PlanActionRunner(this.plan, this));
 	  }
 	}
       }
@@ -367,9 +376,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
       if (this.runner !== null) {
 	// end following a plan.
 	if (!this.runner.update()) {
-	  log("end:  "+this.runner);
-	  this.runner = null;
-	  this.moveToward(null);
+	  this.stopPlan();
 	}
       }
     }

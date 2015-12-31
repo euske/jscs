@@ -79,8 +79,8 @@ define(Enemy, PlanningActor, 'PlanningActor', {
   },
   
   renderPlan: function (ctx, bx, by) {
-    if (this.runner !== null) {
-      this.runner.plan.render(ctx, bx, by, this.scene.tilesize);
+    if (this.plan !== null) {
+      this.plan.render(ctx, bx, by, this.scene.tilesize, this.getTilePos());
     }
   },
 

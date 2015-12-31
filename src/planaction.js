@@ -59,10 +59,6 @@ define(PlanActionRunner, Object, '', {
     return ('<PlanActionRunner: actor='+this.actor+', action='+this.action+'>');
   },
 
-  isValid: function (goal) {
-    return this.plan.isValid(goal);
-  },
-
   update: function () {
     if (this.action === null || this.action.next === null) return false;
     if (this.count == 0) return false;
