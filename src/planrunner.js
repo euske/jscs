@@ -115,9 +115,10 @@ define(PlanActionRunner, Object, '', {
 
 //  PlanningActor
 //
-function PlanningActor(bounds, hitbox, tileno)
+function PlanningActor(tilemap, bounds, hitbox, tileno)
 {
   this._JumpingActor(bounds, hitbox, tileno)
+  this.tilemap = tilemap;
   this.tilebounds = new Rectangle(0, 0, 1, 1);
   this.target = null;
   this.plan = null;
@@ -126,17 +127,17 @@ function PlanningActor(bounds, hitbox, tileno)
 
 define(PlanningActor, JumpingActor, 'JumpingActor', {
   isHolding: function () {
-    var tilemap = this.scene.tilemap;
+    var tilemap = this.tilemap;
     var f = (function (x,y,c) { return T.isGrabbable(c); });
     return (tilemap.apply(f, tilemap.coord2map(this.hitbox)) !== null);
   },
 
   getContactFor: function (range, hitbox, v) {
-    return this.scene.tilemap.contactTile(hitbox, T.isObstacle, v);
+    return this.tilemap.contactTile(hitbox, T.isObstacle, v);
   },
   
   getTilePos: function () {
-    var r = this.scene.tilemap.coord2map(this.hitbox.center());
+    var r = this.tilemap.coord2map(this.hitbox.center());
     return new Vec2(r.x, r.y);
   },
 
@@ -147,9 +148,9 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
 
   start: function (scene) {
     this._JumpingActor_start(scene);
-    this.plan = new PlanMap(scene.tilemap);
+    this.plan = new PlanMap(this.tilemap);
     this.plan.tilebounds = this.tilebounds;
-    this.plan.setJumpRange(scene.tilemap.tilesize,
+    this.plan.setJumpRange(this.tilemap.tilesize,
 			   this.speed, this.jumpfunc, this.fallfunc);
   },
 
@@ -174,7 +175,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
   update: function () {
     var target = this.target;
     if (target !== null) {
-      var tilemap = this.scene.tilemap;
+      var tilemap = this.tilemap;
       var hitbox = ((target.isLanded())? 
 		    target.hitbox :
 		    predictLandingPoint(tilemap, target.hitbox, 

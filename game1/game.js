@@ -70,7 +70,7 @@ define(Player, JumpingActor, 'JumpingActor', {
 // Enemy
 function Enemy(tilemap, bounds)
 {
-  this._PlanningActor(bounds, bounds.inflate(-2, -2), S.ENEMY);
+  this._PlanningActor(tilemap, bounds, bounds.inflate(-2, -2), S.ENEMY);
 }
 
 define(Enemy, PlanningActor, 'PlanningActor', {
