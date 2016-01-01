@@ -3,8 +3,8 @@ load('./src/geom.js')
 load('./src/actor.js')
 load('./src/scene.js')
 load('./src/tilemap.js')
-load('./src/rangemap.js')
 load('./src/planmap.js')
+load('./src/planrunner.js')
 load('./src/app.js')
 log = print;
 

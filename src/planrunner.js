@@ -2,46 +2,12 @@
 //   requires: utils.js
 //   requires: geom.js
 //   requires: tilemap.js
-//   requires: rangemap.js
 //   requires: planmap.js
 'use strict';
 
-var A = {
-  NONE: 'NONE',
-  WALK: 'WALK',
-  FALL: 'FALL',
-  JUMP: 'JUMP',
-  CLIMB: 'CLIMB',
-  MOVETO: 'MOVETO',
-};
 
-function getKey(x, y, context)
-{
-  return (context === undefined)? (x+','+y) : (x+','+y+':'+context);
-}
-
-function PlanAction(p, context, type, cost, next)
-{
-  context = (context !== undefined)? context : null;
-  type = (type !== undefined)? type : A.NONE;
-  cost = (cost !== undefined)? cost : 0;
-  next = (next !== undefined)? next : null;
-  assert(0 <= cost);
-  this.p = p;
-  this.context = context;
-  this.type = type;
-  this.cost = cost;
-  this.next = next;
-  this.key = getKey(p.x, p.y);
-}
-
-define(PlanAction, Object, '', {
-  toString: function () {
-    return ('<PlanAction('+this.p.x+','+this.p.y+'): '+this.type+' cost='+this.cost+'>');
-  },
-
-});
-
+//  PlanActionRunner
+//
 function PlanActionRunner(plan, actor)
 {
   this.plan = plan;
@@ -147,9 +113,8 @@ define(PlanActionRunner, Object, '', {
 });
 
 
-
-
-// PlanningActor
+//  PlanningActor
+//
 function PlanningActor(bounds, hitbox, tileno)
 {
   this._JumpingActor(bounds, hitbox, tileno)

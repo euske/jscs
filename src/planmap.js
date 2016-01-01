@@ -2,26 +2,7 @@
 //   requires: utils.js
 //   requires: geom.js
 //   requires: tilemap.js
-//   requires: rangemap.js
 'use strict';
-
-// predictLandingPoint: returns the estimated landing position.
-function predictLandingPoint(
-  tilemap, hitbox,
-  velocity, fallfunc, maxtime)
-{
-  maxtime = (maxtime !== undefined)? maxtime : 15;
-  var stoppable = tilemap.getRangeMap(T.isStoppable);
-  var dy = velocity.y;
-  for (var t = 0; t < maxtime; t++) {
-    var rect = hitbox.move(velocity.x, dy);
-    dy = fallfunc(dy);
-    var b = tilemap.coord2map(rect);
-    if (stoppable.exists(b)) return hitbox;
-    hitbox = rect;
-  }
-  return null;
-}
 
 // calcJumpRange
 function calcJumpRange(
@@ -76,6 +57,65 @@ function calcFallRange(
   }
   return a;
 }
+
+
+// predictLandingPoint: returns the estimated landing position.
+function predictLandingPoint(
+  tilemap, hitbox,
+  velocity, fallfunc, maxtime)
+{
+  maxtime = (maxtime !== undefined)? maxtime : 15;
+  var stoppable = tilemap.getRangeMap(T.isStoppable);
+  var dy = velocity.y;
+  for (var t = 0; t < maxtime; t++) {
+    var rect = hitbox.move(velocity.x, dy);
+    dy = fallfunc(dy);
+    var b = tilemap.coord2map(rect);
+    if (stoppable.exists(b)) return hitbox;
+    hitbox = rect;
+  }
+  return null;
+}
+
+
+//  PlanAction
+//
+var A = {
+  NONE: 'NONE',
+  WALK: 'WALK',
+  FALL: 'FALL',
+  JUMP: 'JUMP',
+  CLIMB: 'CLIMB',
+  MOVETO: 'MOVETO',
+};
+
+function getKey(x, y, context)
+{
+  return (context === undefined)? (x+','+y) : (x+','+y+':'+context);
+}
+
+function PlanAction(p, context, type, cost, next)
+{
+  context = (context !== undefined)? context : null;
+  type = (type !== undefined)? type : A.NONE;
+  cost = (cost !== undefined)? cost : 0;
+  next = (next !== undefined)? next : null;
+  assert(0 <= cost);
+  this.p = p;
+  this.context = context;
+  this.type = type;
+  this.cost = cost;
+  this.next = next;
+  this.key = getKey(p.x, p.y);
+}
+
+define(PlanAction, Object, '', {
+  toString: function () {
+    return ('<PlanAction('+this.p.x+','+this.p.y+'): '+this.type+' cost='+this.cost+'>');
+  },
+
+});
+
 
 //  PlanMap
 //
