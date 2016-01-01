@@ -118,7 +118,7 @@ define(PlanMap, Object, '', {
       var dist = ((start === null)? Infinity :
 		  (Math.abs(start.x-action.p.x)+
 		   Math.abs(start.y-action.p.y)));
-      this._queue.push({ action:action, prio:(dist+action.cost) });
+      this._queue.push({ action:action, total:(dist+action.cost) });
     }
   },
 
@@ -149,7 +149,7 @@ define(PlanMap, Object, '', {
 
     this.start = start;
     while (0 < this._queue.length) {
-      var a0 = this._queue.pop().action;
+      var a0 = this._queue.shift().action;
       var p = a0.p;
       var context = a0.context;
       if (start !== null && start.equals(p)) return true;
@@ -222,7 +222,7 @@ define(PlanMap, Object, '', {
 	    }
 	    if (v.y === 0 ||
 		this.stoppable.get(fp.x+bx0, fp.y+by1, 
-			      p.x+bx1, p.y+by1) === 0) {
+				   p.x+bx1, p.y+by1) === 0) {
 	      // fall after jump.
 	      this.addAction(start, 
 			     new PlanAction(fp, A.FALL, A.FALL, cost+dc, a0));
@@ -244,10 +244,11 @@ define(PlanMap, Object, '', {
 	    //  |  |...
 	    //  +-X+... (jp.x,jp.y) original position.
 	    // ######
-	    if (this.stoppable.get(jp.x+bx0, jp.y+by1, 
-				   p.x+bx1-vx, p.y+by0) !== 0) break;
 	    if (!this.grabbable.exists(cb.movev(jp)) &&
 		!this.stoppable.exists(pb.movev(jp))) continue;
+	    if (v.x ===0 ||
+		this.stoppable.get(jp.x+bx0, jp.y+by1, 
+				   p.x+bx1-vx, p.y+by0) !== 0) continue;
 	    // extra care is needed not to allow the following case:
 	    //      .#
 	    //    +--+
@@ -264,10 +265,8 @@ define(PlanMap, Object, '', {
 	}
       }
       
-      if (start !== null) {
-	// A* search.
-	this._queue.sort(function (a,b) { return b.prio-a.prio; });
-      }
+      // A* search.
+      this._queue.sort(function (a,b) { return a.total-b.total; });
     }
     
     return false;
