@@ -20,7 +20,7 @@ function App(framerate, frame, images, audios, labels)
   this.music = null;
 
   // Initialize the off-screen bitmap.
-  var scale = 1;
+  var scale = 2;
   this.screen = createCanvas(this.frame.width/scale,
 			     this.frame.height/scale);
   this.ctx = getEdgeyContext(this.screen);
