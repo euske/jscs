@@ -45,8 +45,7 @@ define(PlanActionRunner, Object, '', {
     case A.WALK:
     case A.CLIMB:
       if (this.moveto !== null) {
-	var r = tilemap.map2coord(dst);
-	this.moveto(r.center());
+	this.moveto(dst);
       }
       if (cur.equals(dst)) {
 	this.action = this.action.next;
@@ -58,11 +57,11 @@ define(PlanActionRunner, Object, '', {
       var map = tilemap.getRangeMap(T.isObstacle);
       var path = map.findSimplePath(cur.x, cur.y, dst.x, dst.y, actor.tilebounds);
       for (var i = 0; i < path.length; i++) {
-	var r = tilemap.map2coord(path[i]);
+	var r = actor.getHitboxAt(plan, path[i]);
 	var v = r.diff(actor.hitbox);
 	if (actor.isMovable(v)) {
 	  if (this.moveto !== null) {
-	    this.moveto(r.center());
+	    this.moveto(path[i]);
 	  }
 	  break;
 	}
@@ -85,8 +84,7 @@ define(PlanActionRunner, Object, '', {
       } else {
 	// not landed, holding something, or has no clearance.
 	if (this.moveto !== null) {
-	  var r = tilemap.map2coord(cur);
-	  this.moveto(r.center());
+	  this.moveto(cur);
 	}
       }
       break;
@@ -146,9 +144,10 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
 
   startPlan: function (runner) {
     var actor = this;
+    var plan = this.plan;
     var app = this.scene.app;
     runner.timeout = app.framerate*2;
-    runner.moveto = function (p) { actor.moveToward(p); }
+    runner.moveto = function (p) { actor.moveToward(plan, p); }
     runner.jump = function (t) { actor.setJump(Infinity); }
     this.runner = runner;
     log("begin:"+this.runner);
@@ -234,9 +233,10 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
     return grabbable.exists(this.tilemap.coord2map(hitbox));
   },
 
-  moveToward: function (p) {
-    var dx = (p.x - this.hitbox.centerx());
-    this.velocity.x = clamp(-this.speed, dx, +this.speed);
+  moveToward: function (planmap, p) {
+    var r = this.getHitboxAt(planmap, p);
+    var v = r.diff(this.hitbox);
+    this.velocity.x = clamp(-this.speed, v.x, +this.speed);
   },
 
 });
