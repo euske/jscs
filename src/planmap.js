@@ -119,10 +119,11 @@ define(PlanAction, Object, '', {
 
 //  PlanMap
 //
-function PlanMap(gridsize, tilemap, tilebounds)
+function PlanMap(actor, gridsize, tilemap, tilebounds)
 {
   tilebounds = ((tilebounds !== undefined)?
 		tilebounds : new Rectangle(0, 0, 1, 1));
+  this.actor = actor;
   this.gridsize = gridsize;
   this.tilemap = tilemap;
   this.obstacle = tilemap.getRangeMap(T.isObstacle);
@@ -193,40 +194,37 @@ define(PlanMap, Object, '', {
     start = (start !== undefined)? start : null;
     maxcost = (maxcost !== undefined)? maxcost : 20;
 
-    var cb = this.tilebounds;
-    var cb1 = this.tilebounds.move(0, 1);
-    var pb = new Rect(this.tilebounds.x, this.tilebounds.bottom(),
-		      this.tilebounds.width, 1);
-
     this.start = start;
     while (0 < this._queue.length) {
       var a0 = this._queue.shift().action;
       var p = a0.p;
       var context = a0.context;
       if (start !== null && start.equals(p)) return true;
-      if (this.obstacle.exists(cb.movev(p))) continue;
+      if (!this.actor.canMoveTo(this, p)) continue;
       // a character cannot stand in the mid air.
       if (context === null &&
-	  !this.grabbable.exists(cb.movev(p)) &&
-	  !this.stoppable.exists(pb.movev(p))) continue;
+	  !(this.actor.canGrabAt(this, p) ||
+	    this.actor.canStandAt(this, p))) continue;
       // assert(range.x <= p.x && p.x <= range.right());
       // assert(range.y <= p.y && p.y <= range.bottom());
       var cost = a0.cost+1;
       if (maxcost < cost) continue;
 
       // try climbing down.
+      var dp = new Vec2(p.x, p.y-1);
       if (context === null &&
-	  range.y <= p.y-1 &&
-	  this.grabbable.exists(pb.movev(p))) {
+	  range.contains(dp) &&
+	  this.actor.canClimbDown(this, dp)) {
 	this.addAction(start, 
-		       new PlanAction(new Vec2(p.x, p.y-1), null, A.CLIMB, cost, a0));
+		       new PlanAction(dp, null, A.CLIMB, cost, a0));
       }
       // try climbing up.
+      var up = new Vec2(p.x, p.y+1);
       if (context === null &&
-	  p.y+1 <= range.bottom &&
-	  this.grabbable.exists(cb1.movev(p))) {
+	  range.contains(up) &&
+	  this.actor.canClimbUp(this, up)) {
 	this.addAction(start, 
-		       new PlanAction(new Vec2(p.x, p.y+1), null, A.CLIMB, cost, a0));
+		       new PlanAction(up, null, A.CLIMB, cost, a0));
       }
 
       // for left and right.
@@ -239,9 +237,9 @@ define(PlanMap, Object, '', {
 	var wp = new Vec2(p.x-vx, p.y);
 	if (context === null &&
 	    range.x <= wp.x && wp.x <= range.right() &&
-	    !this.obstacle.exists(cb.movev(wp)) &&
-	    (this.grabbable.exists(cb.movev(wp)) ||
-	     this.stoppable.exists(pb.movev(wp)))) {
+	    this.actor.canMoveTo(this, wp) &&
+	    (this.actor.canGrabAt(this, wp) ||
+	     this.actor.canStandAt(this, wp))) {
 	  this.addAction(start, 
 			 new PlanAction(wp, null, A.WALK, cost, a0));
 	}
@@ -260,13 +258,13 @@ define(PlanMap, Object, '', {
 	    //   ...|  |
 	    //   ...+-X+ (p.x,p.y)
 	    //     ######
-	    if (this.obstacle.exists(cb.movev(fp))) continue;
+	    if (!this.actor.canMoveTo(this, fp)) continue;
 	    var dc = Math.abs(v.x)+Math.abs(v.y);
 	    if (0 < v.x &&
 		this.stoppable.get(fp.x+bx0+vx, fp.y+by0, 
 				   p.x+bx1, p.y+by1) === 0 &&
-		(this.grabbable.exists(cb.movev(fp)) ||
-		 this.stoppable.exists(pb.movev(fp)))) {
+		(this.actor.canGrabAt(this, fp) ||
+		 this.actor.canStandAt(this, fp))) {
 	      // normal fall.
 	      this.addAction(start, 
 			     new PlanAction(fp, null, A.FALL, cost+dc, a0));
@@ -285,6 +283,7 @@ define(PlanMap, Object, '', {
 	if (context === A.FALL) {
 	  for (var i = 0; i < this.jumppts.length; i++) {
 	    var v = this.jumppts[i];
+	    if (v.x === 0) continue;
 	    var jp = p.move(-v.x*vx, -v.y);
 	    if (!range.contains(jp)) continue;
 	    //  ....+--+  [vx = +1]
@@ -295,10 +294,9 @@ define(PlanMap, Object, '', {
 	    //  |  |...
 	    //  +-X+... (jp.x,jp.y) original position.
 	    // ######
-	    if (!this.grabbable.exists(cb.movev(jp)) &&
-		!this.stoppable.exists(pb.movev(jp))) continue;
-	    if (v.x ===0 ||
-		this.stoppable.get(jp.x+bx0, jp.y+by1, 
+	    if (!(this.actor.canGrabAt(this, jp) ||
+		  this.actor.canStandAt(this, jp))) continue;
+	    if (this.stoppable.get(jp.x+bx0, jp.y+by1, 
 				   p.x+bx1-vx, p.y+by0) !== 0) continue;
 	    // extra care is needed not to allow the following case:
 	    //      .#
@@ -323,8 +321,9 @@ define(PlanMap, Object, '', {
     return false;
   },
 
-  render: function (ctx, bx, by, tilesize, start) {
-    var rs = tilesize/2;
+  render: function (ctx, bx, by) {
+    var gs = this.gridsize;
+    var rs = gs/2;
     ctx.lineWidth = 1;
     for (var k in this._map) {
       var a = this._map[k];
@@ -345,28 +344,28 @@ define(PlanMap, Object, '', {
       default:
 	continue;
       }
-      ctx.strokeRect(bx+tilesize*p0.x+(tilesize-rs)/2+.5,
-		     by+tilesize*p0.y+(tilesize-rs)/2+.5,
+      ctx.strokeRect(bx+gs*p0.x+(gs-rs)/2+.5,
+		     by+gs*p0.y+(gs-rs)/2+.5,
 		     rs, rs);
       if (a.next !== null) {
 	var p1 = a.next.p;
 	ctx.beginPath();
-	ctx.moveTo(bx+tilesize*p0.x+rs+.5, by+tilesize*p0.y+rs+.5);
-	ctx.lineTo(bx+tilesize*p1.x+rs+.5, by+tilesize*p1.y+rs+.5);
+	ctx.moveTo(bx+gs*p0.x+rs+.5, by+gs*p0.y+rs+.5);
+	ctx.lineTo(bx+gs*p1.x+rs+.5, by+gs*p1.y+rs+.5);
 	ctx.stroke();
       }
     }
     if (this.start !== null) {
       ctx.strokeStyle = '#ff0000';
-      ctx.strokeRect(bx+tilesize*this.start.x+.5,
-		     by+tilesize*this.start.y+.5,
-		     tilesize, tilesize);
+      ctx.strokeRect(bx+gs*this.start.x+.5,
+		     by+gs*this.start.y+.5,
+		     gs, gs);
     }
     if (this.goal !== null) {
       ctx.strokeStyle = '#00ff00';
-      ctx.strokeRect(bx+tilesize*this.goal.x+.5,
-		     by+tilesize*this.goal.y+.5,
-		     tilesize, tilesize);
+      ctx.strokeRect(bx+gs*this.goal.x+.5,
+		     by+gs*this.goal.y+.5,
+		     gs, gs);
     }
   },
 

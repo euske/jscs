@@ -12,7 +12,7 @@ function PlanActionRunner(plan, actor)
 {
   this.plan = plan;
   this.actor = actor;
-  var cur = actor.getTilePos();
+  var cur = actor.getGridPos();
   this.action = plan.getAction(cur.x, cur.y);
 
   this.timeout = Infinity;
@@ -34,7 +34,7 @@ define(PlanActionRunner, Object, '', {
     var plan = this.plan;
     var actor = this.actor;
     var tilemap = plan.tilemap;
-    var cur = actor.getTilePos();
+    var cur = actor.getGridPos();
     var dst = this.action.next.p;
 
     // Get a micro-level (greedy) plan.
@@ -136,20 +136,10 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
     return this.tilemap.contactTile(hitbox, T.isObstacle, v);
   },
   
-  getTilePos: function () {
-    var r = this.tilemap.coord2map(this.hitbox.center());
-    return new Vec2(r.x, r.y);
-  },
-
-  moveToward: function (p) {
-    var dx = (p.x - this.hitbox.centerx());
-    this.velocity.x = clamp(-this.speed, dx, +this.speed);
-  },
-
   start: function (scene) {
     this._JumpingActor_start(scene);
     var gridsize = this.tilemap.tilesize;
-    this.plan = new PlanMap(gridsize, this.tilemap);
+    this.plan = new PlanMap(this, gridsize, this.tilemap);
     this.plan.tilebounds = this.tilebounds;
     this.plan.setJumpRange(this.speed, this.jumpfunc, this.fallfunc);
   },
@@ -187,7 +177,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
 	    !this.runner.plan.goal.equals(goal)) {
 	  this.stopPlan();
 	  var range = MakeRect(goal, 1, 1).inflate(10, 10);
-	  var start = this.getTilePos();
+	  var start = this.getGridPos();
 	  this.plan.initPlan(goal);
 	  if (this.plan.fillPlan(range, start)) {
 	    // start following a plan.
@@ -205,6 +195,48 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
     }
     
     this._JumpingActor_update();
+  },
+
+  getGridPos: function () {
+    var gs = this.plan.gridsize;
+    return new Vec2(int(this.hitbox.centerx()/gs),
+		    int((this.hitbox.bottom()+gs-1)/gs)-1);
+  },
+  getHitboxAt: function (planmap, p) {
+    var gs = planmap.gridsize;
+    return new Rect(int((p.x+.5)*gs-this.hitbox.width/2),
+		    (p.y+1)*gs-this.hitbox.height,
+		    this.hitbox.width, this.hitbox.height);
+  },
+  canMoveTo: function (planmap, p) {
+    var hitbox = this.getHitboxAt(planmap, p);
+    var obstacle = this.tilemap.getRangeMap(T.isObstacle);
+    return !obstacle.exists(this.tilemap.coord2map(hitbox));
+  },
+  canGrabAt: function (planmap, p) {
+    var hitbox = this.getHitboxAt(planmap, p);
+    var grabbable = this.tilemap.getRangeMap(T.isGrabbable);
+    return grabbable.exists(this.tilemap.coord2map(hitbox));
+  },
+  canStandAt: function (planmap, p) {
+    var hitbox = this.getHitboxAt(planmap, p).move(0, this.hitbox.height);
+    var stoppable = this.tilemap.getRangeMap(T.isStoppable);
+    return stoppable.exists(this.tilemap.coord2map(hitbox));
+  },
+  canClimbUp: function (planmap, p) {
+    var hitbox = this.getHitboxAt(planmap, p);
+    var grabbable = this.tilemap.getRangeMap(T.isGrabbable);
+    return grabbable.exists(this.tilemap.coord2map(hitbox));
+  },
+  canClimbDown: function (planmap, p) {
+    var hitbox = this.getHitboxAt(planmap, p).move(0, this.hitbox.height);
+    var grabbable = this.tilemap.getRangeMap(T.isGrabbable);
+    return grabbable.exists(this.tilemap.coord2map(hitbox));
+  },
+
+  moveToward: function (p) {
+    var dx = (p.x - this.hitbox.centerx());
+    this.velocity.x = clamp(-this.speed, dx, +this.speed);
   },
 
 });

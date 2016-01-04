@@ -80,7 +80,7 @@ define(Enemy, PlanningActor, 'PlanningActor', {
   
   renderPlan: function (ctx, bx, by) {
     if (this.plan !== null) {
-      this.plan.render(ctx, bx, by, this.scene.tilesize);
+      this.plan.render(ctx, bx, by);
     }
   },
 
