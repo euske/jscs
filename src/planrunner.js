@@ -148,10 +148,10 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
 
   start: function (scene) {
     this._JumpingActor_start(scene);
-    this.plan = new PlanMap(this.tilemap);
+    var gridsize = this.tilemap.tilesize;
+    this.plan = new PlanMap(gridsize, this.tilemap);
     this.plan.tilebounds = this.tilebounds;
-    this.plan.setJumpRange(this.tilemap.tilesize,
-			   this.speed, this.jumpfunc, this.fallfunc);
+    this.plan.setJumpRange(this.speed, this.jumpfunc, this.fallfunc);
   },
 
   startPlan: function (runner) {

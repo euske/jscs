@@ -6,7 +6,7 @@
 
 // calcJumpRange
 function calcJumpRange(
-  ts, speed, jumpfunc, fallfunc, maxtime)
+  gridsize, speed, jumpfunc, fallfunc, maxtime)
 {
   maxtime = (maxtime !== undefined)? maxtime : 15;
   var p = new Vec2(0, 0);
@@ -18,9 +18,9 @@ function calcJumpRange(
     if (0 < vy) break;
     p.x += speed;
     p.y += vy;      
-    var cy = Math.ceil(p.y/ts);
+    var cy = Math.ceil(p.y/gridsize);
     for (var x = 0; x <= p.x; x++) {
-      var c = new Vec2(int(x/ts+.5), cy);
+      var c = new Vec2(int(x/gridsize+.5), cy);
       if (c.x == 0 && c.y == 0) continue;
       pts[c.x+','+c.y] = c;
     }
@@ -34,7 +34,7 @@ function calcJumpRange(
 
 // calcFallRange
 function calcFallRange(
-  ts, speed, fallfunc, maxtime)
+  gridsize, speed, fallfunc, maxtime)
 {
   maxtime = (maxtime !== undefined)? maxtime : 15;
   var p = new Vec2(0, 0);
@@ -44,9 +44,9 @@ function calcFallRange(
     vy = fallfunc(vy);
     p.x += speed;
     p.y += vy;
-    var cy = Math.ceil(p.y/ts);
+    var cy = Math.ceil(p.y/gridsize);
     for (var x = 0; x <= p.x; x++) {
-      var c = new Vec2(int(x/ts+.5), cy);
+      var c = new Vec2(int(x/gridsize+.5), cy);
       if (c.x == 0 && c.y == 0) continue;
       pts[c.x+','+c.y] = c;
     }
@@ -119,10 +119,11 @@ define(PlanAction, Object, '', {
 
 //  PlanMap
 //
-function PlanMap(tilemap, tilebounds)
+function PlanMap(gridsize, tilemap, tilebounds)
 {
   tilebounds = ((tilebounds !== undefined)?
 		tilebounds : new Rectangle(0, 0, 1, 1));
+  this.gridsize = gridsize;
   this.tilemap = tilemap;
   this.obstacle = tilemap.getRangeMap(T.isObstacle);
   this.stoppable = tilemap.getRangeMap(T.isStoppable);
@@ -137,9 +138,19 @@ define(PlanMap, Object, '', {
     return ('<PlanMap '+this.goal+'>');
   },
 
-  setJumpRange: function (tilesize, speed, jumpfunc, fallfunc, maxtime) {
-    this.jumppts = calcJumpRange(tilesize, speed, jumpfunc, fallfunc, maxtime);
-    this.fallpts = calcFallRange(tilesize, speed, fallfunc, maxtime);
+  setJumpRange: function (speed, jumpfunc, fallfunc, maxtime) {
+    this.jumppts = calcJumpRange(this.gridsize, speed, jumpfunc, fallfunc, maxtime);
+    this.fallpts = calcFallRange(this.gridsize, speed, fallfunc, maxtime);
+  },
+
+  coord2grid: function (p) {
+    var gs = this.gridsize;
+    return new Vec2(int(p.x/gs), int(p.y/gs));
+  },
+
+  grid2coord: function (p) {
+    var gs = this.gridsize;
+    return new Vec2(p.x*gs, p.y*gs);
   },
 
   getAction: function (x, y, context) {
