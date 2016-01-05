@@ -201,11 +201,11 @@ define(PlanMap, Object, '', {
       var p = a0.p;
       var context = a0.context;
       if (start !== null && start.equals(p)) return true;
-      if (!this.actor.canMoveTo(this, p)) continue;
+      if (!this.actor.canMoveTo(p)) continue;
       // a character cannot stand in the mid air.
       if (context === null &&
-	  !(this.actor.canGrabAt(this, p) ||
-	    this.actor.canStandAt(this, p))) continue;
+	  !(this.actor.canGrabAt(p) ||
+	    this.actor.canStandAt(p))) continue;
       // assert(range.x <= p.x && p.x <= range.right());
       // assert(range.y <= p.y && p.y <= range.bottom());
 
@@ -213,14 +213,14 @@ define(PlanMap, Object, '', {
       var dp = new Vec2(p.x, p.y-1);
       if (context === null &&
 	  range.contains(dp) &&
-	  this.actor.canClimbDown(this, dp)) {
+	  this.actor.canClimbDown(dp)) {
 	this.addAction(start, new PlanAction(dp, null, A.CLIMB, a0, 1));
       }
       // try climbing up.
       var up = new Vec2(p.x, p.y+1);
       if (context === null &&
 	  range.contains(up) &&
-	  this.actor.canClimbUp(this, up)) {
+	  this.actor.canClimbUp(up)) {
 	this.addAction(start, new PlanAction(up, null, A.CLIMB, a0, 1));
       }
 
@@ -234,9 +234,9 @@ define(PlanMap, Object, '', {
 	var wp = new Vec2(p.x-vx, p.y);
 	if (context === null &&
 	    range.x <= wp.x && wp.x <= range.right() &&
-	    this.actor.canMoveTo(this, wp) &&
-	    (this.actor.canGrabAt(this, wp) ||
-	     this.actor.canStandAt(this, wp))) {
+	    this.actor.canMoveTo(wp) &&
+	    (this.actor.canGrabAt(wp) ||
+	     this.actor.canStandAt(wp))) {
 	  this.addAction(start, new PlanAction(wp, null, A.WALK, a0, 1));
 	}
 
@@ -254,13 +254,13 @@ define(PlanMap, Object, '', {
 	    //   ...|  |
 	    //   ...+-X+ (p.x,p.y)
 	    //     ######
-	    if (!this.actor.canMoveTo(this, fp)) continue;
+	    if (!this.actor.canMoveTo(fp)) continue;
 	    var dc = Math.abs(v.x)+Math.abs(v.y);
 	    if (0 < v.x &&
 		this.stoppable.get(fp.x+bx0+vx, fp.y+by0, 
 				   p.x+bx1, p.y+by1) === 0 &&
-		(this.actor.canGrabAt(this, fp) ||
-		 this.actor.canStandAt(this, fp))) {
+		(this.actor.canGrabAt(fp) ||
+		 this.actor.canStandAt(fp))) {
 	      // normal fall.
 	      this.addAction(start, new PlanAction(fp, null, A.FALL, a0, dc));
 	    }
@@ -288,8 +288,8 @@ define(PlanMap, Object, '', {
 	    //  |  |...
 	    //  +-X+... (jp.x,jp.y) original position.
 	    // ######
-	    if (!(this.actor.canGrabAt(this, jp) ||
-		  this.actor.canStandAt(this, jp))) continue;
+	    if (!(this.actor.canGrabAt(jp) ||
+		  this.actor.canStandAt(jp))) continue;
 	    if (this.stoppable.get(jp.x+bx0, jp.y+by1, 
 				   p.x+bx1-vx, p.y+by0) !== 0) continue;
 	    // extra care is needed not to allow the following case:

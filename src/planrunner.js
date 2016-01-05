@@ -57,7 +57,7 @@ define(PlanActionRunner, Object, '', {
       var map = tilemap.getRangeMap(T.isObstacle);
       var path = map.findSimplePath(cur.x, cur.y, dst.x, dst.y, actor.tilebounds);
       for (var i = 0; i < path.length; i++) {
-	var r = actor.getHitboxAt(plan, path[i]);
+	var r = actor.getHitboxAt(path[i]);
 	var v = r.diff(actor.hitbox);
 	if (actor.isMovable(v)) {
 	  if (this.moveto !== null) {
@@ -147,7 +147,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
     var plan = this.plan;
     var app = this.scene.app;
     runner.timeout = app.framerate*2;
-    runner.moveto = function (p) { actor.moveToward(plan, p); }
+    runner.moveto = function (p) { actor.moveToward(p); }
     runner.jump = function (t) { actor.setJump(Infinity); }
     this.runner = runner;
     log("begin:"+this.runner);
@@ -199,42 +199,42 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
   getGridPos: function () {
     var gs = this.plan.gridsize;
     return new Vec2(int(this.hitbox.centerx()/gs),
-		    int((this.hitbox.bottom()+gs-1)/gs)-1);
+		    int((this.hitbox.bottom()-1)/gs));
   },
-  getHitboxAt: function (planmap, p) {
-    var gs = planmap.gridsize;
+  getHitboxAt: function (p) {
+    var gs = this.plan.gridsize;
     return new Rect(int((p.x+.5)*gs-this.hitbox.width/2),
 		    (p.y+1)*gs-this.hitbox.height,
 		    this.hitbox.width, this.hitbox.height);
   },
-  canMoveTo: function (planmap, p) {
-    var hitbox = this.getHitboxAt(planmap, p);
+  canMoveTo: function (p) {
+    var hitbox = this.getHitboxAt(p);
     var obstacle = this.tilemap.getRangeMap(T.isObstacle);
     return !obstacle.exists(this.tilemap.coord2map(hitbox));
   },
-  canGrabAt: function (planmap, p) {
-    var hitbox = this.getHitboxAt(planmap, p);
+  canGrabAt: function (p) {
+    var hitbox = this.getHitboxAt(p);
     var grabbable = this.tilemap.getRangeMap(T.isGrabbable);
     return grabbable.exists(this.tilemap.coord2map(hitbox));
   },
-  canStandAt: function (planmap, p) {
-    var hitbox = this.getHitboxAt(planmap, p).move(0, this.hitbox.height);
+  canStandAt: function (p) {
+    var hitbox = this.getHitboxAt(p).move(0, this.hitbox.height);
     var stoppable = this.tilemap.getRangeMap(T.isStoppable);
     return stoppable.exists(this.tilemap.coord2map(hitbox));
   },
-  canClimbUp: function (planmap, p) {
-    var hitbox = this.getHitboxAt(planmap, p);
+  canClimbUp: function (p) {
+    var hitbox = this.getHitboxAt(p);
     var grabbable = this.tilemap.getRangeMap(T.isGrabbable);
     return grabbable.exists(this.tilemap.coord2map(hitbox));
   },
-  canClimbDown: function (planmap, p) {
-    var hitbox = this.getHitboxAt(planmap, p).move(0, this.hitbox.height);
+  canClimbDown: function (p) {
+    var hitbox = this.getHitboxAt(p).move(0, this.hitbox.height);
     var grabbable = this.tilemap.getRangeMap(T.isGrabbable);
     return grabbable.exists(this.tilemap.coord2map(hitbox));
   },
 
-  moveToward: function (planmap, p) {
-    var r = this.getHitboxAt(planmap, p);
+  moveToward: function (p) {
+    var r = this.getHitboxAt(p);
     var v = r.diff(this.hitbox);
     this.velocity.x = clamp(-this.speed, v.x, +this.speed);
   },
