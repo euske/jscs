@@ -1,4 +1,4 @@
-// planaction.js
+// planrunner.js
 //   requires: utils.js
 //   requires: geom.js
 //   requires: tilemap.js

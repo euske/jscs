@@ -94,18 +94,18 @@ function getKey(x, y, context)
   return (context === undefined)? (x+','+y) : (x+','+y+':'+context);
 }
 
-function PlanAction(p, context, type, cost, next)
+function PlanAction(p, context, type, next, dc)
 {
   context = (context !== undefined)? context : null;
   type = (type !== undefined)? type : A.NONE;
-  cost = (cost !== undefined)? cost : 0;
   next = (next !== undefined)? next : null;
-  assert(0 <= cost);
+  dc = (dc !== undefined)? dc : 0;
+  assert(0 <= dc);
   this.p = p;
   this.context = context;
   this.type = type;
-  this.cost = cost;
   this.next = next;
+  this.cost = (next === null)? 0 : next.cost+dc;
   this.key = getKey(p.x, p.y);
 }
 
@@ -197,6 +197,7 @@ define(PlanMap, Object, '', {
     this.start = start;
     while (0 < this._queue.length) {
       var a0 = this._queue.shift().action;
+      if (maxcost <= a0.cost) continue;
       var p = a0.p;
       var context = a0.context;
       if (start !== null && start.equals(p)) return true;
@@ -207,24 +208,20 @@ define(PlanMap, Object, '', {
 	    this.actor.canStandAt(this, p))) continue;
       // assert(range.x <= p.x && p.x <= range.right());
       // assert(range.y <= p.y && p.y <= range.bottom());
-      var cost = a0.cost+1;
-      if (maxcost < cost) continue;
 
       // try climbing down.
       var dp = new Vec2(p.x, p.y-1);
       if (context === null &&
 	  range.contains(dp) &&
 	  this.actor.canClimbDown(this, dp)) {
-	this.addAction(start, 
-		       new PlanAction(dp, null, A.CLIMB, cost, a0));
+	this.addAction(start, new PlanAction(dp, null, A.CLIMB, a0, 1));
       }
       // try climbing up.
       var up = new Vec2(p.x, p.y+1);
       if (context === null &&
 	  range.contains(up) &&
 	  this.actor.canClimbUp(this, up)) {
-	this.addAction(start, 
-		       new PlanAction(up, null, A.CLIMB, cost, a0));
+	this.addAction(start, new PlanAction(up, null, A.CLIMB, a0, 1));
       }
 
       // for left and right.
@@ -240,8 +237,7 @@ define(PlanMap, Object, '', {
 	    this.actor.canMoveTo(this, wp) &&
 	    (this.actor.canGrabAt(this, wp) ||
 	     this.actor.canStandAt(this, wp))) {
-	  this.addAction(start, 
-			 new PlanAction(wp, null, A.WALK, cost, a0));
+	  this.addAction(start, new PlanAction(wp, null, A.WALK, a0, 1));
 	}
 
 	// try falling.
@@ -266,15 +262,13 @@ define(PlanMap, Object, '', {
 		(this.actor.canGrabAt(this, fp) ||
 		 this.actor.canStandAt(this, fp))) {
 	      // normal fall.
-	      this.addAction(start, 
-			     new PlanAction(fp, null, A.FALL, cost+dc, a0));
+	      this.addAction(start, new PlanAction(fp, null, A.FALL, a0, dc));
 	    }
 	    if (v.y === 0 ||
 		this.stoppable.get(fp.x+bx0, fp.y+by1, 
 				   p.x+bx1, p.y+by1) === 0) {
 	      // fall after jump.
-	      this.addAction(start, 
-			     new PlanAction(fp, A.FALL, A.FALL, cost+dc, a0));
+	      this.addAction(start, new PlanAction(fp, A.FALL, A.FALL, a0, dc));
 	    }
 	  }
 	}
@@ -308,8 +302,7 @@ define(PlanMap, Object, '', {
 		this.obstacle.exists(new Rect(p.x+bx1, p.y+by1+1, 1, 1)) &&
 		!this.obstacle.exists(new Rect(p.x+bx1-vx, p.y+by0-1, 1, 1))) continue;
 	    var dc = Math.abs(v.x)+Math.abs(v.y);
-	    this.addAction(start, 
-			   new PlanAction(jp, null, A.JUMP, cost+dc, a0));
+	    this.addAction(start, new PlanAction(jp, null, A.JUMP, a0, dc));
 	  }
 	}
       }
