@@ -124,16 +124,11 @@ define(PlanAction, Object, '', {
 
 //  PlanMap
 //
-function PlanMap(actor, gridsize, tilemap, tilebounds)
+function PlanMap(actor, gridsize, tilemap)
 {
-  tilebounds = ((tilebounds !== undefined)?
-		tilebounds : new Rectangle(0, 0, 1, 1));
   this.actor = actor;
   this.gridsize = gridsize;
   this.tilemap = tilemap;
-  this.obstacle = tilemap.getRangeMap(T.isObstacle);
-  this.stoppable = tilemap.getRangeMap(T.isStoppable);
-  this.tilebounds = tilebounds;
   this.start = null;
   this.goal = null;
 }
@@ -172,16 +167,6 @@ define(PlanMap, Object, '', {
       this._queue.push({ action:action, total:(dist+action.cost) });
     }
   },
-
-  isValidPos: function (p) {
-    // a start position cannot be in the mid air.
-    var cb = this.tilebounds;
-    var pb = new Rect(this.tilebounds.x, this.tilebounds.bottom(),
-		      this.tilebounds.width, 1);
-    return (grabbable.exists(cb.movev(p)) ||
-	    stoppable.exists(pb.movev(p)));
-  },
-  
 
   render: function (ctx, bx, by) {
     var gs = this.gridsize;
@@ -247,41 +232,28 @@ define(PlanMap, Object, '', {
       var a0 = this._queue.shift().action;
       if (maxcost <= a0.cost) continue;
       var p = a0.p;
-      var context = a0.context;
       if (start !== null && start.equals(p)) return true;
-      if (!this.actor.canMoveTo(p)) continue;
-      // a character cannot stand in the mid air.
-      if (context === null &&
-	  !(this.actor.canGrabAt(p) ||
-	    this.actor.canStandAt(p))) continue;
-      // assert(range.x <= p.x && p.x <= range.right());
-      // assert(range.y <= p.y && p.y <= range.bottom());
+      // assert(range.contains(p));
 
       // try climbing down.
       var dp = new Vec2(p.x, p.y-1);
-      if (context === null &&
-	  range.contains(dp) &&
+      if (range.contains(dp) &&
 	  this.actor.canClimbDown(dp)) {
 	this.addAction(start, new PlanAction(dp, null, A.CLIMB, a0, 1));
       }
       // try climbing up.
       var up = new Vec2(p.x, p.y+1);
-      if (context === null &&
-	  range.contains(up) &&
+      if (range.contains(up) &&
 	  this.actor.canClimbUp(up)) {
 	this.addAction(start, new PlanAction(up, null, A.CLIMB, a0, 1));
       }
 
       // for left and right.
       for (var vx = -1; vx <= +1; vx += 2) {
-	var bx0 = (0 < vx)? this.tilebounds.x : this.tilebounds.right();
-	var bx1 = (0 < vx)? this.tilebounds.right() : this.tilebounds.x;
-	var by0 = this.tilebounds.y, by1 = this.tilebounds.bottom();
 
 	// try walking.
 	var wp = new Vec2(p.x-vx, p.y);
-	if (context === null &&
-	    range.contains(wp) &&
+	if (range.contains(wp) &&
 	    this.actor.canMoveTo(wp) &&
 	    (this.actor.canGrabAt(wp) ||
 	     this.actor.canStandAt(wp))) {
@@ -289,43 +261,36 @@ define(PlanMap, Object, '', {
 	}
 
 	// try falling.
-	if (context === null) {
-	  var fallpts = this.actor.getFallPoints();
-	  for (var i = 0; i < fallpts.length; i++) {
-	    var v = fallpts[i];
-	    var fp = p.move(-v.x*vx, -v.y);
-	    if (!range.contains(fp)) continue;
-	    //  +--+....  [vx = +1]
-	    //  |  |....
-	    //  +-X+.... (fp.x,fp.y) original position.
-	    // ##.......
-	    //   ...+--+
-	    //   ...|  |
-	    //   ...+-X+ (p.x,p.y)
-	    //     ######
-	    if (!this.actor.canMoveTo(fp)) continue;
+	var fallpts = this.actor.getFallPoints();
+	for (var i = 0; i < fallpts.length; i++) {
+	  var v = fallpts[i];
+	  var fp = p.move(-v.x*vx, -v.y);
+	  // try the v.x == 0 case only once.
+	  if (v.x === 0 && vx < 0) continue;
+	  if (!range.contains(fp)) continue;
+	  //  +--+....  [vx = +1]
+	  //  |  |....
+	  //  +-X+.... (fp.x,fp.y) original position.
+	  // ##.......
+	  //   ...+--+
+	  //   ...|  |
+	  //   ...+-X+ (p.x,p.y)
+	  //     ######
+	  if (!this.actor.canMoveTo(fp)) continue;
+	  if (this.actor.canFall(fp, p) && 
+	      this.actor.canStandAt(p)) {
 	    var dc = Math.abs(v.x)+Math.abs(v.y);
-	    if (0 < v.x &&
-		this.actor.canFall(fp, p) && 
-		this.actor.canStandAt(p)) {
-	      // normal fall.
-	      this.addAction(start, new PlanAction(fp, null, A.FALL, a0, dc));
-	    }
-	    if (v.y === 0 ||
-		this.stoppable.get(fp.x+bx0, fp.y+by1, 
-				   p.x+bx1, p.y+by1) === 0) {
-	      // fall after jump.
-	      this.addAction(start, new PlanAction(fp, A.FALL, A.FALL, a0, dc));
-	    }
+	    this.addAction(start, new PlanAction(fp, null, A.FALL, a0, dc));
 	  }
 	}
 
 	// try jumping.
-	if (context === A.FALL) {
+	if (a0.type === A.FALL) {
 	  var jumppts = this.actor.getJumpPoints();
 	  for (var i = 0; i < jumppts.length; i++) {
 	    var v = jumppts[i];
-	    if (v.x === 0) continue;
+	    // try the v.x == 0 case only once.
+	    if (v.x === 0 && vx < 0) continue;
 	    var jp = p.move(-v.x*vx, -v.y);
 	    if (!range.contains(jp)) continue;
 	    //  ....+--+  [vx = +1]
@@ -336,21 +301,12 @@ define(PlanMap, Object, '', {
 	    //  |  |...
 	    //  +-X+... (jp.x,jp.y) original position.
 	    // ######
-	    if (!(this.actor.canGrabAt(jp) ||
-		  this.actor.canStandAt(jp))) continue;
-	    if (this.stoppable.get(jp.x+bx0, jp.y+by1, 
-				   p.x+bx1-vx, p.y+by0) !== 0) continue;
-	    // extra care is needed not to allow the following case:
-	    //      .#
-	    //    +--+
-	    //    |  |  (this is impossible!)
-	    //    +-X+
-	    //       #
-	    if (this.obstacle.exists(new Rect(p.x+bx1, p.y+by0-1, 1, 1)) &&
-		this.obstacle.exists(new Rect(p.x+bx1, p.y+by1+1, 1, 1)) &&
-		!this.obstacle.exists(new Rect(p.x+bx1-vx, p.y+by0-1, 1, 1))) continue;
-	    var dc = Math.abs(v.x)+Math.abs(v.y);
-	    this.addAction(start, new PlanAction(jp, null, A.JUMP, a0, dc));
+	    if (!this.actor.canMoveTo(jp)) continue;
+	    if (this.actor.canJump(jp, p) &&
+		(this.actor.canGrabAt(jp) || this.actor.canStandAt(jp))) {
+	      var dc = Math.abs(v.x)+Math.abs(v.y);
+	      this.addAction(start, new PlanAction(jp, null, A.JUMP, a0, dc));
+	    }
 	  }
 	}
       }

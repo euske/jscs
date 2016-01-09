@@ -121,9 +121,8 @@ function PlanningActor(tilemap, bounds, hitbox, tileno)
   this.target = null;
   this.runner = null;
 
-  var gridsize = this.tilemap.tilesize;
+  var gridsize = this.tilemap.tilesize/2;
   this.plan = new PlanMap(this, gridsize, this.tilemap);
-  this.plan.tilebounds = this.tilebounds;
   this.obstacle = this.tilemap.getRangeMap(T.isObstacle);
   this.grabbable = this.tilemap.getRangeMap(T.isGrabbable);
   this.stoppable = this.tilemap.getRangeMap(T.isStoppable);
@@ -171,7 +170,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
 					target.velocity, target.fallfunc));
       if (hitbox !== null) {
 	// make a plan.
-	var goal = tilemap.coord2map(hitbox.center()).topleft();
+	var goal = this.plan.coord2grid(hitbox.center());
 	if (this.runner === null ||
 	    !this.runner.plan.goal.equals(goal)) {
 	  this.stopPlan();
@@ -268,7 +267,8 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
     //    |  |  (this is impossiburu!)
     //    +-X+
     //       #
-    return true;
+    var rect = hb0.union(hb1);
+    return !this.stoppable.exists(this.tilemap.coord2map(rect));
   },
 
   moveToward: function (p) {
