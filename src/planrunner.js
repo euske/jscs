@@ -119,8 +119,16 @@ function PlanningActor(tilemap, bounds, hitbox, tileno)
   this.tilemap = tilemap;
   this.tilebounds = new Rectangle(0, 0, 1, 1);
   this.target = null;
-  this.plan = null;
   this.runner = null;
+
+  var gridsize = this.tilemap.tilesize;
+  this.plan = new PlanMap(this, gridsize, this.tilemap);
+  this.plan.tilebounds = this.tilebounds;
+  this.obstacle = this.tilemap.getRangeMap(T.isObstacle);
+  this.grabbable = this.tilemap.getRangeMap(T.isGrabbable);
+  this.stoppable = this.tilemap.getRangeMap(T.isStoppable);
+  this.jumppts = calcJumpRange(gridsize, this.speed, this.jumpfunc, this.fallfunc);
+  this.fallpts = calcFallRange(gridsize, this.speed, this.fallfunc);
 }
 
 define(PlanningActor, JumpingActor, 'JumpingActor', {
@@ -134,14 +142,6 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
     return this.tilemap.contactTile(hitbox, T.isObstacle, v);
   },
   
-  start: function (scene) {
-    this._JumpingActor_start(scene);
-    var gridsize = this.tilemap.tilesize;
-    this.plan = new PlanMap(this, gridsize, this.tilemap);
-    this.plan.tilebounds = this.tilebounds;
-    this.plan.setJumpRange(this.speed, this.jumpfunc, this.fallfunc);
-  },
-
   startPlan: function (runner) {
     var actor = this;
     var plan = this.plan;
@@ -201,6 +201,12 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
     return new Vec2(int(this.hitbox.centerx()/gs),
 		    int((this.hitbox.bottom()-1)/gs));
   },
+  getJumpPoints: function () {
+    return this.jumppts;
+  },
+  getFallPoints: function () {
+    return this.fallpts;
+  },
   getHitboxAt: function (p) {
     var gs = this.plan.gridsize;
     return new Rect(int((p.x+.5)*gs-this.hitbox.width/2),
@@ -209,28 +215,60 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
   },
   canMoveTo: function (p) {
     var hitbox = this.getHitboxAt(p);
-    var obstacle = this.tilemap.getRangeMap(T.isObstacle);
-    return !obstacle.exists(this.tilemap.coord2map(hitbox));
+    return !this.obstacle.exists(this.tilemap.coord2map(hitbox));
   },
   canGrabAt: function (p) {
     var hitbox = this.getHitboxAt(p);
-    var grabbable = this.tilemap.getRangeMap(T.isGrabbable);
-    return grabbable.exists(this.tilemap.coord2map(hitbox));
+    return this.grabbable.exists(this.tilemap.coord2map(hitbox));
   },
   canStandAt: function (p) {
     var hitbox = this.getHitboxAt(p).move(0, this.hitbox.height);
-    var stoppable = this.tilemap.getRangeMap(T.isStoppable);
-    return stoppable.exists(this.tilemap.coord2map(hitbox));
+    return this.stoppable.exists(this.tilemap.coord2map(hitbox));
   },
   canClimbUp: function (p) {
     var hitbox = this.getHitboxAt(p);
-    var grabbable = this.tilemap.getRangeMap(T.isGrabbable);
-    return grabbable.exists(this.tilemap.coord2map(hitbox));
+    return this.grabbable.exists(this.tilemap.coord2map(hitbox));
   },
   canClimbDown: function (p) {
     var hitbox = this.getHitboxAt(p).move(0, this.hitbox.height);
-    var grabbable = this.tilemap.getRangeMap(T.isGrabbable);
-    return grabbable.exists(this.tilemap.coord2map(hitbox));
+    return this.grabbable.exists(this.tilemap.coord2map(hitbox));
+  },
+  canFall: function (p0, p1) {
+    //  +--+....
+    //  |  |....
+    //  +-X+.... (p0.x,p0.y) original position.
+    // ##.......
+    //   ...+--+
+    //   ...|  |
+    //   ...+-X+ (p1.x,p1.y)
+    //     ######
+    var hb0 = this.getHitboxAt(p0);
+    var hb1 = this.getHitboxAt(p1);
+    var x0 = Math.min(hb0.right(), hb1.x);
+    var x1 = Math.max(hb0.x, hb1.right());
+    var y0 = Math.min(hb0.y, hb1.y);
+    var y1 = Math.max(hb0.bottom(), hb1.bottom());
+    var rect = new Rectangle(x0, y0, x1-x0, y1-y0);
+    return !this.stoppable.exists(this.tilemap.coord2map(rect));
+  },
+  canJump: function (p0, p1) {
+    //  ....+--+
+    //  ....|  |
+    //  ....+-X+ (p1.x,p1.y) tip point
+    //  .......
+    //  +--+...
+    //  |  |...
+    //  +-X+... (p0.x,p0.y) original position.
+    // ######
+    var hb0 = this.getHitboxAt(p0);
+    var hb1 = this.getHitboxAt(p1);
+    // extra care is needed not to allow the following case:
+    //      .#
+    //    +--+
+    //    |  |  (this is impossiburu!)
+    //    +-X+
+    //       #
+    return true;
   },
 
   moveToward: function (p) {

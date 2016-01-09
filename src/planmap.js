@@ -9,20 +9,25 @@ function calcJumpRange(
   gridsize, speed, jumpfunc, fallfunc, maxtime)
 {
   maxtime = (maxtime !== undefined)? maxtime : 15;
-  var p = new Vec2(0, 0);
-  var vy = 0;
   var pts = {};
-  for (var t = 0; t < maxtime; t++) {
-    var dy = jumpfunc(t);
-    vy = fallfunc(vy+dy);
-    if (0 < vy) break;
-    p.x += speed;
-    p.y += vy;      
-    var cy = Math.ceil(p.y/gridsize);
-    for (var x = 0; x <= p.x; x++) {
-      var c = new Vec2(int(x/gridsize+.5), cy);
-      if (c.x == 0 && c.y == 0) continue;
-      pts[c.x+','+c.y] = c;
+  for (var jt = 1; jt < maxtime; jt++) {
+    var p = new Vec2(0, 0);
+    var vy = 0;
+    for (var t = 0; t < maxtime; t++) {
+      var dy = (t < jt)? jumpfunc(t) : 0;
+      vy = fallfunc(vy+dy);
+      if (0 <= vy) {
+	// tip point.
+	var cy = Math.ceil(p.y/gridsize);
+	for (var x = 0; x <= p.x; x++) {
+	  var c = new Vec2(int(x/gridsize+.5), cy);
+	  if (c.x == 0 && c.y == 0) continue;
+	  pts[c.x+','+c.y] = c;
+	}
+	break;
+      }
+      p.x += speed;
+      p.y += vy;
     }
   }
   var a = [];
@@ -128,7 +133,6 @@ function PlanMap(actor, gridsize, tilemap, tilebounds)
   this.tilemap = tilemap;
   this.obstacle = tilemap.getRangeMap(T.isObstacle);
   this.stoppable = tilemap.getRangeMap(T.isStoppable);
-  this.grabbable = tilemap.getRangeMap(T.isGrabbable);
   this.tilebounds = tilebounds;
   this.start = null;
   this.goal = null;
@@ -137,11 +141,6 @@ function PlanMap(actor, gridsize, tilemap, tilebounds)
 define(PlanMap, Object, '', {
   toString: function () {
     return ('<PlanMap '+this.goal+'>');
-  },
-
-  setJumpRange: function (speed, jumpfunc, fallfunc, maxtime) {
-    this.jumppts = calcJumpRange(this.gridsize, speed, jumpfunc, fallfunc, maxtime);
-    this.fallpts = calcFallRange(this.gridsize, speed, fallfunc, maxtime);
   },
 
   coord2grid: function (p) {
@@ -183,6 +182,55 @@ define(PlanMap, Object, '', {
 	    stoppable.exists(pb.movev(p)));
   },
   
+
+  render: function (ctx, bx, by) {
+    var gs = this.gridsize;
+    var rs = gs/2;
+    ctx.lineWidth = 1;
+    for (var k in this._map) {
+      var a = this._map[k];
+      var p0 = a.p;
+      switch (a.type) {
+      case A.WALK:
+	ctx.strokeStyle = 'white';
+	break;
+      case A.FALL:
+	ctx.strokeStyle = 'blue';
+	break;
+      case A.JUMP:
+	ctx.strokeStyle = 'magenta';
+	break;
+      case A.CLIMB:
+	ctx.strokeStyle = 'cyan';
+	break;
+      default:
+	continue;
+      }
+      ctx.strokeRect(bx+gs*p0.x+(gs-rs)/2+.5,
+		     by+gs*p0.y+(gs-rs)/2+.5,
+		     rs, rs);
+      if (a.next !== null) {
+	var p1 = a.next.p;
+	ctx.beginPath();
+	ctx.moveTo(bx+gs*p0.x+rs+.5, by+gs*p0.y+rs+.5);
+	ctx.lineTo(bx+gs*p1.x+rs+.5, by+gs*p1.y+rs+.5);
+	ctx.stroke();
+      }
+    }
+    if (this.start !== null) {
+      ctx.strokeStyle = '#ff0000';
+      ctx.strokeRect(bx+gs*this.start.x+.5,
+		     by+gs*this.start.y+.5,
+		     gs, gs);
+    }
+    if (this.goal !== null) {
+      ctx.strokeStyle = '#00ff00';
+      ctx.strokeRect(bx+gs*this.goal.x+.5,
+		     by+gs*this.goal.y+.5,
+		     gs, gs);
+    }
+  },
+
   initPlan: function (goal) {
     this.goal = goal;
     this._map = {};
@@ -233,7 +281,7 @@ define(PlanMap, Object, '', {
 	// try walking.
 	var wp = new Vec2(p.x-vx, p.y);
 	if (context === null &&
-	    range.x <= wp.x && wp.x <= range.right() &&
+	    range.contains(wp) &&
 	    this.actor.canMoveTo(wp) &&
 	    (this.actor.canGrabAt(wp) ||
 	     this.actor.canStandAt(wp))) {
@@ -242,8 +290,9 @@ define(PlanMap, Object, '', {
 
 	// try falling.
 	if (context === null) {
-	  for (var i = 0; i < this.fallpts.length; i++) {
-	    var v = this.fallpts[i];
+	  var fallpts = this.actor.getFallPoints();
+	  for (var i = 0; i < fallpts.length; i++) {
+	    var v = fallpts[i];
 	    var fp = p.move(-v.x*vx, -v.y);
 	    if (!range.contains(fp)) continue;
 	    //  +--+....  [vx = +1]
@@ -257,10 +306,8 @@ define(PlanMap, Object, '', {
 	    if (!this.actor.canMoveTo(fp)) continue;
 	    var dc = Math.abs(v.x)+Math.abs(v.y);
 	    if (0 < v.x &&
-		this.stoppable.get(fp.x+bx0+vx, fp.y+by0, 
-				   p.x+bx1, p.y+by1) === 0 &&
-		(this.actor.canGrabAt(fp) ||
-		 this.actor.canStandAt(fp))) {
+		this.actor.canFall(fp, p) && 
+		this.actor.canStandAt(p)) {
 	      // normal fall.
 	      this.addAction(start, new PlanAction(fp, null, A.FALL, a0, dc));
 	    }
@@ -275,8 +322,9 @@ define(PlanMap, Object, '', {
 
 	// try jumping.
 	if (context === A.FALL) {
-	  for (var i = 0; i < this.jumppts.length; i++) {
-	    var v = this.jumppts[i];
+	  var jumppts = this.actor.getJumpPoints();
+	  for (var i = 0; i < jumppts.length; i++) {
+	    var v = jumppts[i];
 	    if (v.x === 0) continue;
 	    var jp = p.move(-v.x*vx, -v.y);
 	    if (!range.contains(jp)) continue;
@@ -312,54 +360,6 @@ define(PlanMap, Object, '', {
     }
     
     return false;
-  },
-
-  render: function (ctx, bx, by) {
-    var gs = this.gridsize;
-    var rs = gs/2;
-    ctx.lineWidth = 1;
-    for (var k in this._map) {
-      var a = this._map[k];
-      var p0 = a.p;
-      switch (a.type) {
-      case A.WALK:
-	ctx.strokeStyle = 'white';
-	break;
-      case A.FALL:
-	ctx.strokeStyle = 'blue';
-	break;
-      case A.JUMP:
-	ctx.strokeStyle = 'magenta';
-	break;
-      case A.CLIMB:
-	ctx.strokeStyle = 'cyan';
-	break;
-      default:
-	continue;
-      }
-      ctx.strokeRect(bx+gs*p0.x+(gs-rs)/2+.5,
-		     by+gs*p0.y+(gs-rs)/2+.5,
-		     rs, rs);
-      if (a.next !== null) {
-	var p1 = a.next.p;
-	ctx.beginPath();
-	ctx.moveTo(bx+gs*p0.x+rs+.5, by+gs*p0.y+rs+.5);
-	ctx.lineTo(bx+gs*p1.x+rs+.5, by+gs*p1.y+rs+.5);
-	ctx.stroke();
-      }
-    }
-    if (this.start !== null) {
-      ctx.strokeStyle = '#ff0000';
-      ctx.strokeRect(bx+gs*this.start.x+.5,
-		     by+gs*this.start.y+.5,
-		     gs, gs);
-    }
-    if (this.goal !== null) {
-      ctx.strokeStyle = '#00ff00';
-      ctx.strokeRect(bx+gs*this.goal.x+.5,
-		     by+gs*this.goal.y+.5,
-		     gs, gs);
-    }
   },
 
 });
