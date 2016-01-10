@@ -8,80 +8,26 @@
 //   requires: app.js
 'use strict';
 
-// MovingActor
-function MovingActor(bounds, hitbox, tileno)
-{
-  this._Actor(bounds, hitbox, tileno)
-  this.jumpfunc = (function (t) { return (t < 4)? -5 : 0; });
-  this.fallfunc = (function (vy) { return clamp(-8, vy+1, +8); });
-  this.velocity = new Vec2(0, 0);
-  this.landed = false;
-  this._jumpt = -1;
-}
-
-define(MovingActor, Actor, 'Actor', {
-  update: function () {
-    var v = this.velocity.copy();
-    if (0 <= this._jumpt) {
-      v.y += this.jumpfunc(this._jumpt);
-      this._jumpt++;
-    }
-    v.y = this.fallfunc(v.y);
-    this.velocity = this.getMove(v);
-    this.landed = (0 < v.y && this.velocity.y < v.y);
-    this.movev(this.velocity);
-  },
-
-  getMoveFor: function (v, rect) {
-    var hitbox = this.hitbox;
-    var d0 = hitbox.contact(v, rect);
-    hitbox = hitbox.move(d0.x, d0.y);
-    v = v.sub(d0);
-    var d1 = hitbox.contact(new Vec2(v.x, 0), rect);
-    hitbox = hitbox.move(d1.x, d1.y);
-    v = v.sub(d1);
-    var d2 = hitbox.contact(new Vec2(0, v.y), rect);
-    return new Vec2(d0.x+d1.x+d2.x,
-		    d0.y+d1.y+d2.y);
-  },
-
-  getMove: function (v) {
-    return v;
-  },
-  
-  isLanded: function () {
-    return this.landed;
-  },
-
-  setJumping: function (jumping) {
-    if (jumping && this.landed) {
-      this._jumpt = 0;
-    } else {
-      this._jumpt = -1;
-    }
-  },
-});
-
 
 // Player
-function Player(bounds)
+function Player(scene, bounds)
 {
-  this._MovingActor(bounds, bounds, 0);
-  this.speed = 4;
+  this._JumpingActor(bounds, bounds, 0);
+  this.scene = scene;
 }
 
-define(Player, MovingActor, 'MovingActor', {
-  getMove: function (v) {
-    return this.getMoveFor(v, this.scene.ground);
+define(Player, JumpingActor, 'JumpingActor', {
+  getContactFor: function (range, hitbox, v) {
+    return hitbox.contact(v, this.scene.ground);
   },
 
   jump: function (jumping) {
     if (jumping) {
       if (this.isLanded()) {
-	this.setJumping(true);
+	this.setJump(true);
       }
     } else {
-      this.setJumping(false);
+      this.setJump(false);
     }
   },
 
@@ -104,7 +50,7 @@ define(Game, GameScene, 'GameScene', {
 
     var app = this.app;
     this.ground = new Rectangle(0, this.screen.height-32, this.screen.width, 32);
-    this.player = new Player(new Rectangle(0,0,32,32));
+    this.player = new Player(this, new Rectangle(0,0,32,32));
     this.addObject(this.player);
     
     // show a banner.
@@ -113,8 +59,8 @@ define(Game, GameScene, 'GameScene', {
     tb.putText(['GAME!!1'], 'center', 'center');
     tb.duration = app.framerate*2;
     tb.update = function () {
+      tb.visible = blink(tb.layer.ticks, app.framerate/2);
       TextBox.prototype.update.call(tb);
-      tb.visible = blink(scene.ticks, app.framerate/2);
     };
     this.addObject(tb);
 

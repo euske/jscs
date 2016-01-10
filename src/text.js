@@ -292,7 +292,7 @@ define(DisplayTask, TextTask, 'TextTask', {
       this.die();
     } else if (this.interval === 0) {
       this.ff();
-    } else if ((this.scene.ticks % this.interval) === 0) {
+    } else if ((this.layer.ticks % this.interval) === 0) {
       var c = this.text.substr(this._index, 1);
       this.textbox.addText(c, this.font);
       this._index++;
@@ -334,8 +334,8 @@ define(MenuTask, TextTask, 'TextTask', {
     return item;
   },
 
-  start: function (scene) {
-    this._Task_start(scene);
+  start: function (layer) {
+    this._Task_start(layer);
     for (var i = 0; i < this.items.length; i++) {
       var item = this.items[i];
       this.textbox.addSegment(item.pos, item.text, this.font);
@@ -436,11 +436,11 @@ define(TextBoxTT, TextBox, 'TextBox', {
     while (true) {
       task = this.getCurrentTask();
       if (task === null) break;
-      if (task.scene === null) {
-	task.start(this.scene);
+      if (task.layer === null) {
+	task.start(this.layer);
       }
       task.update();
-      if (task.scene !== null) break;
+      if (task.layer !== null) break;
       this.removeTask(task);
     }
     if (this.autohide && task === null) {
@@ -452,11 +452,11 @@ define(TextBoxTT, TextBox, 'TextBox', {
     while (true) {
       var task = this.getCurrentTask();
       if (task === null) break;
-      if (task.scene === null) {
-	task.start(this.scene);
+      if (task.layer === null) {
+	task.start(this.layer);
       }
       task.keydown(key);
-      if (task.scene !== null) break;
+      if (task.layer !== null) break;
       this.removeTask(task);
       break;
     }
@@ -466,11 +466,11 @@ define(TextBoxTT, TextBox, 'TextBox', {
     while (true) {
       var task = this.getCurrentTask();
       if (task === null) break;
-      if (task.scene === null) {
-	task.start(this.scene);
+      if (task.layer === null) {
+	task.start(this.layer);
       }
       task.ff();
-      if (task.scene !== null) break;
+      if (task.layer !== null) break;
       this.removeTask(task);
     }
   },

@@ -211,6 +211,7 @@ function playSound(sound)
 }
 
 // getKeySym(keyCode): convert directional keys to symbol.
+// cf. https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
 function getKeySym(keyCode)
 {
   switch (keyCode) {

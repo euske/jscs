@@ -45,7 +45,7 @@ define(GameOver, TextScene, 'TextScene', {
 // 
 function Game(app)
 {
-  this._Scene(app);
+  this._GameScene(app);
   
   this.tilesize = 32;
 }
@@ -64,9 +64,9 @@ define(Game, GameScene, 'GameScene', {
     var objs = [];
     for (var i = 0; i < this.sprites.length; i++) {
       var obj = this.sprites[i];
-      if (obj.scene !== this) continue;
-      if (!obj.visible) continue;
+      if (obj.scene === null) continue;
       if (obj.bounds === null) continue;
+      if (!obj.visible) continue;
       var bounds = obj.bounds;
       if (bounds.overlap(window)) {
 	var x = int((bounds.x+bounds.width/2)/ts);
@@ -107,7 +107,7 @@ define(Game, GameScene, 'GameScene', {
     // Draw floating objects.
     for (var i = 0; i < this.sprites.length; i++) {
       var obj = this.sprites[i];
-      if (obj.scene !== this) continue;
+      if (obj.scene === null) continue;
       if (!obj.visible) continue;
       if (obj.bounds === null) {
 	obj.render(ctx, bx, by);
@@ -168,14 +168,14 @@ define(Game, GameScene, 'GameScene', {
       window.y += wy;
       for (var i = 0; i < this.sprites.length; i++) {
 	var obj = this.sprites[i];
-	if (obj.scene !== this) continue;
+	if (obj.scene === null) continue;
 	if (obj.bounds === null) continue;
 	obj.bounds.x += wx;
 	obj.bounds.y += wy;
       }
       for (var i = 0; i < this.colliders.length; i++) {
 	var obj = this.colliders[i];
-	if (obj.scene !== this) continue;
+	if (obj.scene === null) continue;
 	if (obj.hitbox === null) continue;
 	obj.hitbox.x += wx;
 	obj.hitbox.y += wy;
@@ -215,8 +215,7 @@ define(Game, GameScene, 'GameScene', {
     
     var app = this.app;
     var scene = this;
-    var rect = new Rectangle(2, 3, 1, 1);
-    this.player = new Player(this.tilemap.map2coord(rect));
+    this.player = new Player(this.tilemap, new Vec2(2,3));
     this.addObject(this.player);
     
     function player_jumped(e) {

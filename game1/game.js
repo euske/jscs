@@ -27,9 +27,11 @@ define(Thingy, Actor, 'Actor', {
 });
 
 // Player
-function Player(bounds)
+function Player(tilemap, p)
 {
+  var bounds = tilemap.map2coord(new Rectangle(p.x, p.y, 1, 1));
   this._JumpingActor(bounds, bounds.inflate(-2, -2), S.PLAYER);
+  this.tilemap = tilemap;
   this.picked = new Slot(this);
   this.jumped = new Slot(this);
 }
@@ -51,7 +53,7 @@ define(Player, JumpingActor, 'JumpingActor', {
   },
 
   getContactFor: function (range, hitbox, v) {
-    return this.scene.tilemap.contactTile(hitbox, T.isObstacle, v);
+    return this.tilemap.contactTile(hitbox, T.isObstacle, v);
   },
   
   collide: function (actor) {
@@ -61,7 +63,7 @@ define(Player, JumpingActor, 'JumpingActor', {
       var particle = new Particle(actor.bounds, S.YAY);
       particle.duration = 30;
       particle.velocity = new Vec2(0, -1);
-      this.scene.addObject(particle);
+      this.layer.addObject(particle);
     }
   },
 
@@ -146,9 +148,9 @@ define(Game, GameScene, 'GameScene', {
     var objs = [];
     for (var i = 0; i < this.sprites.length; i++) {
       var obj = this.sprites[i];
-      if (obj.scene !== this) continue;
-      if (!obj.visible) continue;
+      if (obj.layer === null) continue;
       if (obj.bounds === null) continue;
+      if (!obj.visible) continue;
       var bounds = obj.bounds;
       if (bounds.overlap(window)) {
 	var x = int((bounds.x+bounds.width/2)/ts);
@@ -181,9 +183,9 @@ define(Game, GameScene, 'GameScene', {
     // Draw floating objects.
     for (var i = 0; i < this.sprites.length; i++) {
       var obj = this.sprites[i];
-      if (obj.scene !== this) continue;
-      if (!obj.visible) continue;
+      if (obj.layer === null) continue;
       if (obj.bounds === null) {
+      if (!obj.visible) continue;
 	obj.render(ctx, bx, by);
       }
       if (obj instanceof Enemy) {
@@ -240,8 +242,7 @@ define(Game, GameScene, 'GameScene', {
     };
     this.tilemap.apply(f);
 
-    var rect = new Rectangle(1, 10, 1, 1);
-    this.player = new Player(this.tilemap.map2coord(rect));
+    this.player = new Player(this.tilemap, new Vec2(1,10));
     this.addObject(this.player);
 
     var rect = new Rectangle(10, 10, 1, 1);
@@ -292,8 +293,8 @@ define(Game, GameScene, 'GameScene', {
     textbox.putText(['GET ALL TEH','DAMN THINGIES!'], 'center', 'center');
     textbox.duration = app.framerate*2;
     textbox.update = function () {
+      textbox.visible = blink(textbox.layer.ticks, app.framerate/2);
       TextBox.prototype.update.call(textbox);
-      textbox.visible = blink(scene.ticks, app.framerate/2);
     };
     this.addObject(textbox);
   },

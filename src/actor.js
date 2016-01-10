@@ -6,34 +6,34 @@
 // Task: a single procedure that runs at each frame.
 function Task()
 {
-  this.scene = null;
+  this.layer = null;
   this.duration = 0;
   this.died = new Slot(this);
 }
 
 define(Task, Object, '', {
-  start: function (scene) {
-    this.scene = scene;
-    this.ticks0 = scene.ticks;
+  start: function (layer) {
+    this.layer = layer;
+    this.ticks0 = layer.ticks;
   },
 
   isAlive: function () {
-    return (this.scene !== null);
+    return (this.layer !== null);
   },
   
   getTime: function () {
-    return (this.scene.ticks - this.ticks0);
+    return (this.layer.ticks - this.ticks0);
   },
   
   die: function () {
-    this.scene = null;
+    this.layer = null;
     this.died.signal();
   },
   
   update: function () {
     // [OVERRIDE]
     if (0 < this.duration &&
-	this.ticks0+this.duration < this.scene.ticks) {
+	this.ticks0+this.duration < this.layer.ticks) {
       this.die();
     }
   },
@@ -52,11 +52,11 @@ define(Queue, Task, 'Task', {
   update: function () {
     while (0 < this.tasks.length) {
       var task = this.tasks[0];
-      if (task.scene === null) {
-	task.start(this.scene);
+      if (task.layer === null) {
+	task.start(this.layer);
       }
       task.update();
-      if (task.scene !== null) return;
+      if (task.layer !== null) return;
       this.tasks.shift();
     }
     this.die();
@@ -169,6 +169,116 @@ define(Sprite, Task, 'Task', {
 });
 
 
+//  Layer
+// 
+function Layer(app)
+{
+  this.app = app;
+  this.init();
+}
+
+define(Layer, Object, '', {
+  init: function () {
+    this.ticks = 0;
+    this.tasks = [];
+    this.sprites = [];
+    this.colliders = [];
+  },
+  
+  update: function () {
+    this.ticks++;
+    this.updateObjects(this.tasks);
+    this.collideObjects(this.colliders);
+    this.cleanObjects(this.tasks);
+    this.cleanObjects(this.sprites);
+    this.cleanObjects(this.colliders);
+  },
+
+  render: function (ctx, bx, by) {
+    for (var i = 0; i < this.sprites.length; i++) {
+      var obj = this.sprites[i];
+      if (obj.layer === this) {
+	if (obj.visible) {
+	  obj.render(ctx, bx, by);
+	}
+      }
+    }
+  },
+
+  addObject: function (obj) {
+    if (obj.update !== undefined) {
+      if (obj.layer === null) {
+	obj.start(this);
+      }
+      this.tasks.push(obj);
+    }
+    if (obj.render !== undefined) {
+      this.sprites.push(obj);
+      this.sprites.sort(function (a,b) { return a.zorder-b.zorder; });
+    }
+    if (obj.hitbox !== undefined) {
+      this.colliders.push(obj);
+    }
+  },
+
+  removeObject: function (obj) {
+    if (obj.update !== undefined) {
+      removeArray(this.tasks, obj);
+    }
+    if (obj.render !== undefined) {
+      removeArray(this.sprites, obj);
+    }
+    if (obj.hitbox !== undefined) {
+      removeArray(this.colliders, obj);
+    }
+  },
+
+  updateObjects: function (objs) {
+    for (var i = 0; i < objs.length; i++) {
+      var obj = objs[i];
+      if (obj.layer === this) {
+	obj.update();
+      }
+    }
+  },
+
+  collideObjects: function (objs) {
+    for (var i = 0; i < objs.length; i++) {
+      var obj0 = objs[i];
+      if (obj0.layer === this && obj0.hitbox !== null) {
+	for (var j = i+1; j < objs.length; j++) {
+	  var obj1 = objs[j];
+	  if (obj1.layer === this && obj1.hitbox !== null &&
+	      obj1 !== obj0 && obj1.hitbox.overlap(obj0.hitbox)) {
+	    obj0.collide(obj1);
+	    obj1.collide(obj0);
+	    if (obj0.layer === null || obj0.hitbox === null) break;
+	  }
+	}
+      }
+    }
+  },
+    
+  cleanObjects: function (objs) {
+    function f(obj) { return obj.layer === null; }
+    removeArray(objs, f);
+  },
+
+  findObjects: function (rect, f) {
+    var a = [];
+    for (var i = 0; i < this.colliders.length; i++) {
+      var obj1 = this.colliders[i];
+      if (obj1.layer === this && obj1.hitbox !== null &&
+	  (f === undefined || f(obj1)) && obj1.hitbox.overlap(rect)) {
+	a.push(obj1);
+      }
+    }
+    return a;
+  },
+
+});
+
+
 // Actor: a character that can interact with other characters.
 function Actor(bounds, hitbox, tileno)
 {
@@ -190,7 +300,7 @@ define(Actor, Sprite, 'Sprite', {
 
   render: function (ctx, bx, by) {
     // [OVERRIDE]
-    var app = this.scene.app;
+    var app = this.layer.app;
     var w = this.bounds.width;
     var h = this.bounds.height;
     if (typeof(this.tileno) === 'string') {
@@ -253,7 +363,7 @@ function JumpingActor(bounds, hitbox, tileno)
 {
   this._Actor(bounds, hitbox, tileno);
   this.speed = 8;
-  this.jumpfunc = (function (t) { return (t <= 4)? -6 : 0; });
+  this.jumpfunc = (function (vy, t) { return (t <= 4)? vy-6 : vy; });
   this.fallfunc = (function (vy) { return clamp(-16, vy+2, +16); });
   this.velocity = new Vec2(0, 0);
   this._jumpt = Infinity;
@@ -264,7 +374,7 @@ define(JumpingActor, Actor, 'Actor', {
   update: function () {
     var v = this.velocity.copy();
     if (this._jumpt < this._jumpend) {
-      v.y += this.jumpfunc(this._jumpt);
+      v.y = this.jumpfunc(v.y, this._jumpt);
       this._jumpt++;
     }
     v.y = this.fallfunc(v.y);

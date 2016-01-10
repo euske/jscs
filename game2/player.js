@@ -17,7 +17,7 @@ define(FixedSprite, Sprite, 'Sprite', {
   },
 
   render: function (ctx, x, y) {
-    var sprites = this.scene.app.sprites;
+    var sprites = this.layer.app.sprites;
     var tw = sprites.height;
     var w = this.bounds.width;
     var h = this.bounds.height;
@@ -38,7 +38,7 @@ function Thingy(bounds)
 
 define(Thingy, Actor, 'Actor', {
   render: function (ctx, x, y) {
-    var sprites = this.scene.app.sprites;
+    var sprites = this.layer.app.sprites;
     var tw = sprites.height;
     var w = this.bounds.width;
     var h = this.bounds.height;
@@ -52,10 +52,12 @@ define(Thingy, Actor, 'Actor', {
 
 
 // Player
-function Player(bounds)
+function Player(tilemap, p)
 {
+  var bounds = tilemap.map2coord(new Rectangle(p.x, p.y, 1, 1));
   var hitbox = bounds.inflate(-2, -2);
   this._Actor(bounds, hitbox, S.PLAYER);
+  this.tilemap = tilemap;
   this.speed = 8;
   this.gravity = -2;
   this.maxspeed = -16;
@@ -89,13 +91,13 @@ define(Player, Actor, 'Actor', {
   },
 
   render: function (ctx, x, y, front) {
-    var sprites = this.scene.app.sprites;
+    var sprites = this.layer.app.sprites;
     var tw = sprites.height;
     var w = this.bounds.width;
     var h = this.bounds.height;
-    var afloat = (this.scene.tilesize <= this.z);
+    var afloat = (this.tilemap.tilesize <= this.z);
     var shadow = true;
-    var tilemap = this.scene.tilemap;
+    var tilemap = this.tilemap;
     var r = tilemap.coord2map(this.hitbox);
     function isfloor(x,y,c) { return (c == T.FLOOR); }
     x += this.bounds.x;
@@ -136,7 +138,7 @@ define(Player, Actor, 'Actor', {
   },
 
   contactTile: function (p, v0) {
-    var tilemap = this.scene.tilemap;
+    var tilemap = this.tilemap;
     var ts = tilemap.tilesize;
     var bs = new Vec3(ts, ts, ts);
     var ws = new Vec3(ts, ts, 999);
@@ -193,8 +195,8 @@ define(Player, Actor, 'Actor', {
     a.die();
     this.picked.signal();
     // show a particle.
-    var particle = new FixedSprite(a.bounds, this.scene.app.framerate, S.YAY);
-    this.scene.addObject(particle);
+    var particle = new FixedSprite(a.bounds, this.layer.app.framerate, S.YAY);
+    this.layer.addObject(particle);
   },
 
 });

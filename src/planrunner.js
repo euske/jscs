@@ -144,7 +144,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
   startPlan: function (runner) {
     var actor = this;
     var plan = this.plan;
-    var app = this.scene.app;
+    var app = this.layer.app;
     runner.timeout = app.framerate*2;
     runner.moveto = function (p) { actor.moveToward(p); }
     runner.jump = function (t) { actor.setJump(Infinity); }
