@@ -47,7 +47,7 @@ define(Player, JumpingActor, 'JumpingActor', {
 
   setJump: function (jumpend) {
     this._JumpingActor_setJump(jumpend);
-    if (0 < jumpend && 0 < this._jumpend) {
+    if (0 < jumpend && this._jumpt == 0) {
       this.jumped.signal();
     }
   },
@@ -196,7 +196,7 @@ define(Game, GameScene, 'GameScene', {
 
   init: function () {
     this._GameScene_init();
-    this.app.set_music(this.app.audios.music);
+    //this.app.set_music(this.app.audios.music);
     
     // [OVERRIDE]
     // [GAME SPECIFIC CODE]

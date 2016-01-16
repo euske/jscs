@@ -74,7 +74,7 @@ define(PlanActionRunner, Object, '', {
       
     case A.JUMP:
       if (actor.isLanded() && !actor.isHolding() &&
-	  this.hasClearance(cur.x, dst.y)) {
+	  this.actor.canJump(cur, dst)) {
 	if (this.jumpto !== null) {
 	  this.jumpto(dst);
 	}
@@ -91,21 +91,6 @@ define(PlanActionRunner, Object, '', {
     }
 
     return true;
-  },
-
-  hasClearance: function (x, y) {
-    var plan = this.plan;
-    var actor = this.actor;
-    var tilemap = plan.tilemap;
-
-    var r = tilemap.map2coord(
-      new Rectangle(x+actor.tilebounds.x, 
-		    y+actor.tilebounds.y, 
-		    actor.tilebounds.width, 
-		    actor.tilebounds.height));
-    r = r.union(actor.hitbox);
-    var stoppable = tilemap.getRangeMap(T.isStoppable);
-    return (stoppable.get(r.x, r.y, r.right(), r.bottom()) === 0);
   },
 
 });
@@ -174,10 +159,11 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
 	if (this.runner === null ||
 	    !this.runner.plan.goal.equals(goal)) {
 	  this.stopPlan();
+	  var maxcost = 20;
 	  var range = MakeRect(goal, 1, 1).inflate(10, 10);
 	  var start = this.getGridPos();
 	  this.plan.initPlan(goal);
-	  if (this.plan.fillPlan(range, start)) {
+	  if (this.plan.fillPlan(range, start, maxcost)) {
 	    // start following a plan.
 	    this.startPlan(new PlanActionRunner(this.plan, this));
 	  }
