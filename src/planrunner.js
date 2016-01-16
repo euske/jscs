@@ -18,7 +18,7 @@ function PlanActionRunner(plan, actor)
   this.timeout = Infinity;
   this.count = Infinity;
   this.moveto = null;
-  this.jump = null;
+  this.jumpto = null;
 }
 
 define(PlanActionRunner, Object, '', {
@@ -75,8 +75,8 @@ define(PlanActionRunner, Object, '', {
     case A.JUMP:
       if (actor.isLanded() && !actor.isHolding() &&
 	  this.hasClearance(cur.x, dst.y)) {
-	if (this.jump !== null) {
-	  this.jump();
+	if (this.jumpto !== null) {
+	  this.jumpto(dst);
 	}
 	// once you leap, the action is considered finished.
 	this.action = this.action.next;
@@ -147,7 +147,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
     var app = this.layer.app;
     runner.timeout = app.framerate*2;
     runner.moveto = function (p) { actor.moveToward(p); }
-    runner.jump = function (t) { actor.setJump(Infinity); }
+    runner.jumpto = function (t) { actor.setJump(Infinity); }
     this.runner = runner;
     log("begin:"+this.runner);
   },
@@ -198,7 +198,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
   getGridPos: function () {
     var gs = this.plan.gridsize;
     return new Vec2(int(this.hitbox.centerx()/gs),
-		    int((this.hitbox.bottom()-1)/gs));
+		    int(this.hitbox.bottom()/gs-.5));
   },
   getJumpPoints: function () {
     return this.jumppts;
@@ -208,8 +208,8 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
   },
   getHitboxAt: function (p) {
     var gs = this.plan.gridsize;
-    return new Rect(int((p.x+.5)*gs-this.hitbox.width/2),
-		    (p.y+1)*gs-this.hitbox.height,
+    return new Rect(int(p.x*gs-this.hitbox.width/2),
+		    int((p.y+1)*gs-this.hitbox.height),
 		    this.hitbox.width, this.hitbox.height);
   },
   canMoveTo: function (p) {
@@ -221,7 +221,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
     return this.grabbable.exists(this.tilemap.coord2map(hitbox));
   },
   canStandAt: function (p) {
-    var hitbox = this.getHitboxAt(p).move(0, this.hitbox.height);
+    var hitbox = this.getHitboxAt(p).move(0, this.plan.gridsize);
     return this.stoppable.exists(this.tilemap.coord2map(hitbox));
   },
   canClimbUp: function (p) {

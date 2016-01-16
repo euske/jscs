@@ -140,7 +140,8 @@ define(PlanMap, Object, '', {
 
   coord2grid: function (p) {
     var gs = this.gridsize;
-    return new Vec2(int(p.x/gs), int(p.y/gs));
+    return new Vec2(int(p.x/gs+.5),
+		    int(p.y/gs+.5));
   },
 
   grid2coord: function (p) {
@@ -174,7 +175,7 @@ define(PlanMap, Object, '', {
     ctx.lineWidth = 1;
     for (var k in this._map) {
       var a = this._map[k];
-      var p0 = a.p;
+      var p0 = this.grid2coord(a.p);
       switch (a.type) {
       case A.WALK:
 	ctx.strokeStyle = 'white';
@@ -191,27 +192,29 @@ define(PlanMap, Object, '', {
       default:
 	continue;
       }
-      ctx.strokeRect(bx+gs*p0.x+(gs-rs)/2+.5,
-		     by+gs*p0.y+(gs-rs)/2+.5,
+      ctx.strokeRect(bx+p0.x-rs/2+.5,
+		     by+p0.y-rs/2+.5,
 		     rs, rs);
       if (a.next !== null) {
-	var p1 = a.next.p;
+	var p1 = this.grid2coord(a.next.p);
 	ctx.beginPath();
-	ctx.moveTo(bx+gs*p0.x+rs+.5, by+gs*p0.y+rs+.5);
-	ctx.lineTo(bx+gs*p1.x+rs+.5, by+gs*p1.y+rs+.5);
+	ctx.moveTo(bx+p0.x+.5, by+p0.y+.5);
+	ctx.lineTo(bx+p1.x+.5, by+p1.y+.5);
 	ctx.stroke();
       }
     }
     if (this.start !== null) {
+      var p = this.grid2coord(this.start);
       ctx.strokeStyle = '#ff0000';
-      ctx.strokeRect(bx+gs*this.start.x+.5,
-		     by+gs*this.start.y+.5,
+      ctx.strokeRect(bx+p.x-gs/2+.5,
+		     by+p.y-gs/2+.5,
 		     gs, gs);
     }
     if (this.goal !== null) {
+      var p = this.grid2coord(this.goal);
       ctx.strokeStyle = '#00ff00';
-      ctx.strokeRect(bx+gs*this.goal.x+.5,
-		     by+gs*this.goal.y+.5,
+      ctx.strokeRect(bx+p.x-gs/2+.5,
+		     by+p.y-gs/2+.5,
 		     gs, gs);
     }
   },
