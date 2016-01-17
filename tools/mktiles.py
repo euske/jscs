@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # usage: mktiles.py [-o output] gridsize w h
 

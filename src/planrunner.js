@@ -54,8 +54,7 @@ define(PlanActionRunner, Object, '', {
       break;
       
     case A.FALL:
-      var map = tilemap.getRangeMap(T.isObstacle);
-      var path = map.findSimplePath(cur.x, cur.y, dst.x, dst.y, actor.tilebounds);
+      var path = actor.findSimplePath(cur, dst);
       for (var i = 0; i < path.length; i++) {
 	var r = actor.getHitboxAt(path[i]);
 	var v = r.diff(actor.hitbox);
@@ -126,6 +125,59 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
     return this.tilemap.contactTile(hitbox, T.isObstacle, v);
   },
   
+  // findSimplePath(x0, y0, x1, x1, cb): 
+  //   returns a list of points that a character can proceed without being blocked.
+  //   returns null if no such path exists. This function takes O(w*h).
+  //   Note: this returns only a straightforward path without any detour.
+  findSimplePath: function (p0, p1) {
+    var a = [];
+    var w = Math.abs(p1.x-p0.x);
+    var h = Math.abs(p1.y-p0.y);
+    var INF = (w+h+1)*2;
+    var vx = (p0.x <= p1.x)? +1 : -1;
+    var vy = (p0.y <= p1.y)? +1 : -1;
+    
+    for (var dy = 0; dy <= h; dy++) {
+      a.push([]);
+      // y: y0...y1
+      var y = p0.y+dy*vy;
+      for (var dx = 0; dx <= w; dx++) {
+	// x: x0...x1
+	var x = p0.x+dx*vx;
+	// for each point, compare the cost of (x-1,y) and (x,y-1).
+	var p = new Vec2(x, y);
+	var d;
+	var e = null;	// the closest neighbor (if exists).
+	if (dx === 0 && dy === 0) {
+	  d = 0;
+	} else {
+	  d = INF;
+	  if (this.canMoveTo(p)) {
+	    if (0 < dx && a[dy][dx-1].d < d) {
+	      e = a[dy][dx-1];
+	      d = e.d;
+	    }
+	    if (0 < dy && a[dy-1][dx].d < d) {
+	      e = a[dy-1][dx];
+	      d = e.d;
+	    }
+	  }
+	  d++;
+	}
+	// populate a[dy][dx].
+	a[dy].push({p:p, d:d, next:e});
+      }
+    }
+    // trace them in a reverse order: from goal to start.
+    var r = [];
+    var e = a[h][w];
+    while (e !== null) {
+      r.push(e.p);
+      e = e.next;
+    }
+    return r;
+  },
+
   startPlan: function (runner) {
     var actor = this;
     var plan = this.plan;
@@ -148,11 +200,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
   update: function () {
     var target = this.target;
     if (target !== null) {
-      var tilemap = this.tilemap;
-      var hitbox = ((target.isLanded())? 
-		    target.hitbox :
-		    predictLandingPoint(tilemap, target.hitbox, 
-					target.velocity, target.fallfunc));
+      var hitbox = target.getEstimatedHitbox(this.tilemap);
       if (hitbox !== null) {
 	// make a plan.
 	var goal = this.plan.coord2grid(hitbox.center());

@@ -400,4 +400,23 @@ define(JumpingActor, Actor, 'Actor', {
     return (0 <= this.velocity.y && !this.isMovable(new Vec2(0,1)));
   },
 
+  // getEstimatedHitbox: returns the estimated landing position.
+  getEstimatedHitbox: function (tilemap, maxtime) {
+    if (this.isLanded()) {
+      return this.hitbox;
+    }
+    maxtime = (maxtime !== undefined)? maxtime : 15;
+    var stoppable = tilemap.getRangeMap(T.isStoppable);
+    var hitbox = this.hitbox;
+    var dy = this.velocity.y;
+    for (var t = 0; t < maxtime; t++) {
+      var rect = hitbox.move(this.velocity.x, dy);
+      dy = this.fallfunc(dy);
+      var b = tilemap.coord2map(rect);
+      if (stoppable.exists(b)) return hitbox;
+      hitbox = rect;
+    }
+    return null;
+  },
+
 });

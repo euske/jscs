@@ -64,25 +64,6 @@ function calcFallRange(
 }
 
 
-// predictLandingPoint: returns the estimated landing position.
-function predictLandingPoint(
-  tilemap, hitbox,
-  velocity, fallfunc, maxtime)
-{
-  maxtime = (maxtime !== undefined)? maxtime : 15;
-  var stoppable = tilemap.getRangeMap(T.isStoppable);
-  var dy = velocity.y;
-  for (var t = 0; t < maxtime; t++) {
-    var rect = hitbox.move(velocity.x, dy);
-    dy = fallfunc(dy);
-    var b = tilemap.coord2map(rect);
-    if (stoppable.exists(b)) return hitbox;
-    hitbox = rect;
-  }
-  return null;
-}
-
-
 //  PlanAction
 //
 var A = {
