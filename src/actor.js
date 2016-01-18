@@ -157,6 +157,16 @@ define(Sprite, Task, 'Task', {
     return '<Sprite: '+this.bounds+'>';
   },
   
+  move: function (dx, dy) {
+    // [OVERRIDE]
+    this.bounds = this.bounds.move(dx, dy);
+  },
+
+  movev: function (v) {
+    // [OVERRIDE]
+    this.bounds = this.bounds.movev(v);
+  },
+  
   update: function () {
     // [OVERRIDE]
     this._Task_update();
@@ -316,16 +326,14 @@ define(Actor, Sprite, 'Sprite', {
   },
   
   move: function (dx, dy) {
-    // [OVERRIDE]
-    this.bounds = this.bounds.move(dx, dy);
+    this._Sprite_move(dx, dy);
     if (this.hitbox !== null) {
       this.hitbox = this.hitbox.move(dx, dy);
     }
   },
 
   movev: function (v) {
-    // [OVERRIDE]
-    this.bounds = this.bounds.movev(v);
+    this._Sprite_movev(v);
     if (this.hitbox !== null) {
       this.hitbox = this.hitbox.movev(v);
     }
