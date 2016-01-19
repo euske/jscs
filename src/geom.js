@@ -29,11 +29,14 @@ define(Vec2, Object, '', {
   sub: function (v) {
     return new Vec2(this.x-v.x, this.y-v.y);
   },
-  modify: function (v) {
+  scale: function (v) {
     return new Vec2(this.x*v, this.y*v);
   },
   distance: function (v) {
     return this.sub(v).norm();
+  },
+  move: function (dx, dy) {
+    return new Vec2(this.x+dx, this.y+dy);
   },
   rotate90: function (v) {
     if (v < 0) {
@@ -43,9 +46,6 @@ define(Vec2, Object, '', {
     } else {
       return this.copy();
     }
-  },
-  move: function (dx, dy) {
-    return new Vec2(this.x+dx, this.y+dy);
   },
 });
 
@@ -76,7 +76,7 @@ define(Vec3, Object, '', {
   sub: function (v) {
     return new Vec3(this.x-v.x, this.y-v.y, this.z-v.z);
   },
-  modify: function (v) {
+  scale: function (v) {
     return new Vec3(this.x*v, this.y*v, this.z*v);
   },
   distance: function (v) {
