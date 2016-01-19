@@ -99,7 +99,7 @@ define(PlanActionRunner, Object, '', {
 //
 function PlanningActor(tilemap, bounds, hitbox, tileno)
 {
-  this._JumpingActor(bounds, hitbox, tileno)
+  this._PhysicalActor(bounds, hitbox, tileno)
   this.tilemap = tilemap;
   this.tilebounds = new Rectangle(0, 0, 1, 1);
   this.target = null;
@@ -114,7 +114,7 @@ function PlanningActor(tilemap, bounds, hitbox, tileno)
   this.fallpts = calcFallRange(gridsize, this.speed, this.fallfunc);
 }
 
-define(PlanningActor, JumpingActor, 'JumpingActor', {
+define(PlanningActor, PhysicalActor, 'PhysicalActor', {
   isHolding: function () {
     var tilemap = this.tilemap;
     var f = (function (x,y,c) { return T.isGrabbable(c); });
@@ -226,7 +226,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
       }
     }
     
-    this._JumpingActor_update();
+    this._PhysicalActor_update();
   },
 
   getGridPos: function () {

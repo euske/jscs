@@ -12,11 +12,11 @@
 // Player
 function Player(scene, bounds)
 {
-  this._JumpingActor(bounds, bounds, 0);
+  this._PhysicalActor(bounds, bounds, 0);
   this.scene = scene;
 }
 
-define(Player, JumpingActor, 'JumpingActor', {
+define(Player, PhysicalActor, 'PhysicalActor', {
   getContactFor: function (range, hitbox, v) {
     return hitbox.contact(v, this.scene.ground);
   },

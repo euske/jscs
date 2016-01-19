@@ -30,13 +30,13 @@ define(Thingy, Actor, 'Actor', {
 function Player(tilemap, p)
 {
   var bounds = tilemap.map2coord(new Rectangle(p.x, p.y, 1, 1));
-  this._JumpingActor(bounds, bounds.inflate(-2, -2), S.PLAYER);
+  this._PhysicalActor(bounds, bounds.inflate(-2, -2), S.PLAYER);
   this.tilemap = tilemap;
   this.picked = new Slot(this);
   this.jumped = new Slot(this);
 }
 
-define(Player, JumpingActor, 'JumpingActor', {
+define(Player, PhysicalActor, 'PhysicalActor', {
   toString: function () {
     return '<Player: '+this.bounds+'>';
   },
@@ -46,7 +46,7 @@ define(Player, JumpingActor, 'JumpingActor', {
   },
 
   setJump: function (jumpend) {
-    this._JumpingActor_setJump(jumpend);
+    this._PhysicalActor_setJump(jumpend);
     if (0 < jumpend && this._jumpt == 0) {
       this.jumped.signal();
     }

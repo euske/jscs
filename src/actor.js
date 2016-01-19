@@ -366,8 +366,8 @@ define(Actor, Sprite, 'Sprite', {
 });
 
 
-// JumpingActor
-function JumpingActor(bounds, hitbox, tileno)
+// PhysicalActor
+function PhysicalActor(bounds, hitbox, tileno)
 {
   this._Actor(bounds, hitbox, tileno);
   this.speed = 8;
@@ -379,7 +379,7 @@ function JumpingActor(bounds, hitbox, tileno)
   this._jumpend = 0;
 }
 
-define(JumpingActor, Actor, 'Actor', {
+define(PhysicalActor, Actor, 'Actor', {
   update: function () {
     var v = new Vec2(this.movement.x, this.velocity.y);
     if (this._jumpt < this._jumpend) {
@@ -409,6 +409,10 @@ define(JumpingActor, Actor, 'Actor', {
     return (0 <= this.velocity.y && !this.isMovable(new Vec2(0,1)));
   },
 
+  isHolding: function () {
+    return false;
+  },
+  
   // getEstimatedHitbox: returns the estimated landing position.
   getEstimatedHitbox: function (tilemap, maxtime) {
     if (this.isLanded()) {
