@@ -183,8 +183,8 @@ define(Game, GameScene, 'GameScene', {
     }
   },
 
-  update: function () {
-    this._GameScene_update();
+  tick: function () {
+    this._GameScene_tick();
     this.player.jump(this.app.key_action);
     this.player.usermove(this.app.key_dir.x, this.app.key_dir.y);
     this.moveAll(this.speed.x, this.speed.y);
@@ -244,7 +244,6 @@ define(Game, GameScene, 'GameScene', {
     textbox.bounds = null;
     textbox.duration = app.framerate*2;
     textbox.update = function () {
-      TextBox.prototype.update.call(textbox);
       textbox.visible = blink(scene.ticks, app.framerate/2);
     };
     this.addObject(textbox);

@@ -61,7 +61,6 @@ define(Game, GameScene, 'GameScene', {
     tb.duration = app.framerate*2;
     tb.update = function () {
       tb.visible = blink(tb.layer.ticks, app.framerate/2);
-      TextBox.prototype.update.call(tb);
     };
     this.addObject(tb);
 

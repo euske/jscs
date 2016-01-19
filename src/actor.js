@@ -30,12 +30,16 @@ define(Task, Object, '', {
     this.died.signal();
   },
   
-  update: function () {
-    // [OVERRIDE]
+  tick: function () {
+    this.update();
     if (0 < this.duration &&
 	this.ticks0+this.duration < this.layer.ticks) {
       this.die();
     }
+  },
+  
+  update: function () {
+    // [OVERRIDE]
   },
   
 });
@@ -49,13 +53,13 @@ function Queue(tasks)
 }
 
 define(Queue, Task, 'Task', {
-  update: function () {
+  tick: function () {
     while (0 < this.tasks.length) {
       var task = this.tasks[0];
       if (task.layer === null) {
 	task.start(this.layer);
       }
-      task.update();
+      task.tick();
       if (task.layer !== null) return;
       this.tasks.shift();
     }
@@ -176,116 +180,6 @@ define(Sprite, Task, 'Task', {
     // [OVERRIDE]
   },
   
-});
-
-
-//  Layer
-// 
-function Layer(app)
-{
-  this.app = app;
-  this.init();
-}
-
-define(Layer, Object, '', {
-  init: function () {
-    this.ticks = 0;
-    this.tasks = [];
-    this.sprites = [];
-    this.colliders = [];
-  },
-  
-  update: function () {
-    this.ticks++;
-    this.updateObjects(this.tasks);
-    this.collideObjects(this.colliders);
-    this.cleanObjects(this.tasks);
-    this.cleanObjects(this.sprites);
-    this.cleanObjects(this.colliders);
-  },
-
-  render: function (ctx, bx, by) {
-    for (var i = 0; i < this.sprites.length; i++) {
-      var obj = this.sprites[i];
-      if (obj.layer === this) {
-	if (obj.visible) {
-	  obj.render(ctx, bx, by);
-	}
-      }
-    }
-  },
-
-  addObject: function (obj) {
-    if (obj.update !== undefined) {
-      if (obj.layer === null) {
-	obj.start(this);
-      }
-      this.tasks.push(obj);
-    }
-    if (obj.render !== undefined) {
-      this.sprites.push(obj);
-      this.sprites.sort(function (a,b) { return a.zorder-b.zorder; });
-    }
-    if (obj.hitbox !== undefined) {
-      this.colliders.push(obj);
-    }
-  },
-
-  removeObject: function (obj) {
-    if (obj.update !== undefined) {
-      removeArray(this.tasks, obj);
-    }
-    if (obj.render !== undefined) {
-      removeArray(this.sprites, obj);
-    }
-    if (obj.hitbox !== undefined) {
-      removeArray(this.colliders, obj);
-    }
-  },
-
-  updateObjects: function (objs) {
-    for (var i = 0; i < objs.length; i++) {
-      var obj = objs[i];
-      if (obj.layer === this) {
-	obj.update();
-      }
-    }
-  },
-
-  collideObjects: function (objs) {
-    for (var i = 0; i < objs.length; i++) {
-      var obj0 = objs[i];
-      if (obj0.layer === this && obj0.hitbox !== null) {
-	for (var j = i+1; j < objs.length; j++) {
-	  var obj1 = objs[j];
-	  if (obj1.layer === this && obj1.hitbox !== null &&
-	      obj1 !== obj0 && obj1.hitbox.overlap(obj0.hitbox)) {
-	    obj0.collide(obj1);
-	    obj1.collide(obj0);
-	    if (obj0.layer === null || obj0.hitbox === null) break;
-	  }
-	}
-      }
-    }
-  },
-    
-  cleanObjects: function (objs) {
-    function f(obj) { return obj.layer === null; }
-    removeArray(objs, f);
-  },
-
-  findObjects: function (rect, f) {
-    var a = [];
-    for (var i = 0; i < this.colliders.length; i++) {
-      var obj1 = this.colliders[i];
-      if (obj1.layer === this && obj1.hitbox !== null &&
-	  (f === undefined || f(obj1)) && obj1.hitbox.overlap(rect)) {
-	a.push(obj1);
-      }
-    }
-    return a;
-  },
-
 });
 
 

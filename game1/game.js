@@ -289,13 +289,12 @@ define(Game, GameScene, 'GameScene', {
     textbox.duration = app.framerate*2;
     textbox.update = function () {
       textbox.visible = blink(textbox.layer.ticks, app.framerate/2);
-      TextBox.prototype.update.call(textbox);
     };
     this.addObject(textbox);
   },
 
-  update: function () {
-    this._GameScene_update();
+  tick: function () {
+    this._GameScene_tick();
     
     // [GAME SPECIFIC CODE]
     this.player.setMove(this.app.key_dir);

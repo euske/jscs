@@ -220,10 +220,10 @@ define(App, Object, '', {
     this.msgs.push(msg);
   },
 
-  update: function () {
+  tick: function () {
     // [OVERRIDE]
     // [GAME SPECIFIC CODE]
-    this.scene.update();
+    this.scene.tick();
     if (0 < this.keylock) {
       this.keylock--;
     }

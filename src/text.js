@@ -287,7 +287,7 @@ function DisplayTask(textbox, text)
 }
 
 define(DisplayTask, TextTask, 'TextTask', {
-  update: function () {
+  tick: function () {
     if (this.text.length <= this._index) {
       this.die();
     } else if (this.interval === 0) {
@@ -430,8 +430,8 @@ define(TextBoxTT, TextBox, 'TextBox', {
     this.cursor = null;
   },
 
-  update: function () {
-    this._TextBox_update();
+  tick: function () {
+    this._TextBox_tick();
     var task = null;
     while (true) {
       task = this.getCurrentTask();
@@ -439,7 +439,7 @@ define(TextBoxTT, TextBox, 'TextBox', {
       if (task.layer === null) {
 	task.start(this.layer);
       }
-      task.update();
+      task.tick();
       if (task.layer !== null) break;
       this.removeTask(task);
     }

@@ -28,9 +28,9 @@ function run(scene0)
 		  0, 0, frame.width, frame.height);
   }    
   
-  function update() {
+  function tick() {
     if (app.active) {
-      app.update();
+      app.tick();
       app.repaint();
       repaint();
     }
@@ -131,5 +131,5 @@ function run(scene0)
   window.addEventListener('mousemove', mousemove);
   window.addEventListener('focus', focus);
   window.addEventListener('blur', blur);
-  timer = window.setInterval(update, 1000/framerate);
+  timer = window.setInterval(tick, 1000/framerate);
 }
