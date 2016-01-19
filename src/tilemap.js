@@ -108,7 +108,7 @@ define(TileMap, Object, '', {
       }
       return v;
     }
-    var r = rect.movev(v0).union(rect);
+    var r = rect.add(v0).union(rect);
     return this.reduce(f, v0, this.coord2map(r));
   },
   

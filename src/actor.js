@@ -89,12 +89,8 @@ define(Camera, Task, 'Task', {
     return '<Camera: '+this.window+'>';
   },
   
-  move: function (dx, dy) {
-    this.window = this.window.move(dx, dy);
-  },
-
-  movev: function (v) {
-    this.window = this.window.movev(v);
+  move: function (v) {
+    this.window = this.window.add(v);
   },
   
   renderTilesFromBottomLeft: function (ctx, bx, by, tilemap, tiles, ft) {
@@ -161,14 +157,9 @@ define(Sprite, Task, 'Task', {
     return '<Sprite: '+this.bounds+'>';
   },
   
-  move: function (dx, dy) {
+  move: function (v) {
     // [OVERRIDE]
-    this.bounds = this.bounds.move(dx, dy);
-  },
-
-  movev: function (v) {
-    // [OVERRIDE]
-    this.bounds = this.bounds.movev(v);
+    this.bounds = this.bounds.add(v);
   },
   
   update: function () {
@@ -193,6 +184,7 @@ function Actor(bounds, hitbox, tileno)
   this.maxspeed = new Vec2(1, 1);
   this.phase = 0;
   this.movement = new Vec2();
+  this.velocity = new Vec2();
 }
 
 define(Actor, Sprite, 'Sprite', {
@@ -222,28 +214,23 @@ define(Actor, Sprite, 'Sprite', {
   },
   
   update: function () {
-    this.movev(this.getMove(this.movement));
+    this.move(this.movement);
     this._Sprite_update();
   },
   
-  move: function (dx, dy) {
-    this._Sprite_move(dx, dy);
+  move: function (v) {
+    v = this.getMove(v);
+    this.velocity = v;
+    this._Sprite_move(v);
     if (this.hitbox !== null) {
-      this.hitbox = this.hitbox.move(dx, dy);
-    }
-  },
-
-  movev: function (v) {
-    this._Sprite_movev(v);
-    if (this.hitbox !== null) {
-      this.hitbox = this.hitbox.movev(v);
+      this.hitbox = this.hitbox.add(v);
     }
   },
   
   getMove: function (v) {
     var hitbox = this.hitbox;
     if (hitbox === null) return v;
-    var range = hitbox.union(hitbox.movev(v));
+    var range = hitbox.union(hitbox.add(v));
     var d0 = this.getContactFor(range, hitbox, v);
     v = v.sub(d0);
     hitbox = hitbox.move(d0.x, d0.y);
@@ -274,21 +261,19 @@ function PhysicalActor(bounds, hitbox, tileno)
   this._Actor(bounds, hitbox, tileno);
   this.jumpfunc = (function (vy, t) { return (t <= 4)? vy-6 : vy; });
   this.fallfunc = (function (vy) { return clamp(-16, vy+2, +16); });
-  this.velocity = new Vec2();
   this._jumpt = Infinity;
   this._jumpend = 0;
 }
 
 define(PhysicalActor, Actor, 'Actor', {
-  update: function () {
-    var v = new Vec2(this.movement.x, this.velocity.y);
+  move: function (v) {
+    var vy = this.velocity.y;
     if (this._jumpt < this._jumpend) {
-      v.y = this.jumpfunc(v.y, this._jumpt);
+      vy = this.jumpfunc(vy, this._jumpt);
       this._jumpt++;
     }
-    v.y = this.fallfunc(v.y);
-    this.velocity = this.getMove(v);
-    this.movev(this.velocity);
+    vy = this.fallfunc(vy);
+    this._Actor_move(new Vec2(this.movement.x, vy));
   },
 
   setJump: function (jumpend) {

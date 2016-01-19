@@ -123,14 +123,14 @@ define(Player, Actor, 'Actor', {
     }
   },
 
-  move: function (vx, vy) {
-    var v = this.getMove(new Vec3(vx, vy, this._gz));
-    this._Actor_move(v.x, v.y);
+  move: function (v) {
+    var v = this.getMove(new Vec3(v.x, v.y, this._gz));
+    this._Actor_move(v);
     return v;
   },
 
   usermove: function (vx, vy) {
-    var v = this.move(vx*this.speed, vy*this.speed);
+    var v = this.move(new Vec2(vx*this.speed, vy*this.speed));
     if (v !== null) {
       this.z += v.z;
       this._gz = v.z;
@@ -153,7 +153,7 @@ define(Player, Actor, 'Actor', {
       }
       return v;
     }
-    var r = box.movev(v0).union(box);
+    var r = box.add(v0).union(box);
     r = new Rectangle(r.origin.x, r.origin.y, r.size.x, r.size.y);
     v0 = tilemap.reduce(f, v0, tilemap.coord2map(r));
     v0 = box.contactXYPlane(v0, 0, null);
