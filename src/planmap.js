@@ -11,7 +11,7 @@ function calcJumpRange(
   maxtime = (maxtime !== undefined)? maxtime : 15;
   var pts = {};
   for (var jt = 1; jt < maxtime; jt++) {
-    var p = new Vec2(0, 0);
+    var p = new Vec2();
     var vy = 0;
     for (var t = 0; t < maxtime; t++) {
       vy = (t < jt)? jumpfunc(vy, t) : vy;
@@ -42,7 +42,7 @@ function calcFallRange(
   gridsize, speed, fallfunc, maxtime)
 {
   maxtime = (maxtime !== undefined)? maxtime : 15;
-  var p = new Vec2(0, 0);
+  var p = new Vec2();
   var vy = 0;
   var pts = {};
   for (var t = 0; t < maxtime; t++) {

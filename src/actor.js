@@ -373,14 +373,15 @@ function JumpingActor(bounds, hitbox, tileno)
   this.speed = 8;
   this.jumpfunc = (function (vy, t) { return (t <= 4)? vy-6 : vy; });
   this.fallfunc = (function (vy) { return clamp(-16, vy+2, +16); });
-  this.velocity = new Vec2(0, 0);
+  this.movement = new Vec2();
+  this.velocity = new Vec2();
   this._jumpt = Infinity;
   this._jumpend = 0;
 }
 
 define(JumpingActor, Actor, 'Actor', {
   update: function () {
-    var v = this.velocity.copy();
+    var v = new Vec2(this.movement.x, this.velocity.y);
     if (this._jumpt < this._jumpend) {
       v.y = this.jumpfunc(v.y, this._jumpt);
       this._jumpt++;

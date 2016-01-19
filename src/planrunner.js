@@ -184,7 +184,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
     var app = this.layer.app;
     runner.timeout = app.framerate*2;
     runner.moveto = function (p) { actor.moveToward(p); }
-    runner.jumpto = function (t) { actor.setJump(Infinity); }
+    runner.jumpto = function (p) { actor.setJump(Infinity); }
     this.runner = runner;
     log("begin:"+this.runner);
   },
@@ -192,7 +192,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
   stopPlan: function () {
     if (this.runner !== null) {
       log("end:  "+this.runner);
-      this.velocity = new Vec2();
+      this.movement = new Vec2();
     }
     this.runner = null;
   },
@@ -308,7 +308,7 @@ define(PlanningActor, JumpingActor, 'JumpingActor', {
   moveToward: function (p) {
     var r = this.getHitboxAt(p);
     var v = r.diff(this.hitbox);
-    this.velocity.x = clamp(-this.speed, v.x, +this.speed);
+    this.movement.x = clamp(-this.speed, v.x, +this.speed);
   },
 
 });

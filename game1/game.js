@@ -12,7 +12,7 @@ function Particle(bounds, tileno)
 define(Particle, Actor, 'Actor', {
   update: function () {
     this._Actor_update(this);
-    this.bounds = this.bounds.movev(this.velocity);
+    this.movev(this.velocity);
   },
 
 });
@@ -42,7 +42,7 @@ define(Player, JumpingActor, 'JumpingActor', {
   },
 
   setMove: function (v) {
-    this.velocity.x = v.x*this.speed;
+    this.movement.x = v.x*this.speed;
   },
 
   setJump: function (jumpend) {
