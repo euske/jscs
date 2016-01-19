@@ -6,15 +6,9 @@
 function Particle(bounds, tileno)
 {
   this._Actor(bounds, null, tileno);
-  this.velocity = new Vec2();  
 }
 
 define(Particle, Actor, 'Actor', {
-  update: function () {
-    this._Actor_update(this);
-    this.movev(this.velocity);
-  },
-
 });
 
 // Thingy
@@ -32,6 +26,7 @@ function Player(tilemap, p)
   var bounds = tilemap.map2coord(new Rectangle(p.x, p.y, 1, 1));
   this._PhysicalActor(bounds, bounds.inflate(-2, -2), S.PLAYER);
   this.tilemap = tilemap;
+  this.speed = 8;
   this.picked = new Slot(this);
   this.jumped = new Slot(this);
 }
@@ -62,7 +57,7 @@ define(Player, PhysicalActor, 'PhysicalActor', {
       this.picked.signal();
       var particle = new Particle(actor.bounds, S.YAY);
       particle.duration = 30;
-      particle.velocity = new Vec2(0, -1);
+      particle.movement = new Vec2(0, -1);
       this.layer.addObject(particle);
     }
   },

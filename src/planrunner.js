@@ -102,6 +102,7 @@ function PlanningActor(tilemap, bounds, hitbox, tileno)
   this._PhysicalActor(bounds, hitbox, tileno)
   this.tilemap = tilemap;
   this.tilebounds = new Rectangle(0, 0, 1, 1);
+  this.speed = 8;
   this.target = null;
   this.runner = null;
 

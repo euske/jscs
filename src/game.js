@@ -13,6 +13,7 @@
 function Player(scene, bounds)
 {
   this._PhysicalActor(bounds, bounds, 0);
+  this.speed = 8;
   this.scene = scene;
 }
 
@@ -32,7 +33,7 @@ define(Player, PhysicalActor, 'PhysicalActor', {
   },
 
   usermove: function (vx, vy) {
-    this.velocity.x = vx*this.speed;
+    this.movement.x = vx*this.speed;
   },
 });
 

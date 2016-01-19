@@ -296,7 +296,9 @@ function Actor(bounds, hitbox, tileno)
   this.hitbox = (hitbox === null)? null : hitbox.copy();
   this.tileno = tileno;
   this.scale = new Vec2(1, 1);
+  this.maxspeed = new Vec2(1, 1);
   this.phase = 0;
+  this.movement = new Vec2();
 }
 
 define(Actor, Sprite, 'Sprite', {
@@ -325,6 +327,11 @@ define(Actor, Sprite, 'Sprite', {
     }
   },
   
+  update: function () {
+    this.movev(this.getMove(this.movement));
+    this._Sprite_update();
+  },
+  
   move: function (dx, dy) {
     this._Sprite_move(dx, dy);
     if (this.hitbox !== null) {
@@ -341,6 +348,7 @@ define(Actor, Sprite, 'Sprite', {
   
   getMove: function (v) {
     var hitbox = this.hitbox;
+    if (hitbox === null) return v;
     var range = hitbox.union(hitbox.movev(v));
     var d0 = this.getContactFor(range, hitbox, v);
     v = v.sub(d0);
@@ -370,10 +378,8 @@ define(Actor, Sprite, 'Sprite', {
 function PhysicalActor(bounds, hitbox, tileno)
 {
   this._Actor(bounds, hitbox, tileno);
-  this.speed = 8;
   this.jumpfunc = (function (vy, t) { return (t <= 4)? vy-6 : vy; });
   this.fallfunc = (function (vy) { return clamp(-16, vy+2, +16); });
-  this.movement = new Vec2();
   this.velocity = new Vec2();
   this._jumpt = Infinity;
   this._jumpend = 0;
