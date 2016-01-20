@@ -35,6 +35,10 @@ define(Vec2, Object, '', {
   distance: function (v) {
     return this.sub(v).norm();
   },
+  clamp: function (v) {
+    return new Vec2(clamp(-v.x, this.x, +v.x),
+		    clamp(-v.y, this.y, +v.y));
+  },
   move: function (dx, dy) {
     return new Vec2(this.x+dx, this.y+dy);
   },

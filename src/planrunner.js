@@ -111,8 +111,8 @@ function PlanningActor(tilemap, bounds, hitbox, tileno)
   this.obstacle = this.tilemap.getRangeMap(T.isObstacle);
   this.grabbable = this.tilemap.getRangeMap(T.isGrabbable);
   this.stoppable = this.tilemap.getRangeMap(T.isStoppable);
-  this.jumppts = calcJumpRange(gridsize, this.speed, this.jumpfunc, this.fallfunc);
-  this.fallpts = calcFallRange(gridsize, this.speed, this.fallfunc);
+  this.jumppts = calcJumpRange(gridsize, this.speed, this.jumpfunc);
+  this.fallpts = calcFallRange(gridsize, this.speed, this.jumpfunc);
 }
 
 define(PlanningActor, PhysicalActor, 'PhysicalActor', {

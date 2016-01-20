@@ -125,7 +125,8 @@ define(Player, Actor, 'Actor', {
 
   move: function (v) {
     var v = this.getMove(new Vec3(v.x, v.y, this._gz));
-    this._Actor_move(v);
+    this.bounds = this.bounds.add(v);
+    this.hitbox = this.hitbox.add(v);
     return v;
   },
 

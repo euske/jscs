@@ -219,10 +219,8 @@ define(Actor, Sprite, 'Sprite', {
   },
   
   move: function (v) {
-    v = this.getMove(v);
-    this.velocity = new Vec2(
-      clamp(-this.maxspeed.x, v.x, this.maxspeed.x),
-      clamp(-this.maxspeed.y, v.y, this.maxspeed.y));
+    v = this.getMove(v).clamp(this.maxspeed);
+    this.velocity = v;
     this._Sprite_move(v);
     if (this.hitbox !== null) {
       this.hitbox = this.hitbox.add(v);
@@ -261,20 +259,17 @@ define(Actor, Sprite, 'Sprite', {
 function PhysicalActor(bounds, hitbox, tileno)
 {
   this._Actor(bounds, hitbox, tileno);
-  this.jumpfunc = (function (vy, t) { return (t <= 4)? vy-6 : vy; });
-  this.fallfunc = (function (vy) { return vy+2; });
+  this.jumpfunc = (function (vy, t) { return (0 < t && t <= 5)? vy-4 : vy+2; });
   this._jumpt = Infinity;
   this._jumpend = 0;
 }
 
 define(PhysicalActor, Actor, 'Actor', {
   move: function (v) {
-    var vy = this.velocity.y;
     if (this._jumpt < this._jumpend) {
-      vy = this.jumpfunc(vy, this._jumpt);
       this._jumpt++;
     }
-    vy = this.fallfunc(vy);
+    var vy = this.jumpfunc(this.velocity.y, this._jumpt);
     this._Actor_move(new Vec2(this.movement.x, vy));
   },
 
@@ -311,7 +306,7 @@ define(PhysicalActor, Actor, 'Actor', {
     var dy = this.velocity.y;
     for (var t = 0; t < maxtime; t++) {
       var rect = hitbox.move(this.velocity.x, dy);
-      dy = this.fallfunc(dy);
+      dy = this.jumpfunc(dy, 0);
       var b = tilemap.coord2map(rect);
       if (stoppable.exists(b)) return hitbox;
       hitbox = rect;
