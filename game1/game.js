@@ -2,15 +2,6 @@
 
 // [GAME SPECIFIC CODE]
 
-// Particle
-function Particle(bounds, tileno)
-{
-  this._Actor(bounds, null, tileno);
-}
-
-define(Particle, Actor, 'Actor', {
-});
-
 // Thingy
 function Thingy(bounds)
 {
@@ -55,7 +46,7 @@ define(Player, PhysicalActor, 'PhysicalActor', {
     if (actor instanceof Thingy) {
       actor.die();
       this.picked.signal();
-      var particle = new Particle(actor.bounds, S.YAY);
+      var particle = new Actor(actor.bounds, null, S.YAY);
       particle.duration = 30;
       particle.movement = new Vec2(0, -1);
       this.layer.addObject(particle);

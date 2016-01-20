@@ -142,6 +142,21 @@ define(Layer, Object, '', {
     }
   },
 
+  scroll: function (v) {
+    for (var i = 0; i < this.sprites.length; i++) {
+      var obj = this.sprites[i];
+      if (obj.layer === null) continue;
+      if (obj.bounds === null) continue;
+      obj.bounds = obj.bounds.add(v);
+    }
+    for (var i = 0; i < this.colliders.length; i++) {
+      var obj = this.colliders[i];
+      if (obj.layer === null) continue;
+      if (obj.hitbox === null) continue;
+      obj.hitbox = obj.hitbox.add(v);
+    }
+  },
+
   addObject: function (obj) {
     if (obj.tick !== undefined) {
       if (obj.layer === null) {
