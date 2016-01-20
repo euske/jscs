@@ -52,7 +52,6 @@ function Game(app)
 
 define(Game, GameScene, 'GameScene', {
   render: function (ctx, bx, by) {
-    // [OVERRIDE]
     var ts = this.tilesize;
     var window = this.camera.window;
     var dx = -ts;
@@ -107,8 +106,8 @@ define(Game, GameScene, 'GameScene', {
     // Draw floating objects.
     for (var i = 0; i < this.sprites.length; i++) {
       var obj = this.sprites[i];
-      if (obj.scene === null) continue;
       if (!obj.visible) continue;
+      if (obj.scene === null) continue;
       if (obj.bounds === null) {
 	obj.render(ctx, bx, by);
       } else if (obj instanceof FixedSprite) {
@@ -125,8 +124,9 @@ define(Game, GameScene, 'GameScene', {
     }
   },
 
-  scrollTile: function (vx, vy) {
+  scrollTiles: function (vx, vy) {
     // generate tiles for horizontal scrolling.
+    // Leftmost objects are scrolled out and rotated from right.
     for (var x = 0; x < vx; x++) {
       for (var y = 1; y < this.tilemap.height-1; y++) {
 	this.tilemap.set(x, y, T.NONE);
@@ -150,35 +150,32 @@ define(Game, GameScene, 'GameScene', {
     this.tilemap.scroll(null, vx, vy);
   },
 
-  moveAll: function (vx, vy) {
+  moveAll: function (v) {
     var ts = this.tilesize;
-    var window = this.camera.window;
-    window.x += vx;
-    window.y += vy;
-    this.player.move(vx, vy);
+    this.camera.move(v);
+    this.player.move(v);
     
+    var window = this.camera.window;
     var x0 = int(window.x/ts);
     var y0 = int(window.y/ts);
     if (x0 !== 0 || y0 !== 0) {
       // warp all the tiles and characters.
-      this.scrollTile(x0, y0);
-      var wx = -x0*ts;
-      var wy = -y0*ts;
-      window.x += wx;
-      window.y += wy;
+      this.scrollTiles(x0, y0);
+      var vw = new Vec2(-x0*ts, -y0*ts);
+      this.camera.move(vw);
       for (var i = 0; i < this.sprites.length; i++) {
 	var obj = this.sprites[i];
 	if (obj.scene === null) continue;
 	if (obj.bounds === null) continue;
-	obj.bounds.x += wx;
-	obj.bounds.y += wy;
+	obj.bounds.x += vw.x;
+	obj.bounds.y += vw.y;
       }
       for (var i = 0; i < this.colliders.length; i++) {
 	var obj = this.colliders[i];
 	if (obj.scene === null) continue;
 	if (obj.hitbox === null) continue;
-	obj.hitbox.x += wx;
-	obj.hitbox.y += wy;
+	obj.hitbox.x += vw.x;
+	obj.hitbox.y += vw.y;
       }
     }
   },
@@ -187,7 +184,7 @@ define(Game, GameScene, 'GameScene', {
     this._GameScene_tick();
     this.player.jump(this.app.key_action);
     this.player.usermove(this.app.key_dir.x, this.app.key_dir.y);
-    this.moveAll(this.speed.x, this.speed.y);
+    this.moveAll(this.speed);
     if (this.player.hitbox.right() < this.tilesize) {
       this.changeScene(new GameOver(this.app, this.score));
     }
@@ -196,7 +193,6 @@ define(Game, GameScene, 'GameScene', {
   init: function () {
     this._GameScene_init();
     
-    // [OVERRIDE]
     // [GAME SPECIFIC CODE]
     var map = new Array(7);
     for (var y = 0; y < map.length; y++) {

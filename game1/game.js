@@ -105,13 +105,13 @@ define(Title, TextScene, 'TextScene', {
 function EndGame(app, score)
 {
   this._TextScene(app);
-  this.app.lockKeys();
   this.text = '<b>You Won!</b><p><b>Score: '+score+'</b><p>Press Enter to restart.';
 }
 
 define(EndGame, TextScene, 'TextScene', {
   init: function () {
     this._TextScene_init();
+    this.app.lockKeys();
     this.app.set_music(this.app.audios.ending);
   },
   
