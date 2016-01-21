@@ -305,7 +305,7 @@ define(Game, GameScene, 'GameScene', {
       }
       if (rnd(3) === 0) {
 	var y = rnd(1, this.tilemap.height-1);
-	this.tilemap.set(x, y, T.FLOOR);
+	this.tilemap.set(x, y, T.BLOCK);
       }
       if (rnd(3) === 0) {
 	var y = rnd(1, this.tilemap.height-1);

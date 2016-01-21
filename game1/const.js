@@ -13,8 +13,8 @@ S = {
 T = {
   NONE: 0,
   BLOCK: 1,
-  COLLECTIBLE: 2,
   LADDER: 2,
+  COLLECTIBLE: 3,
 
   // isObstacle: Blocks moving and cannot be overlapped. e.g. brick.
   isObstacle: function (c) { return (c < 0 || c == T.BLOCK); },
