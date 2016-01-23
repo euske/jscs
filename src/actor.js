@@ -268,6 +268,8 @@ define(PhysicalActor, Actor, 'Actor', {
   move: function (v) {
     if (this._jumpt < this._jumpend) {
       this._jumpt++;
+    } else {
+      this._jumpt = Infinity;
     }
     var vy = this.jumpfunc(this.velocity.y, this._jumpt);
     this._Actor_move(new Vec2(this.movement.x, vy));

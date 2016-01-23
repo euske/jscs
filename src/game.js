@@ -18,23 +18,14 @@ function Player(scene, bounds)
 }
 
 define(Player, PhysicalActor, 'PhysicalActor', {
+  setMove: function (v) {
+    this.movement.x = v.x*this.speed;
+  },
+
   getContactFor: function (range, hitbox, v) {
     return hitbox.contact(v, this.scene.ground);
   },
 
-  jump: function (jumping) {
-    if (jumping) {
-      if (this.isLanded()) {
-	this.setJump(true);
-      }
-    } else {
-      this.setJump(false);
-    }
-  },
-
-  usermove: function (vx, vy) {
-    this.movement.x = vx*this.speed;
-  },
 });
 
 
@@ -98,14 +89,14 @@ define(Game, GameScene, 'GameScene', {
   set_dir: function (vx, vy) {
     this._GameScene_set_dir(vx, vy);
     if (!this.textbox.visible) {
-      this.player.usermove(vx, vy);
+      this.player.setMove(new Vec2(vx, vy));
     }
   },
 
   set_action: function (action) {
     this._GameScene_set_action(action);
     if (!this.textbox.visible) {
-      this.player.jump(action);
+      this.player.setJump(action? Infinity : 0);
     }
   },
 
