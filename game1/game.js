@@ -28,7 +28,7 @@ define(Player, PhysicalActor, 'PhysicalActor', {
   },
 
   setMove: function (v) {
-    this.movement.x = v.x*this.speed;
+    this.movement = v.scale(this.speed);
   },
 
   setJump: function (jumpend) {
@@ -38,8 +38,18 @@ define(Player, PhysicalActor, 'PhysicalActor', {
     }
   },
 
+  isHolding: function () {
+    var f = (function (x, y, c) { return T.isGrabbable(c); });
+    var r = this.tilemap.coord2map(this.hitbox);
+    return this.tilemap.apply(f, r);
+  },
+
   getContactFor: function (range, hitbox, v) {
-    return this.tilemap.contactTile(hitbox, T.isObstacle, v);
+    if (!this.isHolding() && this.movement.x == 0) {
+      return this.tilemap.contactTile(hitbox, T.isStoppable, v);
+    } else {
+      return this.tilemap.contactTile(hitbox, T.isObstacle, v);
+    }
   },
   
   collide: function (actor) {

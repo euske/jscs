@@ -265,13 +265,19 @@ function PhysicalActor(bounds, hitbox, tileno)
 }
 
 define(PhysicalActor, Actor, 'Actor', {
-  move: function (v) {
-    var vy = this.jumpfunc(this.velocity.y, this._jumpt);
+  update: function () {
+    this._Actor_update();
     if (this._jumpt < this._jumpend) {
       this._jumpt++;
     } else {
       this._jumpt = Infinity;
     }
+  },
+  
+  move: function (v) {
+    var vy = ((this.isHolding())?
+	      this.movement.y :
+	      this.jumpfunc(this.velocity.y, this._jumpt));
     this._Actor_move(new Vec2(this.movement.x, vy));
   },
 
