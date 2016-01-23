@@ -36,8 +36,9 @@ define(Vec2, Object, '', {
     return this.sub(v).norm();
   },
   clamp: function (v) {
-    return new Vec2(clamp(-v.x, this.x, +v.x),
-		    clamp(-v.y, this.y, +v.y));
+    return new Vec2(
+      clamp(-v.x, this.x, +v.x),
+      clamp(-v.y, this.y, +v.y));
   },
   move: function (dx, dy) {
     return new Vec2(this.x+dx, this.y+dy);
@@ -85,6 +86,12 @@ define(Vec3, Object, '', {
   },
   distance: function (v) {
     return this.sub(v).norm();
+  },
+  clamp: function (v) {
+    return new Vec3(
+      clamp(-v.x, this.x, +v.x),
+      clamp(-v.y, this.y, +v.y),
+      clamp(-v.z, this.z, +v.z));
   },
   move: function (dx, dy, dz) {
     return new Vec3(this.x+dx, this.y+dy, this.z+dz);
@@ -324,7 +331,7 @@ define(Box, Object, '', {
     return new Box(this.origin.add(v), this.size);
   },
   diff: function (rect) {
-    return new this.origin.sub(rect.origin);
+    return this.origin.sub(rect.origin);
   },
   inflate: function (dx, dy, dz) {
     return new Box(this.origin.move(-dx, -dy, -dz),

@@ -259,7 +259,7 @@ define(Actor, Sprite, 'Sprite', {
 function PhysicalActor(bounds, hitbox, tileno)
 {
   this._Actor(bounds, hitbox, tileno);
-  this.jumpfunc = (function (vy, t) { return (0 <= t && t <= 4)? vy-4 : vy+2; });
+  this.jumpfunc = (function (vy, t) { return (0 <= t && t <= 4)? -10 : vy+2; });
   this._jumpt = Infinity;
   this._jumpend = 0;
 }
