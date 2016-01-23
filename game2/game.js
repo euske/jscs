@@ -1,36 +1,34 @@
 // game.js
-
 // [GAME SPECIFIC CODE]
 
 // Thingy
 function Thingy(bounds)
 {
-  var hitbox = bounds.inflate(-2, -2);
-  this._Actor(bounds, hitbox, S.THINGY);
+  this._Actor(bounds, bounds.inflate(-2, -2), S.THINGY);
 }
 
 define(Thingy, Actor, 'Actor', {
-  render: function (ctx, x, y) {
-    var sprites = this.layer.app.sprites;
-    var tw = sprites.height;
+  render: function (ctx, bx, by) {
+    var app = this.layer.app;
     var w = this.bounds.width;
     var h = this.bounds.height;
-    ctx.drawImage(sprites,
-		  S.SHADOW*tw, tw-h, w, h,
-		  x+this.bounds.x, y+this.bounds.y, w, h);
-    this._Actor_render(ctx, x, y);
+    var size = app.sprites_size;
+    drawImageScaled(ctx, app.sprites,
+		    size.x*S.SHADOW, size.y-h, w, h,
+		    bx+this.bounds.x, by+this.bounds.y,
+		    w*this.scale.x, h*this.scale.y);
+    this._Actor_render(ctx, bx, by);
   },
 
 });
 
 
 // Player
-function Player(scene, p)
+function Player(tilemap, p)
 {
-  this.tilemap = scene.tilemap;
-  var bounds = this.tilemap.map2coord(new Rectangle(p.x, p.y, 1, 1));
-  var hitbox = bounds.inflate(-2, -2);
-  this._Actor(bounds, hitbox, S.PLAYER);
+  var bounds = tilemap.map2coord(new Rectangle(p.x, p.y, 1, 1));
+  this._Actor(bounds, bounds.inflate(-2, -2), S.PLAYER);
+  this.tilemap = tilemap;
   this.speed = 8;
   this.gravity = -2;
   this.maxspeed = -16;
@@ -50,7 +48,7 @@ define(Player, Actor, 'Actor', {
   },
 
   collide: function (actor) {
-    if (actor instanceof Actor && actor.tileno == S.THINGY) {
+    if (actor instanceof Thingy) {
       actor.die();
       this.picked.signal();
       var particle = new Actor(actor.bounds, null, S.YAY);
@@ -366,7 +364,7 @@ define(Game, GameScene, 'GameScene', {
     
     var app = this.app;
     var scene = this;
-    this.player = new Player(this, new Vec2(2,3));
+    this.player = new Player(this.tilemap, new Vec2(2,3));
     this.addObject(this.player);
     
     function player_jumped(e) {

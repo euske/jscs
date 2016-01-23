@@ -164,9 +164,6 @@ define(Rectangle, Object, '', {
   move: function (dx, dy) {
     return new Rectangle(this.x+dx, this.y+dy, this.width, this.height);  
   },
-  moveTo: function (x, y) {
-    return new Rectangle(x-this.width/2, y-this.height/2, this.width, this.height);  
-  },
   add: function (v) {
     return new Rectangle(this.x+v.x, this.y+v.y, this.width, this.height);  
   },
@@ -323,14 +320,11 @@ define(Box, Object, '', {
   move: function (dx, dy, dz) {
     return new Box(this.origin.move(dx, dy, dz), this.size);
   },
-  moveTo: function (p) {
-    return new Box(new Vec3(p.x-this.size.x/2,
-			    p.y-this.size.y/2,
-			    p.z-this.size.z/2),
-		   this.size);
-  },
   add: function (v) {
     return new Box(this.origin.add(v), this.size);
+  },
+  diff: function (rect) {
+    return new this.origin.sub(rect.origin);
   },
   inflate: function (dx, dy, dz) {
     return new Box(this.origin.move(-dx, -dy, -dz),

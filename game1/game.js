@@ -1,5 +1,4 @@
 // game.js
-
 // [GAME SPECIFIC CODE]
 
 // Thingy
@@ -10,6 +9,7 @@ function Thingy(bounds)
 
 define(Thingy, Actor, 'Actor', {
 });
+
 
 // Player
 function Player(tilemap, p)

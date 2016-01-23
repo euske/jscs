@@ -14,7 +14,7 @@ function calcJumpRange(
     var p = new Vec2();
     var vy = 0;
     for (var t = 0; t < maxtime; t++) {
-      vy = (t < jt)? jumpfunc(vy, t+1) : jumpfunc(vy, 0);
+      vy = (t < jt)? jumpfunc(vy, t) : jumpfunc(vy, Infinity);
       if (0 <= vy) {
 	// tip point.
 	var cy = Math.ceil(p.y/gridsize);
@@ -45,7 +45,7 @@ function calcFallRange(
   var vy = 0;
   var pts = {};
   for (var t = 0; t < maxtime; t++) {
-    vy = jumpfunc(vy, 0);
+    vy = jumpfunc(vy, Infinity);
     p.x += speed;
     p.y += vy;
     var cy = Math.ceil(p.y/gridsize);

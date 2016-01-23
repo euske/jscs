@@ -233,16 +233,16 @@ define(Actor, Sprite, 'Sprite', {
     var range = hitbox.union(hitbox.add(v));
     var d0 = this.getContactFor(range, hitbox, v);
     v = v.sub(d0);
-    hitbox = hitbox.move(d0.x, d0.y);
+    hitbox = hitbox.add(d0);
     if (v.x != 0) {
       var d1 = this.getContactFor(range, hitbox, new Vec2(v.x, 0));
       v = v.sub(d1);
-      hitbox = hitbox.move(d1.x, d1.y);
+      hitbox = hitbox.add(d1);
     }
     if (v.y != 0) {
       var d2 = this.getContactFor(range, hitbox, new Vec2(0, v.y));
       v = v.sub(d2);
-      hitbox = hitbox.move(d2.x, d2.y);
+      hitbox = hitbox.add(d2);
     }
     return hitbox.diff(this.hitbox);
   },
@@ -259,19 +259,19 @@ define(Actor, Sprite, 'Sprite', {
 function PhysicalActor(bounds, hitbox, tileno)
 {
   this._Actor(bounds, hitbox, tileno);
-  this.jumpfunc = (function (vy, t) { return (0 < t && t <= 5)? vy-4 : vy+2; });
+  this.jumpfunc = (function (vy, t) { return (0 <= t && t <= 4)? vy-4 : vy+2; });
   this._jumpt = Infinity;
   this._jumpend = 0;
 }
 
 define(PhysicalActor, Actor, 'Actor', {
   move: function (v) {
+    var vy = this.jumpfunc(this.velocity.y, this._jumpt);
     if (this._jumpt < this._jumpend) {
       this._jumpt++;
     } else {
       this._jumpt = Infinity;
     }
-    var vy = this.jumpfunc(this.velocity.y, this._jumpt);
     this._Actor_move(new Vec2(this.movement.x, vy));
   },
 
@@ -308,7 +308,7 @@ define(PhysicalActor, Actor, 'Actor', {
     var dy = this.velocity.y;
     for (var t = 0; t < maxtime; t++) {
       var rect = hitbox.move(this.velocity.x, dy);
-      dy = this.jumpfunc(dy, 0);
+      dy = this.jumpfunc(dy, Infinity);
       var b = tilemap.coord2map(rect);
       if (stoppable.exists(b)) return hitbox;
       hitbox = rect;
