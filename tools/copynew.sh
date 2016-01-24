@@ -3,8 +3,10 @@ dst="$1"
 name=${dst/*\//}
 rsyn="$dst/.rsyn"
 [ -d "$dst" ] || exit 1
-echo "opts='--exclude *.wav --exclude *.md --exclude tmp --exclude tools --exclude Makefile'" > "$rsyn"
-echo "remote='tabesugi:public/file/ludumdare.tabesugi.net/ohgj/$name'" > "$rsyn"
+(
+  echo "opts='--exclude *.wav --exclude *.md --exclude tmp --exclude tools --exclude Makefile'"
+  echo "remote='tabesugi:public/file/ludumdare.tabesugi.net/ohgj/$name'"
+) > "$rsyn"
 mkdir "$dst"/src
 mkdir "$dst"/assets
 cp .gitignore "$dst"

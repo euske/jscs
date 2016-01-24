@@ -52,6 +52,18 @@ function clamp(v0, v, v1)
   return Math.min(Math.max(v, v0), v1);
 }
 
+// sign(v): return -1, 0, +1
+function sign(v)
+{
+  if (v < 0) {
+    return -1;
+  } else if (0 < v) {
+    return +1;
+  } else {
+    return 0;
+  }
+}
+
 // blink(t, d): returns true if t is within the on interval.
 function blink(t, d)
 {
