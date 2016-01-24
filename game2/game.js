@@ -123,7 +123,7 @@ define(Player, Actor, 'Actor', {
     );
   },
 
-  getContactFor: function (hitbox, v0) {
+  getContactFor: function (v0, hitbox) {
     var tilemap = this.tilemap;
     var ts = tilemap.tilesize;
     var bs = new Vec3(ts, ts, ts);
@@ -145,24 +145,24 @@ define(Player, Actor, 'Actor', {
     return v0;
   },
 
-  getMove3: function (v) {
-    var hitbox0 = this.getHitbox();
+  getMove3: function (v, hitbox0) {
+    var hitbox0 = (hitbox0 !== undefined)? hitbox0 : this.getHitbox();
     var hitbox = hitbox0;
-    var d0 = this.getContactFor(hitbox, v);
+    var d0 = this.getContactFor(v, hitbox);
     v = v.sub(d0);
     hitbox = hitbox.add(d0);
     if (v.x != 0) {
-      var d1 = this.getContactFor(hitbox, new Vec3(v.x,0,0));
+      var d1 = this.getContactFor(new Vec3(v.x,0,0), hitbox);
       v = v.sub(d1);
       hitbox = hitbox.add(d1);
     }
     if (v.y != 0) {
-      var d2 = this.getContactFor(hitbox, new Vec3(0,v.y,0));
+      var d2 = this.getContactFor(new Vec3(0,v.y,0), hitbox);
       v = v.sub(d2);
       hitbox = hitbox.add(d2);
     }
     if (v.z != 0) {
-      var d3 = this.getContactFor(hitbox, new Vec3(0,0,v.z));
+      var d3 = this.getContactFor(new Vec3(0,0,v.z), hitbox);
       v = v.sub(d3);
       hitbox = hitbox.add(d3);
     }

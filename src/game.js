@@ -22,7 +22,7 @@ define(Player, PhysicalActor, 'PhysicalActor', {
     this.movement.x = v.x*this.speed;
   },
 
-  getContactFor: function (range, hitbox, v) {
+  getContactFor: function (v, hitbox, range) {
     return hitbox.contact(v, this.scene.ground);
   },
 

@@ -227,27 +227,32 @@ define(Actor, Sprite, 'Sprite', {
     }
   },
   
-  getMove: function (v) {
-    var hitbox = this.hitbox;
+  isMovable: function (v0, hitbox) {
+    var v1 = this.getMove(v0, hitbox);
+    return v1.equals(v0);
+  },
+
+  getMove: function (v, hitbox) {
+    hitbox = (hitbox !== undefined)? hitbox : this.hitbox;
     if (hitbox === null) return v;
     var range = hitbox.union(hitbox.add(v));
-    var d0 = this.getContactFor(range, hitbox, v);
+    var d0 = this.getContactFor(v, hitbox, range);
     v = v.sub(d0);
     hitbox = hitbox.add(d0);
     if (v.x != 0) {
-      var d1 = this.getContactFor(range, hitbox, new Vec2(v.x, 0));
+      var d1 = this.getContactFor(new Vec2(v.x, 0), hitbox, range);
       v = v.sub(d1);
       hitbox = hitbox.add(d1);
     }
     if (v.y != 0) {
-      var d2 = this.getContactFor(range, hitbox, new Vec2(0, v.y));
+      var d2 = this.getContactFor(new Vec2(0, v.y), hitbox, range);
       v = v.sub(d2);
       hitbox = hitbox.add(d2);
     }
     return hitbox.diff(this.hitbox);
   },
   
-  getContactFor: function (range, hitbox, v) {
+  getContactFor: function (v, hitbox, range) {
     // [OVERRIDE]
     return v;
   },
@@ -288,11 +293,6 @@ define(PhysicalActor, Actor, 'Actor', {
       }
     }
     this._jumpend = jumpend;
-  },
-
-  isMovable: function (v0) {
-    var v1 = this.getMove(v0);
-    return v1.equals(v0);
   },
 
   isLanded: function () {

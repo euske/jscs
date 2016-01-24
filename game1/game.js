@@ -44,7 +44,7 @@ define(Player, PhysicalActor, 'PhysicalActor', {
     return this.tilemap.apply(f, r);
   },
 
-  getContactFor: function (range, hitbox, v) {
+  getContactFor: function (v, hitbox, range) {
     if (!this.isHolding() && this.movement.x == 0) {
       return this.tilemap.contactTile(hitbox, T.isStoppable, v);
     } else {

@@ -122,7 +122,7 @@ define(PlanningActor, PhysicalActor, 'PhysicalActor', {
     return (tilemap.apply(f, tilemap.coord2map(this.hitbox)) !== null);
   },
 
-  getContactFor: function (range, hitbox, v) {
+  getContactFor: function (v, hitbox, range) {
     return this.tilemap.contactTile(hitbox, T.isObstacle, v);
   },
   
