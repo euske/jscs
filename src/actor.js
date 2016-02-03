@@ -184,7 +184,6 @@ function Actor(bounds, hitbox, tileno)
   this.maxspeed = new Vec2(16, 16);
   this.phase = 0;
   this.movement = new Vec2();
-  this.velocity = new Vec2();
 }
 
 define(Actor, Sprite, 'Sprite', {
@@ -215,44 +214,41 @@ define(Actor, Sprite, 'Sprite', {
   
   update: function () {
     this._Sprite_update();
-    this.move(this.movement);
+    this.move(this.getMove(this.movement, this.hitbox, true));
   },
   
   move: function (v) {
-    v = this.getMove(v).clamp(this.maxspeed);
-    this.velocity = v;
     this._Sprite_move(v);
     if (this.hitbox !== null) {
       this.hitbox = this.hitbox.add(v);
     }
   },
   
-  isMovable: function (v0, hitbox) {
-    var v1 = this.getMove(v0, hitbox);
+  isMovable: function (v0) {
+    var v1 = this.getMove(v0, this.hitbox, true);
     return v1.equals(v0);
   },
 
-  getMove: function (v, hitbox) {
-    hitbox = (hitbox !== undefined)? hitbox : this.hitbox;
+  getMove: function (v, hitbox, force) {
     if (hitbox === null) return v;
     var range = hitbox.union(hitbox.add(v));
-    var d0 = this.getContactFor(v, hitbox, range);
+    var d0 = this.getContactFor(v, hitbox, force, range);
     v = v.sub(d0);
     hitbox = hitbox.add(d0);
     if (v.x != 0) {
-      var d1 = this.getContactFor(new Vec2(v.x, 0), hitbox, range);
+      var d1 = this.getContactFor(new Vec2(v.x, 0), hitbox, force, range);
       v = v.sub(d1);
       hitbox = hitbox.add(d1);
     }
     if (v.y != 0) {
-      var d2 = this.getContactFor(new Vec2(0, v.y), hitbox, range);
+      var d2 = this.getContactFor(new Vec2(0, v.y), hitbox, force, range);
       v = v.sub(d2);
       hitbox = hitbox.add(d2);
     }
     return hitbox.diff(this.hitbox);
   },
   
-  getContactFor: function (v, hitbox, range) {
+  getContactFor: function (v, hitbox, force, range) {
     // [OVERRIDE]
     return v;
   },
@@ -264,28 +260,13 @@ define(Actor, Sprite, 'Sprite', {
 function PhysicalActor(bounds, hitbox, tileno)
 {
   this._Actor(bounds, hitbox, tileno);
+  this.velocity = new Vec2();
   this.jumpfunc = (function (vy, t) { return (0 <= t && t <= 4)? -10 : vy+2; });
   this._jumpt = Infinity;
   this._jumpend = 0;
 }
 
 define(PhysicalActor, Actor, 'Actor', {
-  update: function () {
-    this._Actor_update();
-    if (this._jumpt < this._jumpend) {
-      this._jumpt++;
-    } else {
-      this._jumpt = Infinity;
-    }
-  },
-  
-  move: function (v) {
-    var vy = ((this.isHolding())?
-	      this.movement.y :
-	      this.jumpfunc(this.velocity.y, this._jumpt));
-    this._Actor_move(new Vec2(this.movement.x, vy));
-  },
-
   setJump: function (jumpend) {
     if (0 < jumpend) {
       if (this.isLanded()) {
@@ -295,8 +276,27 @@ define(PhysicalActor, Actor, 'Actor', {
     this._jumpend = jumpend;
   },
 
+  update: function () {
+    this._Actor_update();
+    this.fall();
+    if (this._jumpt < this._jumpend) {
+      this._jumpt++;
+    } else {
+      this._jumpt = Infinity;
+    }
+  },
+  
+  fall: function () {
+    if (!this.isHolding()) {
+      this.velocity.y = this.jumpfunc(this.velocity.y, this._jumpt);
+      this.velocity = this.getMove(this.velocity, this.hitbox, false);
+      this.move(this.velocity);
+    }
+  },
+
   isLanded: function () {
-    return (0 <= this.velocity.y && !this.isMovable(new Vec2(0,1)));
+    var v = this.getMove(new Vec2(0, 1), this.hitbox, false);
+    return (0 <= this.velocity.y && v.y == 0);
   },
 
   isHolding: function () {

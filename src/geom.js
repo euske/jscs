@@ -17,6 +17,9 @@ define(Vec2, Object, '', {
   equals: function (p) {
     return (this.x == p.x && this.y == p.y);
   },
+  isZero: function () {
+    return (this.x == 0 && this.y == 0);
+  },
   copy: function () {
     return new Vec2(this.x, this.y);
   },
@@ -74,6 +77,9 @@ define(Vec3, Object, '', {
   },
   equals: function (p) {
     return (this.x == p.x && this.y == p.y && this.z == p.z);
+  },
+  isZero: function () {
+    return (this.x == 0 && this.y == 0 && this.z == 0);
   },
   copy: function () {
     return new Vec3(this.x, this.y, this.z);
@@ -222,11 +228,21 @@ define(Rectangle, Object, '', {
 	    rect.x+rect.width <= this.x+this.width &&
 	    rect.y+rect.height <= this.y+this.height);
   },
+  xdistance: function (rect) {
+    return Math.max(rect.x-(this.x+this.width),
+		    this.x-(rect.x+rect.width));
+  },
+  ydistance: function (rect) {
+    return Math.max(rect.y-(this.y+this.height),
+		    this.y-(rect.y+rect.height));
+  },
+  distance: function (rect) {
+    return new Vec2(this.xdistance(rect),
+		    this.ydistance(rect));
+  },
   overlap: function (rect) {
-    return !(this.x+this.width <= rect.x ||
-	     this.y+this.height <= rect.y ||
-	     rect.x+rect.width <= this.x ||
-	     rect.y+rect.height <= this.y);
+    return (this.xdistance(rect) < 0 &&
+	    this.ydistance(rect) < 0);
   },
   union: function (rect) {
     var x0 = Math.min(this.x, rect.x);
@@ -342,8 +358,20 @@ define(Box, Object, '', {
   add: function (v) {
     return new Box(this.origin.add(v), this.size);
   },
-  diff: function (rect) {
-    return this.origin.sub(rect.origin);
+  diff: function (box) {
+    return this.origin.sub(box.origin);
+  },
+  xdistance: function (box) {
+    return Math.max(box.origin.x-(this.origin.x+this.size.x),
+		    this.origin.x-(box.origin.x+box.size.x));
+  },
+  ydistance: function (box) {
+    return Math.max(box.origin.y-(this.origin.y+this.size.y),
+		    this.origin.y-(box.origin.y+box.size.y));
+  },
+  zdistance: function (box) {
+    return Math.max(box.origin.z-(this.origin.z+this.size.z),
+		    this.origin.z-(box.origin.z+box.size.z));
   },
   inflate: function (dx, dy, dz) {
     return new Box(this.origin.move(-dx, -dy, -dz),
@@ -356,12 +384,9 @@ define(Box, Object, '', {
 	    p.z <= this.origin.z+this.size.z);
   },
   overlap: function (box) {
-    return !(this.origin.x+this.size.x <= box.origin.x ||
-	     this.origin.y+this.size.y <= box.origin.y ||
-	     this.origin.z+this.size.z <= box.origin.z ||
-	     box.origin.x+box.size.x <= this.origin.x ||
-	     box.origin.y+box.size.y <= this.origin.y ||
-	     box.origin.z+box.size.z <= this.origin.z);
+    return (this.xdistance(box) < 0 &&
+	    this.ydistance(box) < 0 &&
+	    this.zdistance(box) < 0);
   },
   union: function (box) {
     var x0 = Math.min(this.origin.x, box.origin.x);

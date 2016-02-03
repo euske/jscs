@@ -29,6 +29,9 @@ define(Player, PhysicalActor, 'PhysicalActor', {
 
   setMove: function (v) {
     this.movement = v.scale(this.speed);
+    if (!this.isHolding()) {
+      this.movement.y = 0;
+    }
   },
 
   setJump: function (jumpend) {
@@ -44,12 +47,9 @@ define(Player, PhysicalActor, 'PhysicalActor', {
     return this.tilemap.apply(f, r);
   },
 
-  getContactFor: function (v, hitbox, range) {
-    if (!this.isHolding() && this.movement.x == 0) {
-      return this.tilemap.contactTile(hitbox, T.isStoppable, v);
-    } else {
-      return this.tilemap.contactTile(hitbox, T.isObstacle, v);
-    }
+  getContactFor: function (v, hitbox, force, range) {
+    var f = (force || this.isHolding())? T.isObstacle : T.isStoppable;
+    return this.tilemap.contactTile(hitbox, f, v);
   },
   
   collide: function (actor) {

@@ -122,8 +122,9 @@ define(PlanningActor, PhysicalActor, 'PhysicalActor', {
     return (tilemap.apply(f, tilemap.coord2map(this.hitbox)) !== null);
   },
 
-  getContactFor: function (v, hitbox, range) {
-    return this.tilemap.contactTile(hitbox, T.isObstacle, v);
+  getContactFor: function (v, hitbox, force, range) {
+    var f = (force)? T.isObstacle : T.isStoppable;
+    return this.tilemap.contactTile(hitbox, f, v);
   },
   
   // findSimplePath(x0, y0, x1, x1, cb): 
