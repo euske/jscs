@@ -30,7 +30,7 @@ define(Player, PhysicalActor, 'PhysicalActor', {
   setMove: function (v) {
     this.movement = v.scale(this.speed);
     if (!this.isHolding()) {
-      this.movement.y = 0;
+      this.movement.y = Math.max(this.movement.y, 0);
     }
   },
 
