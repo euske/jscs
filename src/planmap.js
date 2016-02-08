@@ -4,12 +4,39 @@
 //   requires: tilemap.js
 'use strict';
 
+
+// PointSet
+function PointSet()
+{
+  this._pts = {};
+}
+
+define(PointSet, Object, '', {
+  add: function (p) {
+    this._pts[p.x+','+p.y] = p;
+  },
+
+  exists: function (p) {
+    return (this._pts[p.x+','+p.y] !== undefined);
+  },
+
+  toList: function () {
+    var a = [];
+    for (var k in this._pts) {
+      a.push(this._pts[k]);
+    }
+    return a;
+  },
+
+});
+
+
 // calcJumpRange
 function calcJumpRange(
   gridsize, speed, jumpfunc, maxtime)
 {
   maxtime = (maxtime !== undefined)? maxtime : 15;
-  var pts = {};
+  var pts = new PointSet();
   for (var jt = 1; jt < maxtime; jt++) {
     var p = new Vec2();
     var vy = 0;
@@ -21,7 +48,7 @@ function calcJumpRange(
 	for (var x = 0; x <= p.x; x++) {
 	  var c = new Vec2(int(x/gridsize+.5), cy);
 	  if (c.x == 0 && c.y == 0) continue;
-	  pts[c.x+','+c.y] = c;
+	  pts.add(c);
 	}
 	break;
       }
@@ -29,11 +56,7 @@ function calcJumpRange(
       p.y += vy;
     }
   }
-  var a = [];
-  for (var k in pts) {
-    a.push(pts[k]);
-  }
-  return a;
+  return pts.toList();
 }
 
 // calcFallRange
@@ -43,7 +66,7 @@ function calcFallRange(
   maxtime = (maxtime !== undefined)? maxtime : 15;
   var p = new Vec2();
   var vy = 0;
-  var pts = {};
+  var pts = new PointSet();
   for (var t = 0; t < maxtime; t++) {
     vy = jumpfunc(vy, Infinity);
     p.x += speed;
@@ -52,14 +75,10 @@ function calcFallRange(
     for (var x = 0; x <= p.x; x++) {
       var c = new Vec2(int(x/gridsize+.5), cy);
       if (c.x == 0 && c.y == 0) continue;
-      pts[c.x+','+c.y] = c;
+      pts.add(c);
     }
   }
-  var a = [];
-  for (var k in pts) {
-    a.push(pts[k]);
-  }
-  return a;
+  return pts.toList();
 }
 
 
