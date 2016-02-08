@@ -287,3 +287,32 @@ define(Slot, Object, '', {
   },
 
 });
+
+// Color:
+function Color(r, g, b, a)
+{
+  this.r = r;
+  this.g = g;
+  this.b = b;
+  this.a = a;
+}
+define(Color, Object, '', {
+  toString: function () {
+    if (this.a === undefined) {
+      return ('rgb('+
+	      int(255*clamp(0,this.r,1))+','+
+	      int(255*clamp(0,this.g,1))+','+
+	      int(255*clamp(0,this.b,1))+')');
+    } else {
+      return ('rgba('+
+	      int(255*clamp(0,this.r,1))+','+
+	      int(255*clamp(0,this.g,1))+','+
+	      int(255*clamp(0,this.b,1))+','+
+	      clamp(0,this.a,1)+')');
+    }
+  },
+
+  setAlpha: function (a) {
+    return new Color(this.r, this.g, this.b, a);
+  },
+});
