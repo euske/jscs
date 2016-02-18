@@ -174,6 +174,37 @@ define(Sprite, Task, 'Task', {
 });
 
 
+// TileSprite: displays a tiled image repeatedly.
+function TileSprite(bounds, image)
+{
+  this._Sprite(bounds);
+  this.image = image;
+  this.offset = new Vec2();
+}
+
+define(TileSprite, Sprite, 'Sprite', {
+  render: function (ctx, bx, by) {
+    bx += this.bounds.x;
+    by += this.bounds.y;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(bx, by, this.bounds.width, this.bounds.height);
+    ctx.clip();
+    var w = this.image.width;
+    var h = this.image.height;
+    var dx0 = int(Math.floor(this.offset.x/w)*w - this.offset.x);
+    var dy0 = int(Math.floor(this.offset.y/h)*h - this.offset.y);
+    for (var dy = dy0; dy < this.bounds.height; dy += h) {
+      for (var dx = dx0; dx < this.bounds.width; dx += w) {
+	ctx.drawImage(this.image, bx+dx, by+dy);
+      }
+    }
+    ctx.restore();
+  },
+  
+});
+
+
 // Actor: a character that can interact with other characters.
 function Actor(bounds, hitbox, tileno)
 {
