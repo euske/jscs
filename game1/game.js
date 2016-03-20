@@ -128,6 +128,10 @@ define(EndGame, TextScene, 'TextScene', {
 function Game(app)
 {
   this._GameScene(app);
+  Sprite.IMAGE = app.images.sprites;
+  Sprite.prototype.getSpriteSrc = (function (tileno, phase) {
+    return new Rectangle(48*tileno, 48-32, 32, 32);
+  });
   
   this.tilesize = 32;
   this.world = this.screen.copy();
@@ -174,7 +178,7 @@ define(Game, GameScene, 'GameScene', {
     ctx.fillStyle = 'rgb(0,0,128)';
     ctx.fillRect(bx, by, window.width, window.height);
     this.camera.renderTilesFromBottomLeft(
-      ctx, bx, by, this.tilemap, this.app.tiles, ft);
+      ctx, bx, by, this.tilemap, this.app.images.tiles, ft);
 
     // Draw floating objects.
     for (var i = 0; i < this.sprites.length; i++) {

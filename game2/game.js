@@ -9,12 +9,11 @@ function Thingy(bounds)
 
 define(Thingy, Actor, 'Actor', {
   render: function (ctx, bx, by) {
-    var app = this.layer.app;
     var w = this.bounds.width;
     var h = this.bounds.height;
-    var size = app.sprites_size;
-    drawImageScaled(ctx, app.sprites,
-		    size.x*S.SHADOW, size.y-h, w, h,
+    var src = this.getSpriteSrc(S.SHADOW, 0);
+    drawImageScaled(ctx, Sprite.IMAGE,
+		    src.x, src.y, src.width, src.height,
 		    bx+this.bounds.x, by+this.bounds.y,
 		    w*this.scale.x, h*this.scale.y);
     this._Actor_render(ctx, bx, by);
@@ -69,8 +68,6 @@ define(Player, Actor, 'Actor', {
   },
 
   render: function (ctx, bx, by, front) {
-    var sprites = this.layer.app.sprites;
-    var tw = sprites.height;
     var w = this.bounds.width;
     var h = this.bounds.height;
     var afloat = (this.tilemap.tilesize <= this.z);
@@ -83,20 +80,23 @@ define(Player, Actor, 'Actor', {
     if (front) {
       if (afloat) {
 	if (tilemap.apply(isfloor, r) !== null) {
-	  ctx.drawImage(sprites,
-			S.SHADOW*tw, tw-h, w, h,
+	  var src = this.getSpriteSrc(S.SHADOW, 0);
+	  ctx.drawImage(Sprite.IMAGE,
+			src.x, src.y, src.width, src.height,
 			x, y-h/2, w, h);
 	}
       }
     } else if (!afloat) {
       var d = this.z/4;
-      ctx.drawImage(sprites,
-		    S.SHADOW*tw, tw-h, w, h,
+      var src = this.getSpriteSrc(S.SHADOW, 0);
+      ctx.drawImage(Sprite.IMAGE,
+		    src.x, src.y, src.width, src.height,
 		    x+d, y+d, w-d*2, h-d*2);
     }
     if ((front && afloat) || (!front && !afloat)) {
-      ctx.drawImage(sprites,
-		    this.tileno*tw, tw-h, w, h,
+      var src = this.getSpriteSrc(this.tileno, this.phase);
+      ctx.drawImage(Sprite.IMAGE,
+		    src.x, src.y, src.width, src.height,
 		    x, y-this.z/2, w, h);
     }
   },
@@ -116,14 +116,14 @@ define(Player, Actor, 'Actor', {
     this.bounds = this.bounds.add(new Vec2(v3.x, v3.y));
   },
 
-  getHitbox: function () {
+  getHitbox3: function () {
     return new Box(
       new Vec3(this.hitbox.x, this.hitbox.y, this.z),
       new Vec3(this.hitbox.width, this.hitbox.height, this.depth)
     );
   },
 
-  getContactFor: function (v0, hitbox) {
+  getContactFor3: function (v0, hitbox) {
     var tilemap = this.tilemap;
     var ts = tilemap.tilesize;
     var bs = new Vec3(ts, ts, ts);
@@ -146,23 +146,23 @@ define(Player, Actor, 'Actor', {
   },
 
   getMove3: function (v, hitbox0) {
-    var hitbox0 = (hitbox0 !== undefined)? hitbox0 : this.getHitbox();
+    var hitbox0 = (hitbox0 !== undefined)? hitbox0 : this.getHitbox3();
     var hitbox = hitbox0;
-    var d0 = this.getContactFor(v, hitbox);
+    var d0 = this.getContactFor3(v, hitbox);
     v = v.sub(d0);
     hitbox = hitbox.add(d0);
     if (v.x != 0) {
-      var d1 = this.getContactFor(new Vec3(v.x,0,0), hitbox);
+      var d1 = this.getContactFor3(new Vec3(v.x,0,0), hitbox);
       v = v.sub(d1);
       hitbox = hitbox.add(d1);
     }
     if (v.y != 0) {
-      var d2 = this.getContactFor(new Vec3(0,v.y,0), hitbox);
+      var d2 = this.getContactFor3(new Vec3(0,v.y,0), hitbox);
       v = v.sub(d2);
       hitbox = hitbox.add(d2);
     }
     if (v.z != 0) {
-      var d3 = this.getContactFor(new Vec3(0,0,v.z), hitbox);
+      var d3 = this.getContactFor3(new Vec3(0,0,v.z), hitbox);
       v = v.sub(d3);
       hitbox = hitbox.add(d3);
     }
@@ -229,7 +229,11 @@ define(GameOver, TextScene, 'TextScene', {
 function Game(app)
 {
   this._GameScene(app);
-  
+
+  Sprite.IMAGE = app.images.sprites;
+  Sprite.prototype.getSpriteSrc = (function (tileno, phase) {
+    return new Rectangle(48*tileno, 48-32, 32, 32);
+  });
   this.tilesize = 32;
 }
 
@@ -282,7 +286,7 @@ define(Game, GameScene, 'GameScene', {
     ctx.fillStyle = 'rgb(0,128,224)';
     ctx.fillRect(bx+dx, bx+dy, window.width, window.height);
     this.camera.renderTilesFromTopRight(
-      ctx, bx+dx, by+dy, this.tilemap, this.app.tiles, ft);
+      ctx, bx+dx, by+dy, this.tilemap, this.app.images.tiles, ft);
 
     // Draw floating objects.
     for (var i = 0; i < this.sprites.length; i++) {
