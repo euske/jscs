@@ -4,6 +4,28 @@
 //   requires: actor.js
 'use strict';
 
+function MakeGlyphs(src, color)
+{
+  var dst = createCanvas(src.width, src.height);
+  var ctx = getEdgeyContext(dst);
+  ctx.clearRect(0, 0, dst.width, dst.height);
+  ctx.drawImage(src, 0, 0);
+  ctx.globalCompositeOperation = 'source-in';
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, dst.width, dst.height);
+  return dst;
+}
+
+function MakeSegment(pt, text, font)
+{
+  text = (text !== undefined)? text : '';
+  var size = font.getSize(text);
+  var bounds = new Rectangle(pt.x, pt.y, size.x, size.y);
+  var seg = {bounds:bounds, text:text, font:font};
+  return seg;
+}
+
+
 //  Font
 //
 function Font(glyphs, color, scale)
@@ -17,13 +39,7 @@ function Font(glyphs, color, scale)
   if (color === null) {
     this._glyphs = glyphs;
   } else {
-    this._glyphs = createCanvas(glyphs.width, glyphs.height);
-    var ctx = getEdgeyContext(this._glyphs);
-    ctx.clearRect(0, 0, glyphs.width, glyphs.height);
-    ctx.drawImage(glyphs, 0, 0);
-    ctx.globalCompositeOperation = 'source-in';
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, glyphs.width, glyphs.height);
+    this._glyphs = MakeGlyphs(glyphs, color);
   }
 }
 
@@ -31,7 +47,7 @@ define(Font, Object, '', {
   getSize: function (text) {
     return new Vec2(this.width * text.length, this.height);
   },
-
+  
   renderString: function (ctx, text, x, y) {
     for (var i = 0; i < text.length; i++) {
       var c = text.charCodeAt(i)-32;
@@ -43,14 +59,37 @@ define(Font, Object, '', {
 
 });
 
-function MakeSegment(pt, text, font)
+
+//  ShadowFont
+//
+function ShadowFont(glyphs, color, scale, shadowcolor, shadowdist)
 {
-  text = (text !== undefined)? text : '';
-  var size = font.getSize(text);
-  var bounds = new Rectangle(pt.x, pt.y, size.x, size.y);
-  var seg = {bounds:bounds, text:text, font:font};
-  return seg;
+  shadowcolor = (shadowcolor !== undefined)? shadowcolor : 'rgb(0,0,0)';
+  shadowdist = (shadowdist !== undefined)? shadowdist : 1;
+  this._Font(glyphs, color, scale);
+  this._glyphs2 = MakeGlyphs(glyphs, shadowcolor);
+  this.shadowdist = shadowdist;
 }
+
+define(ShadowFont, Font, 'Font', {
+  getSize2: function (text) {
+    var size = this._Font_getSize(text);
+    return size.move(this.shadowdist, this.shadowdist);
+  },
+  
+  renderString: function (ctx, text, x, y) {
+    var x1 = x+this.shadowdist;
+    var y1 = y+this.shadowdist;
+    for (var i = 0; i < text.length; i++) {
+      var c = text.charCodeAt(i)-32;
+      ctx.drawImage(this._glyphs2,
+		    c*this._width0, 0, this._width0, this._height0,
+		    x1+this.width*i, y1, this.width, this.height);
+    }
+    this._Font_renderString(ctx, text, x, y);
+  },
+
+});
 
 
 //  TextBox
