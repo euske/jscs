@@ -34,6 +34,8 @@ define(Player, PhysicalActor, 'PhysicalActor', {
 function Game(app)
 {
   this._GameScene(app);
+  Sprite.SIZE = new Vec2(48, 48);
+  Sprite.IMAGE = app.images.sprites;
 }
 
 define(Game, GameScene, 'GameScene', {

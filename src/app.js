@@ -25,11 +25,8 @@ function App(framerate, frame, images, audios, labels)
 			     this.frame.height/scale);
   this.ctx = getEdgeyContext(this.screen);
 
-  // [GAME SPECIFIC CODE]
-  this.sprites = this.images.sprites;
-  this.sprites_size = new Vec2(this.sprites.height, this.sprites.height);
-  this.tiles = this.images.tiles;
   this.font = new Font(this.images.font, 'white');
+  this.shadowfont = new ShadowFont(this.images.font, 'white');
   this.colorfont = new Font(this.images.font);
   
   this._key_left = false;

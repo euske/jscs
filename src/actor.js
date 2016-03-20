@@ -144,13 +144,18 @@ define(Camera, Task, 'Task', {
 
 
 // Sprite: a moving object that doesn't interact.
-function Sprite(bounds)
+function Sprite(bounds, tileno)
 {
   this._Task();
   this.visible = true;
   this.zorder = 0;
   this.bounds = (bounds === null)? bounds : bounds.copy();
+  this.tileno = tileno;
+  this.scale = new Vec2(1, 1);
+  this.phase = 0;
 }
+Sprite.SIZE = null;
+Sprite.IMAGE = null;
 
 define(Sprite, Task, 'Task', {
   toString: function () {
@@ -169,8 +174,26 @@ define(Sprite, Task, 'Task', {
   
   render: function (ctx, bx, by) {
     // [OVERRIDE]
+    var w = this.bounds.width;
+    var h = this.bounds.height;
+    if (typeof(this.tileno) === 'string') {
+      ctx.fillStyle = this.tileno;
+      ctx.fillRect(bx+this.bounds.x, by+this.bounds.y, w, h);
+    } else {
+      var src = this.getSpriteSrc(this.tileno, this.phase);
+      drawImageScaled(ctx, Sprite.IMAGE,
+		      src.x, src.y, src.width, src.height,
+		      bx+this.bounds.x, by+this.bounds.y,
+		      w*this.scale.x, h*this.scale.y);
+    }
   },
   
+  getSpriteSrc: function (tileno, phase) {
+    // [OVERRIDE]
+    var size = Sprite.SIZE;
+    return new Rectangle(size.x*tileno, size.y*phase, size.x, size.y);
+  },
+
 });
 
 
@@ -208,12 +231,9 @@ define(TileSprite, Sprite, 'Sprite', {
 // Actor: a character that can interact with other characters.
 function Actor(bounds, hitbox, tileno)
 {
-  this._Sprite(bounds);
+  this._Sprite(bounds, tileno);
   this.hitbox = (hitbox === null)? null : hitbox.copy();
-  this.tileno = tileno;
-  this.scale = new Vec2(1, 1);
   this.maxspeed = new Vec2(16, 16);
-  this.phase = 0;
   this.movement = new Vec2();
 }
 
@@ -226,23 +246,6 @@ define(Actor, Sprite, 'Sprite', {
     // [OVERRIDE]
   },
 
-  render: function (ctx, bx, by) {
-    // [OVERRIDE]
-    var app = this.layer.app;
-    var w = this.bounds.width;
-    var h = this.bounds.height;
-    if (typeof(this.tileno) === 'string') {
-      ctx.fillStyle = this.tileno;
-      ctx.fillRect(bx+this.bounds.x, by+this.bounds.y, w, h);
-    } else {
-      var size = app.sprites_size;
-      drawImageScaled(ctx, app.sprites,
-		      size.x*this.tileno, size.y*(this.phase+1)-h, w, h,
-		      bx+this.bounds.x, by+this.bounds.y,
-		      w*this.scale.x, h*this.scale.y);
-    }
-  },
-  
   update: function () {
     this._Sprite_update();
     this.move(this.getMove(this.movement, this.hitbox, true));
@@ -276,12 +279,21 @@ define(Actor, Sprite, 'Sprite', {
       v = v.sub(d2);
       hitbox = hitbox.add(d2);
     }
+    var bounds = this.getConstraintsFor(hitbox, force);
+    if (bounds !== null) {
+      hitbox = hitbox.clamp(bounds);
+    }
     return hitbox.diff(this.hitbox);
   },
   
   getContactFor: function (v, hitbox, force, range) {
     // [OVERRIDE]
     return v;
+  },
+  
+  getConstraintsFor: function (hitbox, force) {
+    // [OVERRIDE]
+    return null;
   },
 
 });

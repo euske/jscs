@@ -103,6 +103,7 @@ function PlanningActor(tilemap, bounds, hitbox, tileno)
   this.tilemap = tilemap;
   this.tilebounds = new Rectangle(0, 0, 1, 1);
   this.speed = 8;
+  this.timeout = 30;
   this.target = null;
   this.runner = null;
 
@@ -183,8 +184,7 @@ define(PlanningActor, PhysicalActor, 'PhysicalActor', {
   startPlan: function (runner) {
     var actor = this;
     var plan = this.plan;
-    var app = this.layer.app;
-    runner.timeout = app.framerate*2;
+    runner.timeout = this.timeout;
     runner.moveto = function (p) { actor.moveToward(p); }
     runner.jumpto = function (p) { actor.setJump(Infinity); }
     this.runner = runner;

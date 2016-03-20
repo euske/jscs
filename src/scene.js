@@ -8,7 +8,6 @@
 function Scene(app)
 {
   this.app = app;
-  this.music = null;
   this.screen = new Rectangle(0, 0, app.screen.width, app.screen.height);
 }
 
@@ -108,9 +107,8 @@ define(TextScene, Scene, 'Scene', {
 
 //  Layer
 // 
-function Layer(app)
+function Layer()
 {
-  this.app = app;
   this.init();
 }
 
@@ -236,7 +234,7 @@ define(Layer, Object, '', {
 function GameScene(app)
 {
   this._Scene(app);
-  this.layer = new Layer(app);
+  this.layer = new Layer();
 }
 
 define(GameScene, Scene, 'Scene', {
