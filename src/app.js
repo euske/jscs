@@ -203,12 +203,15 @@ define(App, Object, '', {
     this.scene.init();
   },
 
-  set_music: function (music) {
+  set_music: function (music, start, end) {
     if (this.music !== null) {
       this.music.pause();
     }
     this.music = music;
+    this.music_start = (start !== undefined)? start : 0;
+    this.music_end = (end !== undefined)? end : 0;
     if (this.music !== null) {
+      this.music.currentTime = this.music_start;
       this.music.play();
     }
   },
@@ -223,6 +226,12 @@ define(App, Object, '', {
     this.scene.tick();
     if (0 < this.keylock) {
       this.keylock--;
+    }
+
+    if (this.music !== null &&
+	this.music_start < this.music_end &&
+	this.music_end <= this.music.currentTime) {
+      this.music.currentTime = this.music_start;
     }
 
     while (0 < this.msgs.length) {
