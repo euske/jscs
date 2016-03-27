@@ -61,6 +61,9 @@ define(Vec2, Object, '', {
       return this.copy();
     }
   },
+  expand: function (dw, dh, vx, vy) {
+    return new Rectangle(this.x, this.y).expand(dw, dh, vx, vy);
+  },
 });
 
 

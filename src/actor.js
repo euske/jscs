@@ -32,7 +32,7 @@ define(Task, Object, '', {
   
   tick: function () {
     this.update();
-    if (0 < this.duration &&
+    if (this.isAlive() && 0 < this.duration &&
 	this.ticks0+this.duration < this.layer.ticks) {
       this.die();
     }

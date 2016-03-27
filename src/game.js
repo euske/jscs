@@ -72,6 +72,10 @@ define(Game, GameScene, 'GameScene', {
     this.addObject(this.textbox);
   },
 
+  tick: function () {
+    this._GameScene_tick();
+  },
+
   render: function (ctx, bx, by) {
     ctx.fillStyle = 'rgb(0,0,0)';
     ctx.fillRect(bx, by, this.screen.width, this.screen.height);
