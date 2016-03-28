@@ -208,10 +208,10 @@ define(App, Object, '', {
       this.music.pause();
     }
     this.music = music;
-    this.music_start = (start !== undefined)? start : 0;
-    this.music_end = (end !== undefined)? end : 0;
+    this.loop_start = (start !== undefined)? start : 0;
+    this.loop_end = (end !== undefined)? end : 0;
     if (this.music !== null) {
-      this.music.currentTime = this.music_start;
+      this.music.currentTime = 0;
       this.music.play();
     }
   },
@@ -229,9 +229,9 @@ define(App, Object, '', {
     }
 
     if (this.music !== null &&
-	this.music_start < this.music_end &&
-	this.music_end <= this.music.currentTime) {
-      this.music.currentTime = this.music_start;
+	this.loop_start < this.loop_end &&
+	this.loop_end <= this.music.currentTime) {
+      this.music.currentTime = this.loop_start;
     }
 
     while (0 < this.msgs.length) {
