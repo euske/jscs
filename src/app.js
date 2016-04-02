@@ -181,7 +181,7 @@ define(App, Object, '', {
   focus: function (ev) {
     // [OVERRIDE]
     this.active = true;
-    if (this.music !== null && this.music.loop) {
+    if (this.music !== null && 0 < this.music.currentTime) {
       this.music.play();
     }
   },
