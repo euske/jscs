@@ -46,6 +46,13 @@ function define(obj, base, name, props)
   obj.prototype = proto1;
 }
 
+// fmod(x, y):
+function fmod(x, y)
+{
+  var v = x % y;
+  return (0 <= v)? v : v+y;
+}
+
 // clamp(v0, v, v1): limit the value within v0-v1.
 function clamp(v0, v, v1)
 {

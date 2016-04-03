@@ -272,6 +272,10 @@ define(Rectangle, Object, '', {
     return new Vec2(this.x+rnd(this.width),
 		    this.y+rnd(this.height));
   },
+  modpt: function (v) {
+    return new Vec2(this.x+fmod(v.x-this.x, this.width),
+		    this.y+fmod(v.y-this.y, this.height));
+  },
   
   contactVLine: function (v, x, y0, y1) {
     var dx, dy;
